@@ -143,6 +143,7 @@ fabric.properties
 
 ### macOS ###
 # General
+.idea/
 .DS_Store
 .AppleDouble
 .LSOverride

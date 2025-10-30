@@ -5,7 +5,7 @@ import RoutesProvider from "@routes/RoutesProvider";
 function App() {
 
     return (
-        <div id={"app"}>
+        <div id={"app"} className={"w-full"}>
             <RoutesProvider />
         </div>
     )

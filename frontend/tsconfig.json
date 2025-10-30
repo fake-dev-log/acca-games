@@ -24,6 +24,8 @@
     "paths": {
       "@routes/*": ["./src/routes/*"],
       "@pages/*": ["./src/pages/*"],
+      "@components/*": ["./src/components/*"],
+      "@wails/*": ["./wailsjs/*"]
     }
   },
   "include": [

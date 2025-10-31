@@ -1,11 +1,10 @@
 import './App.css';
-import React from "react";
 import RoutesProvider from "@routes/RoutesProvider";
 
 function App() {
 
     return (
-        <div id={"app"} className={"w-full"}>
+        <div id={"app"} className={"bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark min-h-screen"}>
             <RoutesProvider />
         </div>
     )

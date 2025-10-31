@@ -82,3 +82,33 @@ func (a *App) SubmitNBackAnswer(playerChoice string, responseTimeMs int, trialNu
     log.Printf("Saved n-back result for trial: %d", result.QuestionNum)
 	return result, nil
 }
+
+// GetNBackGameSessions fetches all N-Back game sessions.
+func (a *App) GetNBackGameSessions() ([]types.GameSession, error) {
+	sessions, err := database.GetNBackGameSessions(a.db)
+	if err != nil {
+		log.Printf("Error getting n-back game sessions: %v", err)
+		return nil, err
+	}
+	return sessions, nil
+}
+
+// GetNBackResultsForSession fetches all N-Back results for a given session ID.
+func (a *App) GetNBackResultsForSession(sessionID int64) ([]types.NBackRecord, error) {
+	records, err := database.GetNBackResultsForSession(a.db, sessionID)
+	if err != nil {
+		log.Printf("Error getting n-back results for session %d: %v", sessionID, err)
+		return nil, err
+	}
+	return records, nil
+}
+
+// GetAllNBackResults fetches all N-Back results across all sessions.
+func (a *App) GetAllNBackResults() ([]types.NBackRecord, error) {
+	records, err := database.GetAllNBackResults(a.db)
+	if err != nil {
+		log.Printf("Error getting all n-back results: %v", err)
+		return nil, err
+	}
+	return records, nil
+}

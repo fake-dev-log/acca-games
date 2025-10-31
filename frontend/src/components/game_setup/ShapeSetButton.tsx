@@ -1,5 +1,3 @@
-import React from 'react';
-
 // This is a simplified map for the button, the full map is in NBackGame.tsx
 import { Circle } from '@components/shapes/nback/Circle';
 import { Square } from '@components/shapes/nback/Square';

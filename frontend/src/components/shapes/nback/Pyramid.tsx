@@ -1,5 +1,3 @@
-import React from 'react';
-
 export const Pyramid = () => (
   <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="black" strokeWidth="3">
     <rect x="10" y="70" width="80" height="20" />

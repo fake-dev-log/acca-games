@@ -19,3 +19,23 @@ type NBackResult struct {
 	PlayerChoice   string `json:"playerChoice"` // "LEFT", "RIGHT", "SPACE"
 	CorrectChoice  string `json:"correctChoice"`// "LEFT", "RIGHT", "SPACE"
 }
+
+// GameSession represents a row in the game_sessions table.
+type GameSession struct {
+	SessionID    int64  `json:"sessionId"`
+	GameCode     string `json:"gameCode"`
+	PlayDatetime string `json:"playDatetime"`
+	Settings     string `json:"settings"` // JSON string of NBackSettings
+}
+
+// NBackRecord represents a row in the shape_memory_results table.
+type NBackRecord struct {
+	ResultID       int64  `json:"resultId"`
+	SessionID      int64  `json:"sessionId"`
+	Round          int    `json:"round"`
+	QuestionNum    int    `json:"questionNum"`
+	IsCorrect      bool   `json:"isCorrect"`
+	ResponseTimeMs int    `json:"responseTimeMs"`
+	PlayerChoice   string `json:"playerChoice"`
+	CorrectChoice  string `json:"correctChoice"`
+}

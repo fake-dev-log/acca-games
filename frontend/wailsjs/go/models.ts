@@ -39,6 +39,50 @@ export namespace games {
 
 export namespace types {
 	
+	export class GameSession {
+	    sessionId: number;
+	    gameCode: string;
+	    playDatetime: string;
+	    settings: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new GameSession(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.sessionId = source["sessionId"];
+	        this.gameCode = source["gameCode"];
+	        this.playDatetime = source["playDatetime"];
+	        this.settings = source["settings"];
+	    }
+	}
+	export class NBackRecord {
+	    resultId: number;
+	    sessionId: number;
+	    round: number;
+	    questionNum: number;
+	    isCorrect: boolean;
+	    responseTimeMs: number;
+	    playerChoice: string;
+	    correctChoice: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new NBackRecord(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.resultId = source["resultId"];
+	        this.sessionId = source["sessionId"];
+	        this.round = source["round"];
+	        this.questionNum = source["questionNum"];
+	        this.isCorrect = source["isCorrect"];
+	        this.responseTimeMs = source["responseTimeMs"];
+	        this.playerChoice = source["playerChoice"];
+	        this.correctChoice = source["correctChoice"];
+	    }
+	}
 	export class NBackResult {
 	    sessionId: number;
 	    round: number;

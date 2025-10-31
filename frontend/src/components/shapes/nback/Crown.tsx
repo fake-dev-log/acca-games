@@ -1,5 +1,3 @@
-import React from 'react';
-
 export const Crown = () => (
   <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="black" strokeWidth="3">
     <polygon points="30,10 50,50 30,90 10,50" />

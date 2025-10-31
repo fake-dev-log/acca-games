@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, ComponentType } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { games, types } from '@wails/go/models';
 import { SubmitNBackAnswer } from '@wails/go/main/App';
@@ -17,8 +17,9 @@ import { Pyramid } from '@components/shapes/nback/Pyramid';
 import { DoubleTriangle } from '@components/shapes/nback/DoubleTriangle';
 import { XShape } from '@components/shapes/nback/XShape';
 import { Crown } from '@components/shapes/nback/Crown';
+import { PrimaryButton } from '@components/common/PrimaryButton';
 
-const shapeMap: { [key: string]: React.ComponentType } = {
+const shapeMap: { [key: string]: ComponentType } = {
   circle: Circle,
   square: Square,
   triangle: Triangle,
@@ -181,9 +182,9 @@ export function NBackGame() {
               <h1 className="text-2xl font-bold">게임 종료!</h1>
               <p className="text-xl mt-4">정확도: {accuracy.toFixed(2)}%</p>
               <div className="mt-6 flex flex-col items-center space-y-2">
-                <button onClick={() => navigate('/games/n-back/setup')} className="w-48 px-4 py-2 bg-indigo-600 text-white rounded">
+                <PrimaryButton onClick={() => navigate('/games/n-back/setup')} className="w-48">
                     다시하기
-                </button>
+                </PrimaryButton>
               </div>
           </div>
       )
@@ -199,22 +200,22 @@ export function NBackGame() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen w-full bg-gray-50 relative p-4">
-      <button onClick={handleExit} className="absolute top-4 right-4 px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 z-20">
+    <div className="flex flex-col items-center justify-center h-screen w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark relative p-4">
+      <button onClick={handleExit} className="absolute top-4 right-4 px-4 py-2 bg-surface-light dark:bg-surface-dark text-text-light dark:text-text-dark rounded-md hover:bg-primary-light dark:hover:bg-primary-dark hover:text-text-light dark:hover:text-text-dark z-20">
         나가기
       </button>
       <div className="w-80">
-        <div className="absolute top-6 left-1/2 -translate-x-1/2 text-center text-gray-600 text-lg">
+        <div className="absolute top-6 left-1/2 -translate-x-1/2 text-center text-text-light dark:text-text-dark text-lg">
           <Instructions />
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-2.5 my-4">
-          <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${progress}%` }}></div>
+        <div className="w-full bg-surface-light dark:bg-surface-dark rounded-full h-2.5 my-4">
+          <div className="bg-primary-light dark:bg-primary-dark h-2.5 rounded-full" style={{ width: `${progress}%` }}></div>
         </div>
-        <div className="w-full h-80 border-2 border-gray-300 bg-white flex items-center justify-center relative shadow-lg rounded-md">
-          {showStart && <div className="absolute text-6xl font-bold text-blue-500 animate-pulse">START</div>}
+        <div className="w-80 h-80 border-2 border-gray-300 bg-surface-light dark:bg-surface-dark flex items-center justify-center relative shadow-lg rounded-md">
+          {showStart && <div className="absolute text-6xl text-primary-light dark:text-primary-dark font-bold animate-pulse">START</div>}
           {renderShape()}
-          {feedback === 'correct' && <div className="absolute text-6xl text-green-500">✓</div>}
-          {feedback === 'incorrect' && <div className="absolute text-6xl text-red-500">✗</div>}
+          {feedback === 'correct' && <div className="absolute text-6xl text-success">✓</div>}
+          {feedback === 'incorrect' && <div className="absolute text-6xl text-danger">✗</div>}
         </div>
         <div className="mt-4 text-xl font-mono text-center">
           <p>진행: {Math.min(currentTrial + 1, gameState.settings.numTrials)} / {gameState.settings.numTrials}</p>

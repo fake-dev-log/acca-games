@@ -1,5 +1,6 @@
-import {useNavigate} from "react-router-dom";
-import {Quit} from "../../wailsjs/runtime";
+import { useNavigate } from "react-router-dom";
+import { Quit } from "@wails/runtime";
+import { PrimaryButton } from '@components/common/PrimaryButton';
 
 export default function MainPage() {
     const navigate = useNavigate();
@@ -13,12 +14,12 @@ export default function MainPage() {
     }
 
     return (
-        <div className={"flex m-auto"}>
-            <div className={"flex m-auto flex-col gap-4 p-8"}>
-                <button onClick={toGames} className={"py-3 px-12 text-xl bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 transition-all duration-200"}>게임</button>
-                <button className={"py-3 px-12 text-xl bg-gray-400 text-white rounded-lg shadow-md cursor-not-allowed"} disabled>기록</button>
-                <button className={"py-3 px-12 text-xl bg-gray-400 text-white rounded-lg shadow-md cursor-not-allowed"} disabled>설정</button>
-                <button onClick={quit} className={"py-3 px-12 text-xl bg-red-500 text-white rounded-lg shadow-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-75 transition-all duration-200"}>종료</button>
+        <div className={"flex flex-col items-center justify-center w-full h-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark"}>
+            <div className={"flex flex-col gap-4 p-8"}>
+                <PrimaryButton onClick={toGames} className={"bg-primary-light dark:bg-primary-dark text-text-light dark:text-text-dark border-primary-light dark:border-primary-dark hover:bg-button-primary-hover-light dark:hover:bg-button-primary-hover-dark focus:ring-primary-light dark:focus:ring-primary-dark"}>게임</PrimaryButton>
+                <PrimaryButton onClick={() => navigate('/records')} className={"bg-primary-light dark:bg-primary-dark text-text-light dark:text-text-dark border-primary-light dark:border-primary-dark hover:bg-button-primary-hover-light dark:hover:bg-button-primary-hover-dark focus:ring-primary-light dark:focus:ring-primary-dark"}>기록</PrimaryButton>
+                <PrimaryButton className={"bg-button-primary-disabled-light dark:bg-button-primary-disabled-dark text-button-disabled-text-light dark:text-button-disabled-text-dark border-button-primary-disabled-light dark:border-button-primary-disabled-dark cursor-not-allowed"} disabled>설정</PrimaryButton>
+                <PrimaryButton onClick={quit} className={"bg-danger text-text-light dark:text-text-dark border-danger hover:bg-button-danger-hover-light dark:hover:bg-button-danger-hover-dark focus:ring-danger dark:focus:ring-danger-dark"}>종료</PrimaryButton>
             </div>
         </div>
     )

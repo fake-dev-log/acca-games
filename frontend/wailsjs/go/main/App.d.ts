@@ -3,6 +3,12 @@
 import {types} from '../models';
 import {games} from '../models';
 
+export function GetAllNBackResults():Promise<Array<types.NBackRecord>>;
+
+export function GetNBackGameSessions():Promise<Array<types.GameSession>>;
+
+export function GetNBackResultsForSession(arg1:number):Promise<Array<types.NBackRecord>>;
+
 export function GetShapeGroups():Promise<Record<string, Array<string>>>;
 
 export function StartNBackGame(arg1:types.NBackSettings):Promise<games.NBackGameState>;

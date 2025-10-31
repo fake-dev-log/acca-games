@@ -1,6 +1,77 @@
+@import "tailwindcss";
+
+@theme {
+  /* Background */
+  --color-background-light:   #FAF8F1;
+  --color-background-dark:    #333D31;
+
+  /* Surface */
+  --color-surface-light:      #F5F2E9;
+  --color-surface-dark:       #404A3F;
+
+  /* Text */
+  --color-text-light:         #4A4A4A;
+  --color-text-dark:          #EFEBE0;
+
+  /* Primary */
+  --color-primary-light:      #8FAF8A;
+  --color-primary:            #8FAF8A;
+  --color-primary-dark:       #A8D0A5;
+
+  /* Secondary */
+  --color-secondary-light:    #C4A484;
+  --color-secondary:          #C4A484;
+  --color-secondary-dark:     #D2B48C;
+
+  /* Accent */
+  --color-accent-light:       #E5C07B; /* Using a suggested accent color for now */
+  --color-accent:             #E5C07B;
+  --color-accent-dark:        #E5C07B;
+
+  /* Danger */
+  --color-danger:             #D98880; /* Terracotta for failure/incorrect */
+  --color-danger-dark:        #F2B9AC;
+
+  /* Feedback specific colors */
+  --color-success:            #5D9C59; /* Sharper green for success */
+  --color-warning:            #E5C07B; /* Light yellow for warning */
+
+  /* Button specific colors */
+  --color-button-primary-hover-light: #7D9D7A;
+  --color-button-primary-disabled-light: #DDE2DD;
+  --color-button-primary-hover-dark: #BCE0BA;
+  --color-button-primary-disabled-dark: #5C6B5B;
+
+  --color-button-secondary-hover-light: #F5F2E9;
+  --color-button-secondary-hover-dark: #404A3F;
+
+  --color-button-disabled-text-light: #A1A1A1;
+  --color-button-disabled-text-dark: #8A9A8C;
+
+  --color-button-danger-hover-light: #C67670;
+  --color-button-danger-hover-dark: #ED9895;
+
+  /* Chart specific colors */
+  --color-chart-axis-light: #A1A1A1;
+  --color-chart-axis-dark: #8A9A8C;
+  --color-chart-data1-light: #8FAF8A;
+  --color-chart-data1-dark: #A8D0A5;
+  --color-chart-data2-light: #C4A484;
+  --color-chart-data2-dark: #D2B48C;
+  --color-chart-data3-light: #A9BCCB;
+  --color-chart-data3-dark: #B8D0E3;
+  --color-chart-tooltip-bg-light: #4A4A4A;
+  --color-chart-tooltip-bg-dark: #EFEBE0;
+  --color-chart-tooltip-text-light: #FAF8F1;
+  --color-chart-tooltip-text-dark: #333D31;
+}
+
+
+
 #app {
     display: flex;
     height: 100vh;
+    width: 100vw;
     text-align: center;
 }
 

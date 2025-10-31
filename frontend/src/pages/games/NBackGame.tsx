@@ -18,6 +18,7 @@ import { DoubleTriangle } from '@components/shapes/nback/DoubleTriangle';
 import { XShape } from '@components/shapes/nback/XShape';
 import { Crown } from '@components/shapes/nback/Crown';
 import { PrimaryButton } from '@components/common/PrimaryButton';
+import { ProgressBar } from '@components/common/ProgressBar';
 
 const shapeMap: { [key: string]: ComponentType } = {
   circle: Circle,
@@ -41,7 +42,7 @@ export function NBackGame() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [gameState, setGameState] = useState<games.NBackGameState | null>(location.state?.gameState);
+  const gameState: games.NBackGameState | null = location.state?.gameState;
   
   const [currentTrial, setCurrentTrial] = useState(0);
   const [currentShape, setCurrentShape] = useState<string | null>(null);
@@ -50,37 +51,50 @@ export function NBackGame() {
   const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null);
   const [showStart, setShowStart] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
-  const [progress, setProgress] = useState(100);
+  const [animateCard, setAnimateCard] = useState(false);
 
   const advanceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const feedbackTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const progressAnimatorRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(0);
+  const answeredRef = useRef(false);
+  const showStartTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const feedbackClearTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleExit = () => {
     if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
     if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
-    if (progressAnimatorRef.current) cancelAnimationFrame(progressAnimatorRef.current);
+    if (feedbackClearTimerRef.current) clearTimeout(feedbackClearTimerRef.current);
     navigate('/games');
   };
 
   const advanceToNextTrial = useCallback(() => {
-    if (progressAnimatorRef.current) cancelAnimationFrame(progressAnimatorRef.current);
+    if (feedbackClearTimerRef.current) {
+      clearTimeout(feedbackClearTimerRef.current);
+    }
     setFeedback(null);
     setCurrentTrial(prev => prev + 1);
   }, []);
 
   const submitAnswer = useCallback(async (choice: string, responseTime: number, trial: number) => {
+    if (feedbackClearTimerRef.current) {
+      clearTimeout(feedbackClearTimerRef.current);
+    }
     try {
       const result = await SubmitNBackAnswer(choice, responseTime, trial);
       setResults(prev => [...prev, result]);
       if (!gameState?.settings.isRealMode) {
         setFeedback(result.isCorrect ? 'correct' : 'incorrect');
+        feedbackClearTimerRef.current = setTimeout(() => {
+          setFeedback(null);
+        }, 1000);
       }
     } catch (err) {
       console.error('Error submitting answer:', err);
       if (!gameState?.settings.isRealMode) {
         setFeedback('incorrect');
+        feedbackClearTimerRef.current = setTimeout(() => {
+          setFeedback(null);
+        }, 1000);
       }
     }
   }, [gameState?.settings.isRealMode]);
@@ -101,64 +115,44 @@ export function NBackGame() {
 
     if (currentTrial === requiredBuffer && !gameState.settings.isRealMode) {
       setShowStart(true);
-      setTimeout(() => setShowStart(false), 1500);
+      showStartTimerRef.current = setTimeout(() => setShowStart(false), 1500);
+    } else {
+      setShowStart(false);
     }
 
+    answeredRef.current = false;
     setCurrentShape(gameState.shapeSequence[currentTrial]);
+    setAnimateCard(true);
     startTimeRef.current = Date.now();
-    setProgress(100);
     setIsInputAllowed(isTrialActive);
 
     advanceTimerRef.current = setTimeout(async () => {
       setIsInputAllowed(false);
-      if (isTrialActive) {
+      if (isTrialActive && !answeredRef.current) {
         await submitAnswer('MISS', gameState.settings.presentationTime, currentTrial);
       }
-      setCurrentShape(null);
       feedbackTimerRef.current = setTimeout(advanceToNextTrial, 200);
     }, gameState.settings.presentationTime);
 
     return () => {
       if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
       if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
+      if (showStartTimerRef.current) clearTimeout(showStartTimerRef.current);
+      if (feedbackClearTimerRef.current) clearTimeout(feedbackClearTimerRef.current);
     };
   }, [currentTrial, gameState, navigate, submitAnswer, advanceToNextTrial]);
-
-  // Progress Bar Animator
-  useEffect(() => {
-    if (!currentShape || !gameState) return;
-    const animate = () => {
-      const elapsedTime = Date.now() - startTimeRef.current;
-      const newProgress = 100 - (elapsedTime / gameState.settings.presentationTime) * 100;
-      if (newProgress > 0) {
-        setProgress(newProgress);
-        progressAnimatorRef.current = requestAnimationFrame(animate);
-      } else {
-        setProgress(0);
-      }
-    };
-    progressAnimatorRef.current = requestAnimationFrame(animate);
-    return () => {
-      if (progressAnimatorRef.current) cancelAnimationFrame(progressAnimatorRef.current);
-    };
-  }, [currentShape, gameState]);
 
   const handleKeyPress = useCallback(async (e: KeyboardEvent) => {
     if (!isInputAllowed || !['ArrowLeft', 'ArrowRight', ' '].includes(e.key)) return;
 
     setIsInputAllowed(false);
-    if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
-    if (progressAnimatorRef.current) cancelAnimationFrame(progressAnimatorRef.current);
+    answeredRef.current = true;
 
     const responseTime = Date.now() - startTimeRef.current;
     const choice = e.key === ' ' ? 'SPACE' : e.key === 'ArrowLeft' ? 'LEFT' : 'RIGHT';
 
     await submitAnswer(choice, responseTime, currentTrial);
-    
-    setCurrentShape(null);
-    feedbackTimerRef.current = setTimeout(advanceToNextTrial, 400);
-
-  }, [isInputAllowed, submitAnswer, advanceToNextTrial, currentTrial]);
+  }, [isInputAllowed, submitAnswer, currentTrial]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyPress);
@@ -199,6 +193,8 @@ export function NBackGame() {
     return <p>2칸 앞과 같으면 <kbd>←</kbd>, 3칸 앞과 같으면 <kbd>→</kbd>, 모두 다르면 <kbd>Space</kbd></p>;
   };
 
+  const animationClass = animateCard ? 'card-border-highlight-dark dark:card-border-highlight-light' : '';
+
   return (
     <div className="flex flex-col items-center justify-center h-screen w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark relative p-4">
       <button onClick={handleExit} className="absolute top-4 right-4 px-4 py-2 bg-surface-light dark:bg-surface-dark text-text-light dark:text-text-dark rounded-md hover:bg-primary-light dark:hover:bg-primary-dark hover:text-text-light dark:hover:text-text-dark z-20">
@@ -208,14 +204,19 @@ export function NBackGame() {
         <div className="absolute top-6 left-1/2 -translate-x-1/2 text-center text-text-light dark:text-text-dark text-lg">
           <Instructions />
         </div>
-        <div className="w-full bg-surface-light dark:bg-surface-dark rounded-full h-2.5 my-4">
-          <div className="bg-primary-light dark:bg-primary-dark h-2.5 rounded-full" style={{ width: `${progress}%` }}></div>
-        </div>
-        <div className="w-80 h-80 border-2 border-gray-300 bg-surface-light dark:bg-surface-dark flex items-center justify-center relative shadow-lg rounded-md">
-          {showStart && <div className="absolute text-6xl text-primary-light dark:text-primary-dark font-bold animate-pulse">START</div>}
+        <ProgressBar
+          key={currentTrial}
+          duration={gameState.settings.presentationTime}
+        />
+        <div 
+          onAnimationEnd={() => setAnimateCard(false)}
+          className={`w-80 h-80 border-2 bg-surface-light dark:bg-surface-dark flex items-center justify-center relative shadow-lg rounded-md border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] ${animationClass}`}>
           {renderShape()}
-          {feedback === 'correct' && <div className="absolute text-6xl text-success">✓</div>}
-          {feedback === 'incorrect' && <div className="absolute text-6xl text-danger">✗</div>}
+        </div>
+        <div className="h-20 flex items-center justify-center text-6xl font-bold">
+            {showStart && !feedback && <div className="text-primary-light dark:text-primary-dark fade-in-out-1-5s">START</div>}
+            {feedback === 'correct' && <div className="text-success fade-in-out-1s">✓</div>}
+            {feedback === 'incorrect' && <div className="text-danger fade-in-out-1s">✗</div>}
         </div>
         <div className="mt-4 text-xl font-mono text-center">
           <p>진행: {Math.min(currentTrial + 1, gameState.settings.numTrials)} / {gameState.settings.numTrials}</p>

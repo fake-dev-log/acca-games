@@ -64,6 +64,12 @@
   --color-chart-tooltip-bg-dark: #EFEBE0;
   --color-chart-tooltip-text-light: #FAF8F1;
   --color-chart-tooltip-text-dark: #333D31;
+
+  /* Borders */
+  --color-border-light:       #D1D5DB; /* gray-300 */
+  --color-border-dark:        #5C6B5B;
+  --color-border-highlight-light: #8FAF8A;
+  --color-border-highlight-dark:  #A8D0A5;
 }
 
 
@@ -87,4 +93,44 @@ kbd {
     line-height: 1;
     padding: 2px 4px;
     white-space: nowrap;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@keyframes fade-in-out {
+  0%, 100% { opacity: 0; }
+  10%, 90% { opacity: 1; }
+}
+
+.fade-in-out-1s {
+  animation: fade-in-out 1s ease-in-out forwards;
+}
+
+.fade-in-out-1-5s {
+  animation: fade-in-out 1.5s ease-in-out forwards;
+}
+
+.card-border-highlight-light {
+  animation: border-highlight-light 0.5s ease-out forwards;
+}
+
+.card-border-highlight-dark {
+  animation: border-highlight-dark 0.5s ease-out forwards;
+}
+
+@keyframes border-highlight-light {
+  from { border-color: var(--color-border-highlight-light); }
+  to { border-color: var(--color-border-light); }
+}
+
+@keyframes border-highlight-dark {
+  from { border-color: var(--color-border-highlight-dark); }
+  to { border-color: var(--color-border-dark); }
 }

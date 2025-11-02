@@ -6,6 +6,8 @@ import { types } from '@wails/go/models';
 import { GetNBackResultsForSession, GetNBackGameSessions } from '@wails/go/main/App';
 import { RecordPageLayout } from '@layout/RecordPageLayout';
 import { SessionList } from '@components/records/SessionList';
+import { ResultsTable, Column } from '@components/records/ResultsTable';
+import { Card } from '@components/common/Card';
 import { formatSettings } from '@utils/nbackHelpers'; // Import from nbackHelpers
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
@@ -105,7 +107,7 @@ export function NBackSessionDetail() {
     responsive: true,
     plugins: {
       legend: { position: 'top' as const },
-      title: { display: true, text: 'N-back 레벨별 정답률' },
+      title: { display: true, text: 'N-Back 레벨별 정답률' },
     },
     scales: {
       y: { beginAtZero: true, max: 100, title: { display: true, text: '정확도 (%)' } },
@@ -129,63 +131,45 @@ export function NBackSessionDetail() {
     responsive: true,
     plugins: {
       legend: { position: 'top' as const },
-      title: { display: true, text: 'N-back 레벨별 평균 반응 시간' },
+      title: { display: true, text: 'N-Back 레벨별 평균 반응 시간' },
     },
     scales: {
       y: { beginAtZero: true, title: { display: true, text: '시간 (ms)' } },
     },
   };
 
+  const columns: Column<types.NBackRecord>[] = [
+    { header: '문제 번호', accessor: (row) => row.questionNum },
+    { header: '라운드', accessor: (row) => row.round },
+    { header: '플레이어 선택', accessor: (row) => row.playerChoice },
+    { header: '정답', accessor: (row) => row.correctChoice },
+    { header: '정답 여부', accessor: (row) => row.isCorrect ? 'O' : 'X' },
+    { header: '반응 시간 (ms)', accessor: (row) => row.responseTimeMs },
+  ];
+
   return (
     <RecordPageLayout backPath="/records/n-back" title={`세션 상세 기록 (ID: ${sessionId})`} sidebarContent={<SessionList onSessionClick={handleSessionClick} />}>
       <div className="space-y-6">
-        <div className="bg-surface p-4 rounded-lg shadow-sm text-on-surface">
-          <h3 className="text-xl font-semibold mb-2">요약 정보</h3>
+        <Card title="요약 정보">
           <p>총 문제 수: {totalTrials}</p>
           <p>정답 수: {correctTrials}</p>
           <p>전체 정확도: {overallAccuracy.toFixed(2)}%</p>
           <p>평균 반응 시간: {avgResponseTime} ms</p>
           {sessionInfo && <p>설정: {formatSettings(sessionInfo.settings)}</p>}
-        </div>
+        </Card>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-surface p-4 rounded-lg shadow-sm text-on-surface">
+          <Card>
             <Bar data={accuracyChartData} options={accuracyChartOptions} />
-          </div>
-          <div className="bg-surface p-4 rounded-lg shadow-sm text-on-surface">
+          </Card>
+          <Card>
             <Bar data={responseTimeChartData} options={responseTimeChartOptions} />
-          </div>
+          </Card>
         </div>
 
-        <div className="bg-surface p-4 rounded-lg shadow-sm text-on-surface">
-          <h3 className="text-xl font-semibold mb-2">라운드별 상세 기록</h3>
-          <div className="overflow-x-auto">
-            <table className="min-w-full bg-surface border border-gray-200 text-on-surface">
-              <thead>
-                <tr>
-                  <th className="py-2 px-4 border-b">문제 번호</th>
-                  <th className="py-2 px-4 border-b">라운드</th>
-                  <th className="py-2 px-4 border-b">플레이어 선택</th>
-                  <th className="py-2 px-4 border-b">정답</th>
-                  <th className="py-2 px-4 border-b">정답 여부</th>
-                  <th className="py-2 px-4 border-b">반응 시간 (ms)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sessionResults.map(record => (
-                  <tr key={record.resultId} className="hover:bg-primary hover:text-on-primary">
-                    <td className="py-2 px-4 border-b text-center">{record.questionNum}</td>
-                    <td className="py-2 px-4 border-b text-center">{record.round}</td>
-                    <td className="py-2 px-4 border-b text-center">{record.playerChoice}</td>
-                    <td className="py-2 px-4 border-b text-center">{record.correctChoice}</td>
-                    <td className="py-2 px-4 border-b text-center">{record.isCorrect ? 'O' : 'X'}</td>
-                    <td className="py-2 px-4 border-b text-center">{record.responseTimeMs}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <Card title="라운드별 상세 기록">
+          <ResultsTable columns={columns} data={sessionResults} />
+        </Card>
       </div>
     </RecordPageLayout>
   );

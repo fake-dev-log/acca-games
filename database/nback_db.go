@@ -42,7 +42,7 @@ func SaveNBackResult(db *sql.DB, result types.NBackResult) error {
 		result.CorrectChoice,
 	)
 	if err != nil {
-		return fmt.Errorf("failed to insert n-back result: %w", err)
+		return fmt.Errorf("failed to insert N-Back result: %w", err)
 	}
 	return nil
 }
@@ -73,7 +73,7 @@ func GetNBackResultsForSession(db *sql.DB, sessionID int64) ([]types.NBackRecord
 		SELECT result_id, session_id, round, question_num, is_correct, response_time_ms, player_choice, correct_choice
 		FROM shape_memory_results WHERE session_id = ? ORDER BY question_num ASC`, sessionID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to query n-back results: %w", err)
+		return nil, fmt.Errorf("failed to query N-Back results: %w", err)
 	}
 	defer rows.Close()
 
@@ -81,7 +81,7 @@ func GetNBackResultsForSession(db *sql.DB, sessionID int64) ([]types.NBackRecord
 	for rows.Next() {
 		var record types.NBackRecord
 		if err := rows.Scan(&record.ResultID, &record.SessionID, &record.Round, &record.QuestionNum, &record.IsCorrect, &record.ResponseTimeMs, &record.PlayerChoice, &record.CorrectChoice); err != nil {
-			return nil, fmt.Errorf("failed to scan n-back record: %w", err)
+			return nil, fmt.Errorf("failed to scan N-Back record: %w", err)
 		}
 		records = append(records, record)
 	}
@@ -104,7 +104,7 @@ func GetAllNBackResults(db *sql.DB) ([]types.NBackRecord, error) {
 		SELECT result_id, session_id, round, question_num, is_correct, response_time_ms, player_choice, correct_choice
 		FROM shape_memory_results ORDER BY session_id ASC, question_num ASC`)
 	if err != nil {
-		return nil, fmt.Errorf("failed to query all n-back results: %w", err)
+		return nil, fmt.Errorf("failed to query all N-Back results: %w", err)
 	}
 	defer rows.Close()
 
@@ -112,7 +112,7 @@ func GetAllNBackResults(db *sql.DB) ([]types.NBackRecord, error) {
 	for rows.Next() {
 		var record types.NBackRecord
 		if err := rows.Scan(&record.ResultID, &record.SessionID, &record.Round, &record.QuestionNum, &record.IsCorrect, &record.ResponseTimeMs, &record.PlayerChoice, &record.CorrectChoice); err != nil {
-			return nil, fmt.Errorf("failed to scan n-back record: %w", err)
+			return nil, fmt.Errorf("failed to scan N-Back record: %w", err)
 		}
 		records = append(records, record)
 	}

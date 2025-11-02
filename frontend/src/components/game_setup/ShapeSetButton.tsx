@@ -1,4 +1,5 @@
 // This is a simplified map for the button, the full map is in NBackGame.tsx
+import { ComponentType } from "react";
 import { Circle } from '@components/shapes/nback/Circle';
 import { Square } from '@components/shapes/nback/Square';
 import { Triangle } from '@components/shapes/nback/Triangle';
@@ -15,7 +16,7 @@ import { DoubleTriangle } from '@components/shapes/nback/DoubleTriangle';
 import { XShape } from '@components/shapes/nback/XShape';
 import { Crown } from '@components/shapes/nback/Crown';
 
-const shapeMap: { [key: string]: React.ComponentType } = {
+const shapeMap: { [key: string]: ComponentType } = {
   circle: Circle,
   square: Square,
   triangle: Triangle,

@@ -6,7 +6,8 @@ import { types } from '@wails/go/models';
 import { RecordPageLayout } from '@layout/RecordPageLayout';
 import { SessionList } from '@components/records/SessionList';
 import { parseSettings } from '@utils/nbackHelpers';
-import { useNBackSessions } from '@hooks/useNBackSessions'; // Import the custom hook
+import { Select } from '@components/common/Select';
+import { useNBackSessions } from "@hooks/useNBackSessions";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -82,26 +83,31 @@ export function NBackRecords() {
   const uniqueShapeGroups = Array.from(new Set(sessions.map(s => parseSettings(s.settings)?.shapeGroup))).filter(Boolean) as string[];
 
   return (
-    <RecordPageLayout backPath="/records" title="N-Back 게임 기록" sidebarContent={<SessionList onSessionClick={handleSessionClick} />}>
+    <RecordPageLayout backPath="/records" title="도형 순서 기억하기 게임 기록" sidebarContent={<SessionList onSessionClick={handleSessionClick} />}>
       <h2 className="text-2xl font-bold mb-4">대시보드</h2>
       <div className="mb-4 flex space-x-4">
-        <div>
-          <label htmlFor="filterLevel" className="block text-sm font-medium text-on-surface">라운드 필터:</label>
-          <select id="filterLevel" value={filterLevel} onChange={e => setFilterLevel(Number(e.target.value) || 'all')} className="mt-1 block w-full p-2 border rounded-md bg-background text-foreground">
-            <option value="all">모두</option>
-            <option value={1}>1라운드 (2-back)</option>
-            <option value={2}>2라운드 (2 & 3-back)</option>
-          </select>
-        </div>
-        <div>
-          <label htmlFor="filterShapeGroup" className="block text-sm font-medium text-on-surface">도형 그룹 필터:</label>
-          <select id="filterShapeGroup" value={filterShapeGroup} onChange={e => setFilterShapeGroup(e.target.value)} className="mt-1 block w-full p-2 border rounded-md bg-background text-foreground">
-            <option value="all">모두</option>
-            {uniqueShapeGroups.map(group => (
-              <option key={group} value={group}>{group === 'random' ? '랜덤' : `${group.replace('group', '')}번 세트`}</option>
-            ))}
-          </select>
-        </div>
+        <Select
+          id="filterLevel"
+          label="라운드 필터:"
+          value={filterLevel}
+          onChange={e => setFilterLevel(Number(e.target.value) || 'all')}
+        >
+          <option value="all">모두</option>
+          <option value={1}>1라운드 (2-back)</option>
+          <option value={2}>2라운드 (2 & 3-back)</option>
+        </Select>
+
+        <Select
+          id="filterShapeGroup"
+          label="도형 그룹 필터:"
+          value={filterShapeGroup}
+          onChange={e => setFilterShapeGroup(e.target.value)}
+        >
+          <option value="all">모두</option>
+          {uniqueShapeGroups.map(group => (
+            <option key={group} value={group}>{group === 'random' ? '랜덤' : `${group.replace('group', '')}번 세트`}</option>
+          ))}
+        </Select>
       </div>
       
       {loading && <p>데이터를 불러오는 중...</p>}

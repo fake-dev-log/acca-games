@@ -17,8 +17,9 @@ import { Pyramid } from '@components/shapes/nback/Pyramid';
 import { DoubleTriangle } from '@components/shapes/nback/DoubleTriangle';
 import { XShape } from '@components/shapes/nback/XShape';
 import { Crown } from '@components/shapes/nback/Crown';
-import { PrimaryButton } from '@components/common/PrimaryButton';
+import { Button } from '@components/common/Button';
 import { ProgressBar } from '@components/common/ProgressBar';
+import { GameLayout } from '@layout/GameLayout';
 
 const shapeMap: { [key: string]: ComponentType } = {
   circle: Circle,
@@ -176,9 +177,9 @@ export function NBackGame() {
               <h1 className="text-2xl font-bold">게임 종료!</h1>
               <p className="text-xl mt-4">정확도: {accuracy.toFixed(2)}%</p>
               <div className="mt-6 flex flex-col items-center space-y-2">
-                <PrimaryButton onClick={() => navigate('/games/n-back/setup')} className="w-48">
+                <Button onClick={() => navigate('/games/n-back/setup')} className="w-48">
                     다시하기
-                </PrimaryButton>
+                </Button>
               </div>
           </div>
       )
@@ -196,10 +197,7 @@ export function NBackGame() {
   const animationClass = animateCard ? 'card-border-highlight-dark dark:card-border-highlight-light' : '';
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark relative p-4">
-      <button onClick={handleExit} className="absolute top-4 right-4 px-4 py-2 bg-surface-light dark:bg-surface-dark text-text-light dark:text-text-dark rounded-md hover:bg-primary-light dark:hover:bg-primary-dark hover:text-text-light dark:hover:text-text-dark z-20">
-        나가기
-      </button>
+    <GameLayout onExit={handleExit}>
       <div className="w-80">
         <div className="absolute top-6 left-1/2 -translate-x-1/2 text-center text-text-light dark:text-text-dark text-lg">
           <Instructions />
@@ -222,6 +220,6 @@ export function NBackGame() {
           <p>진행: {Math.min(currentTrial + 1, gameState.settings.numTrials)} / {gameState.settings.numTrials}</p>
         </div>
       </div>
-    </div>
+    </GameLayout>
   );
 }

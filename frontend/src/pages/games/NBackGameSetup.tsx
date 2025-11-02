@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { types } from '@wails/go/models';
 import { GetShapeGroups, StartNBackGame } from '@wails/go/main/App';
+import { RoundButton } from '@components/game_setup/RoundButton';
 import { ShapeSetButton } from '@components/game_setup/ShapeSetButton';
 import { PageLayout } from '@layout/PageLayout';
-import { PrimaryButton } from '@components/common/PrimaryButton';
+import { Button } from '@components/common/Button';
 
 export function NBackGameSetup() {
   const navigate = useNavigate();
@@ -60,18 +61,8 @@ export function NBackGameSetup() {
           <div>
             <label className="block text-base font-medium text-text-light dark:text-text-dark mb-2">라운드 선택</label>
             <div className="grid grid-cols-2 gap-4">
-              <button
-                type="button"
-                onClick={() => handleLevelChange(1)}
-                className={`py-3 px-4 rounded-lg transition-colors text-base ${settings.nBackLevel === 1 ? 'bg-primary-light dark:bg-primary-dark text-text-light dark:text-text-dark shadow-md' : 'bg-button-primary-disabled-light dark:bg-button-primary-disabled-dark text-text-light dark:text-text-dark hover:bg-background-light dark:hover:bg-background-dark'}`}>
-                1라운드 (2-back)
-              </button>
-              <button
-                type="button"
-                onClick={() => handleLevelChange(2)}
-                className={`py-3 px-4 rounded-lg transition-colors text-base ${settings.nBackLevel === 2 ? 'bg-primary-light dark:bg-primary-dark text-text-light dark:text-text-dark shadow-md' : 'bg-button-primary-disabled-light dark:bg-button-primary-disabled-dark dark:text-text-dark hover:bg-background-light dark:hover:bg-background-dark'}`}>
-                2라운드 (2 & 3-back)
-              </button>
+              <RoundButton level={1} text="1라운드 (2-back)" isSelected={settings.nBackLevel === 1} onClick={handleLevelChange} />
+              <RoundButton level={2} text="2라운드 (2 & 3-back)" isSelected={settings.nBackLevel === 2} onClick={handleLevelChange} />
             </div>
           </div>
 
@@ -108,7 +99,7 @@ export function NBackGameSetup() {
               max="50"
               value={settings.numTrials}
               onChange={handleInputChange}
-              className="mt-2 block w-full p-3 text-base border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-light dark:focus:ring-primary-dark focus:border-primary-light dark:focus:border-primary-dark bg-surface-light dark:bg-surface-dark text-text-light dark:text-text-dark"
+              className="mt-2 block w-full p-3 text-base border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-light dark:focus:ring-primary-dark focus:border-primary-light dark:focus:border-primary-dark bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark text-center"
             />
           </div>
 
@@ -124,7 +115,7 @@ export function NBackGameSetup() {
               max="10"
               value={presentationTimeInSeconds}
               onChange={(e) => setSettings((prev: types.NBackSettings) => ({...prev, presentationTime: Number(e.target.value) * 1000}))}
-              className="mt-2 block w-full p-3 text-base border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-light dark:focus:ring-primary-dark focus:border-primary-light dark:focus:border-primary-dark bg-surface-light dark:bg-surface-dark text-text-light dark:text-text-dark"
+              className="mt-2 block w-full p-3 text-base border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-light dark:focus:ring-primary-dark focus:focus:border-primary-light dark:focus:border-primary-dark bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark text-center"
             />
           </div>
 
@@ -144,9 +135,9 @@ export function NBackGameSetup() {
           
           {error && <p className="text-danger text-sm text-center">{error}</p>}
 
-          <PrimaryButton type="submit" className="w-full">
+          <Button type="submit" className="w-full">
             게임 시작
-          </PrimaryButton>
+          </Button>
         </form>
       </div>
     </PageLayout>

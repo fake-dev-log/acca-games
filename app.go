@@ -44,7 +44,7 @@ func (a *App) GetShapeGroups() map[string][]string {
 	return games.ShapeGroups
 }
 
-// StartNBackGame starts a new n-back game with the given settings.
+// StartNBackGame starts a new N-Back game with the given settings.
 func (a *App) StartNBackGame(settings types.NBackSettings) (*games.NBackGameState, error) {
 	dbSettings := types.NBackSettings{
 		NumTrials:        settings.NumTrials,
@@ -56,13 +56,13 @@ func (a *App) StartNBackGame(settings types.NBackSettings) (*games.NBackGameStat
 
 	sessionID, err := database.CreateNBackSession(a.db, dbSettings)
 	if err != nil {
-		log.Printf("Error creating n-back session: %v", err)
+		 log.Printf("Error creating N-Back session: %v", err)
 		return nil, err
 	}
 
 	a.nback = games.NewNBackGame(settings)
 	a.nback.SessionID = sessionID
-	log.Printf("Started n-back game with session ID: %d", sessionID)
+	 log.Printf("Started N-Back game with session ID: %d", sessionID)
 	return a.nback, nil
 }
 
@@ -76,10 +76,10 @@ func (a *App) SubmitNBackAnswer(playerChoice string, responseTimeMs int, trialNu
 
 	err := database.SaveNBackResult(a.db, *result)
 	if err != nil {
-		log.Printf("Error saving n-back result: %v", err)
+		 log.Printf("Error saving N-Back result: %v", err)
 		return nil, err
 	}
-    log.Printf("Saved n-back result for trial: %d", result.QuestionNum)
+    log.Printf("Saved N-Back result for trial: %d", result.QuestionNum)
 	return result, nil
 }
 
@@ -87,7 +87,7 @@ func (a *App) SubmitNBackAnswer(playerChoice string, responseTimeMs int, trialNu
 func (a *App) GetNBackGameSessions() ([]types.GameSession, error) {
 	sessions, err := database.GetNBackGameSessions(a.db)
 	if err != nil {
-		log.Printf("Error getting n-back game sessions: %v", err)
+		 log.Printf("Error getting N-Back game sessions: %v", err)
 		return nil, err
 	}
 	return sessions, nil
@@ -97,7 +97,7 @@ func (a *App) GetNBackGameSessions() ([]types.GameSession, error) {
 func (a *App) GetNBackResultsForSession(sessionID int64) ([]types.NBackRecord, error) {
 	records, err := database.GetNBackResultsForSession(a.db, sessionID)
 	if err != nil {
-		log.Printf("Error getting n-back results for session %d: %v", sessionID, err)
+		 log.Printf("Error getting N-Back results for session %d: %v", sessionID, err)
 		return nil, err
 	}
 	return records, nil
@@ -107,7 +107,7 @@ func (a *App) GetNBackResultsForSession(sessionID int64) ([]types.NBackRecord, e
 func (a *App) GetAllNBackResults() ([]types.NBackRecord, error) {
 	records, err := database.GetAllNBackResults(a.db)
 	if err != nil {
-		log.Printf("Error getting all n-back results: %v", err)
+		 log.Printf("Error getting all N-Back results: %v", err)
 		return nil, err
 	}
 	return records, nil

@@ -14,6 +14,14 @@ export function GetNBackResultsForSession(arg1) {
   return window['go']['main']['App']['GetNBackResultsForSession'](arg1);
 }
 
+export function GetRpsGameSessions() {
+  return window['go']['main']['App']['GetRpsGameSessions']();
+}
+
+export function GetRpsResultsForSession(arg1) {
+  return window['go']['main']['App']['GetRpsResultsForSession'](arg1);
+}
+
 export function GetShapeGroups() {
   return window['go']['main']['App']['GetShapeGroups']();
 }
@@ -22,6 +30,14 @@ export function StartNBackGame(arg1) {
   return window['go']['main']['App']['StartNBackGame'](arg1);
 }
 
+export function StartRpsGame(arg1) {
+  return window['go']['main']['App']['StartRpsGame'](arg1);
+}
+
 export function SubmitNBackAnswer(arg1, arg2, arg3) {
   return window['go']['main']['App']['SubmitNBackAnswer'](arg1, arg2, arg3);
+}
+
+export function SubmitRpsAnswer(arg1, arg2, arg3) {
+  return window['go']['main']['App']['SubmitRpsAnswer'](arg1, arg2, arg3);
 }

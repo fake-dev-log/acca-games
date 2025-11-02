@@ -37,6 +37,63 @@ export namespace nback {
 
 }
 
+export namespace rps {
+	
+	export class Problem {
+	    problemCardHolder: string;
+	    givenCard: string;
+	    round: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Problem(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.problemCardHolder = source["problemCardHolder"];
+	        this.givenCard = source["givenCard"];
+	        this.round = source["round"];
+	    }
+	}
+	export class GameState {
+	    settings: types.RpsSettings;
+	    problems: Problem[];
+	    sessionId: number;
+	    gameCode: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new GameState(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.settings = this.convertValues(source["settings"], types.RpsSettings);
+	        this.problems = this.convertValues(source["problems"], Problem);
+	        this.sessionId = source["sessionId"];
+	        this.gameCode = source["gameCode"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+
+}
+
 export namespace types {
 	
 	export class GameSession {
@@ -125,6 +182,50 @@ export namespace types {
 	        this.nBackLevel = source["nBackLevel"];
 	        this.shapeGroup = source["shapeGroup"];
 	        this.isRealMode = source["isRealMode"];
+	    }
+	}
+	export class RpsResult {
+	    sessionId: number;
+	    round: number;
+	    questionNum: number;
+	    problemCardHolder: string;
+	    givenCard: string;
+	    isCorrect: boolean;
+	    responseTimeMs: number;
+	    playerChoice: string;
+	    correctChoice: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new RpsResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.sessionId = source["sessionId"];
+	        this.round = source["round"];
+	        this.questionNum = source["questionNum"];
+	        this.problemCardHolder = source["problemCardHolder"];
+	        this.givenCard = source["givenCard"];
+	        this.isCorrect = source["isCorrect"];
+	        this.responseTimeMs = source["responseTimeMs"];
+	        this.playerChoice = source["playerChoice"];
+	        this.correctChoice = source["correctChoice"];
+	    }
+	}
+	export class RpsSettings {
+	    rounds: number[];
+	    questionsPerRound: number;
+	    timeLimitMs: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new RpsSettings(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.rounds = source["rounds"];
+	        this.questionsPerRound = source["questionsPerRound"];
+	        this.timeLimitMs = source["timeLimitMs"];
 	    }
 	}
 

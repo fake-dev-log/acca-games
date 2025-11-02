@@ -41,7 +41,7 @@ export function NBackRecords() {
     navigate(`/records/n-back/${sessionId}`); // Navigate to detail page
   };
 
-  const filteredSessions = sessions.filter((session: types.GameSession) => {
+  const filteredSessions = (sessions || []).filter((session: types.GameSession) => {
     const settings = parseSettings(session.settings);
     if (!settings) return false;
 
@@ -92,10 +92,10 @@ export function NBackRecords() {
     },
   };
 
-  const uniqueShapeGroups = Array.from(new Set(sessions.map((s: types.GameSession) => parseSettings(s.settings)?.shapeGroup))).filter(Boolean) as string[];
+  const uniqueShapeGroups = Array.from(new Set((sessions || []).map((s: types.GameSession) => parseSettings(s.settings)?.shapeGroup))).filter(Boolean) as string[];
 
   return (
-    <RecordPageLayout backPath="/records" title="도형 순서 기억하기 게임 기록" sidebarContent={<SessionList onSessionClick={handleSessionClick} />}>
+    <RecordPageLayout backPath="/records" title="도형 순서 기억하기 게임 기록" sidebarContent={<SessionList sessions={sessions} loading={loading} error={error} onSessionClick={handleSessionClick} />}>
       <h2 className="text-2xl font-bold mb-4">대시보드</h2>
       <div className="mb-4 flex space-x-4">
         <Select

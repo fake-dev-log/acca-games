@@ -3,6 +3,7 @@ package main
 import (
 	"acca-games/database"
 	"acca-games/games/nback"
+	"acca-games/games/rps"
 	"acca-games/types"
 	"context"
 	"database/sql"
@@ -14,6 +15,7 @@ type App struct {
 	ctx          context.Context
 	db           *sql.DB
 	nbackService *nback.Service
+	rpsService   *rps.Service
 }
 
 // NewApp creates a new App application struct
@@ -31,6 +33,7 @@ func (a *App) startup(ctx context.Context) {
 	}
 	a.db = db
 	a.nbackService = nback.NewService(a.db)
+	a.rpsService = rps.NewService(a.db)
 }
 
 func (a *App) shutdown(ctx context.Context) {
@@ -46,25 +49,34 @@ func (a *App) GetShapeGroups() map[string][]string {
 
 // StartNBackGame starts a new N-Back game with the given settings.
 func (a *App) StartNBackGame(settings types.NBackSettings) (*nback.NBackGameState, error) {
-	gameState, err := a.nbackService.StartGame(settings)
-	if err != nil {
-		log.Printf("Error starting N-Back game: %v", err)
-		return nil, err
-	}
-	log.Printf("Started N-Back game with session ID: %d", gameState.SessionID)
-	return gameState, nil
+	return a.nbackService.StartGame(settings)
 }
 
 // SubmitNBackAnswer checks the user's answer for a given trial, saves it to the DB, and returns the result.
 func (a *App) SubmitNBackAnswer(playerChoice string, responseTimeMs int, trialNum int) (*types.NBackResult, error) {
-	result, err := a.nbackService.SubmitAnswer(playerChoice, responseTimeMs, trialNum)
-	if err != nil {
-		log.Printf("Error submitting N-Back answer: %v", err)
-		return nil, err
-	}
-	log.Printf("Saved N-Back result for trial: %d", result.QuestionNum)
-	return result, nil
+	return a.nbackService.SubmitAnswer(playerChoice, responseTimeMs, trialNum)
 }
+
+// StartRpsGame starts a new Rock-Paper-Scissors game with the given settings.
+func (a *App) StartRpsGame(settings types.RpsSettings) (*rps.GameState, error) {
+	return a.rpsService.StartGame(settings)
+}
+
+// SubmitRpsAnswer checks the user's answer for a given trial, saves it to the DB, and returns the result.
+func (a *App) SubmitRpsAnswer(playerChoice string, responseTimeMs int, questionNum int) (*types.RpsResult, error) {
+	return a.rpsService.SubmitAnswer(playerChoice, responseTimeMs, questionNum)
+}
+
+// GetRpsGameSessions fetches all Rock-Paper-Scissors game sessions.
+func (a *App) GetRpsGameSessions() ([]types.GameSession, error) {
+	return database.GetGameSessionsByCode(a.db, "RPS")
+}
+
+// GetRpsResultsForSession fetches all results for a given RPS session ID.
+func (a *App) GetRpsResultsForSession(sessionID int64) ([]types.RpsResult, error) {
+	return database.GetRpsResultsForSession(a.db, sessionID)
+}
+
 
 // GetNBackGameSessions fetches all N-Back game sessions.
 func (a *App) GetNBackGameSessions() ([]types.GameSession, error) {

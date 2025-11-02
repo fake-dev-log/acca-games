@@ -20,6 +20,8 @@ CREATE TABLE IF NOT EXISTS `rps_results` (
   `session_id` INTEGER NOT NULL,
   `round` INTEGER NOT NULL,
   `question_num` INTEGER NOT NULL,
+  `problem_card_holder` TEXT NOT NULL, -- 'me' or 'opponent'
+  `given_card` TEXT NOT NULL, -- 'ROCK', 'PAPER', 'SCISSORS'
   `is_correct` INTEGER NOT NULL, -- 0 for false, 1 for true
   `response_time_ms` INTEGER NOT NULL,
   `player_choice` TEXT, -- 'ROCK', 'PAPER', 'SCISSORS'

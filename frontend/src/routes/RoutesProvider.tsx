@@ -6,6 +6,10 @@ import { NBackGame } from "@pages/games/NBackGame";
 import { RecordsIndex } from "@pages/records/RecordsIndex";
 import { NBackRecords } from "@pages/records/NBackRecords";
 import { NBackSessionDetail } from "@pages/records/NBackSessionDetail"; // Import NBackSessionDetail
+import { RpsGameSetup } from "@pages/games/RpsGameSetup";
+import { RpsGame } from "@pages/games/RpsGame";
+import { RpsRecords } from "@pages/records/RpsRecords";
+import { RpsSessionDetail } from "@pages/records/RpsSessionDetail";
 
 export default function RoutesProvider() {
 
@@ -28,6 +32,14 @@ export default function RoutesProvider() {
                     path={"/records/n-back/:sessionId"} // New route for session detail
                     element={<NBackSessionDetail />}
                 />
+                <Route
+                    path={"/records/rps"}
+                    element={<RpsRecords />}
+                />
+                <Route
+                    path={"/records/rps/:sessionId"}
+                    element={<RpsSessionDetail />}
+                />
                 <Route path={"/games"}>
                     <Route
                         path={""}
@@ -40,6 +52,14 @@ export default function RoutesProvider() {
                     <Route
                         path={"n-back/play"}
                         element={<NBackGame />}
+                    />
+                    <Route
+                        path={"rps/setup"}
+                        element={<RpsGameSetup />}
+                    />
+                    <Route
+                        path={"rps/play"}
+                        element={<RpsGame />}
                     />
                 </Route>
             </Routes>

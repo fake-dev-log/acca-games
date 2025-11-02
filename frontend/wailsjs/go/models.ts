@@ -1,4 +1,4 @@
-export namespace games {
+export namespace nback {
 	
 	export class NBackGameState {
 	    settings: types.NBackSettings;

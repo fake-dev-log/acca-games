@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import { types } from '@wails/go/models';
-import { GetNBackResultsForSession, GetNBackGameSessions } from '@wails/go/main/App';
+import { useNBackStore } from '@stores/nbackStore';
 import { RecordPageLayout } from '@layout/RecordPageLayout';
 import { SessionList } from '@components/records/SessionList';
 import { ResultsTable, Column } from '@components/records/ResultsTable';
@@ -15,43 +15,37 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 export function NBackSessionDetail() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
-  const [sessionResults, setSessionResults] = useState<types.NBackRecord[]>([]);
-  const [sessionInfo, setSessionInfo] = useState<types.GameSession | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const {
+    currentSessionResults: sessionResults,
+    sessions,
+    loading,
+    error,
+    fetchResultsForSession,
+    fetchSessions,
+  } = useNBackStore();
 
   useEffect(() => {
     if (sessionId) {
-      setLoading(true);
-      Promise.all([
-        GetNBackResultsForSession(parseInt(sessionId)),
-        GetNBackGameSessions() // Fetch all sessions to find the current session's info
-      ])
-        .then(([resultsData, sessionsData]) => {
-          setSessionResults(resultsData);
-          const currentSession = sessionsData.find(s => s.sessionId === parseInt(sessionId));
-          setSessionInfo(currentSession || null);
-          setLoading(false);
-        })
-        .catch((err: any) => {
-          console.error('Error fetching session details:', err);
-          setError('세션 상세 정보를 불러오는 데 실패했습니다.');
-          setLoading(false);
-        });
+      fetchResultsForSession(parseInt(sessionId));
+      if (sessions.length === 0) {
+        fetchSessions(); // Fetch all sessions if not already in store
+      }
     }
-  }, [sessionId]);
+  }, [sessionId, fetchResultsForSession, fetchSessions, sessions.length]);
+
+  const sessionInfo = sessions.find((s: types.GameSession) => s.sessionId === parseInt(sessionId!));
 
   const calculateAccuracyByRound = (round: number) => {
-    const roundResults = sessionResults.filter(r => r.isCorrect && r.round === round);
+    const roundResults = sessionResults.filter((r: types.NBackRecord) => r.round === round);
     if (roundResults.length === 0) return 0;
-    const correctCount = roundResults.filter(r => r.isCorrect).length;
+    const correctCount = roundResults.filter((r: types.NBackRecord) => r.isCorrect).length;
     return (correctCount / roundResults.length) * 100;
   };
 
   const calculateAvgResponseTimeByRound = (round: number) => {
-    const roundResults = sessionResults.filter(r => r.isCorrect && r.round === round);
+    const roundResults = sessionResults.filter((r: types.NBackRecord) => r.round === round);
     if (roundResults.length === 0) return 0;
-    const totalResponseTime = roundResults.reduce((sum, r) => sum + r.responseTimeMs, 0);
+    const totalResponseTime = roundResults.reduce((sum: number, r: types.NBackRecord) => sum + r.responseTimeMs, 0);
     return (totalResponseTime / roundResults.length);
   };
 
@@ -84,10 +78,10 @@ export function NBackSessionDetail() {
   }
 
   const totalTrials = sessionResults.length;
-  const correctTrials = sessionResults.filter(r => r.isCorrect).length;
+  const correctTrials = sessionResults.filter((r: types.NBackRecord) => r.isCorrect).length;
   const overallAccuracy = totalTrials > 0 ? (correctTrials / totalTrials) * 100 : 0;
   const avgResponseTime = totalTrials > 0 
-    ? (sessionResults.reduce((sum, r) => sum + r.responseTimeMs, 0) / totalTrials).toFixed(2) 
+    ? (sessionResults.reduce((sum: number, r: types.NBackRecord) => sum + r.responseTimeMs, 0) / totalTrials).toFixed(2) 
     : 'N/A';
 
   const accuracyChartData = {

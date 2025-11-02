@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, ComponentType } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { games, types } from '@wails/go/models';
-import { SubmitNBackAnswer } from '@wails/go/main/App';
+import { nback, types } from '@wails/go/models';
+import { useNBackStore } from '@stores/nbackStore';
 import { Circle } from '@components/shapes/nback/Circle';
 import { Square } from '@components/shapes/nback/Square';
 import { Triangle } from '@components/shapes/nback/Triangle';
@@ -40,11 +40,13 @@ const shapeMap: { [key: string]: ComponentType } = {
 };
 
 export function NBackGame() {
-  const location = useLocation();
   const navigate = useNavigate();
+  const {
+    gameState,
+    submitAnswer: submitAnswerToAction,
+    resetGameState,
+  } = useNBackStore();
 
-  const gameState: games.NBackGameState | null = location.state?.gameState;
-  
   const [currentTrial, setCurrentTrial] = useState(0);
   const [currentShape, setCurrentShape] = useState<string | null>(null);
   const [isInputAllowed, setIsInputAllowed] = useState(false);
@@ -65,6 +67,7 @@ export function NBackGame() {
     if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
     if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
     if (feedbackClearTimerRef.current) clearTimeout(feedbackClearTimerRef.current);
+    resetGameState();
     navigate('/games');
   };
 
@@ -81,13 +84,15 @@ export function NBackGame() {
       clearTimeout(feedbackClearTimerRef.current);
     }
     try {
-      const result = await SubmitNBackAnswer(choice, responseTime, trial);
-      setResults(prev => [...prev, result]);
-      if (!gameState?.settings.isRealMode) {
-        setFeedback(result.isCorrect ? 'correct' : 'incorrect');
-        feedbackClearTimerRef.current = setTimeout(() => {
-          setFeedback(null);
-        }, 1000);
+      const result = await submitAnswerToAction(choice, responseTime, trial);
+      if (result) {
+        setResults(prev => [...prev, result]);
+        if (!gameState?.settings.isRealMode) {
+          setFeedback(result.isCorrect ? 'correct' : 'incorrect');
+          feedbackClearTimerRef.current = setTimeout(() => {
+            setFeedback(null);
+          }, 1000);
+        }
       }
     } catch (err) {
       console.error('Error submitting answer:', err);
@@ -98,7 +103,7 @@ export function NBackGame() {
         }, 1000);
       }
     }
-  }, [gameState?.settings.isRealMode]);
+  }, [gameState?.settings.isRealMode, submitAnswerToAction]);
 
   // Main Game Loop
   useEffect(() => {

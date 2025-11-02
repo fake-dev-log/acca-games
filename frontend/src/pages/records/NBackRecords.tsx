@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
@@ -7,21 +7,33 @@ import { RecordPageLayout } from '@layout/RecordPageLayout';
 import { SessionList } from '@components/records/SessionList';
 import { parseSettings } from '@utils/nbackHelpers';
 import { Select } from '@components/common/Select';
-import { useNBackSessions } from "@hooks/useNBackSessions";
+import { useNBackStore } from "@stores/nbackStore";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 export function NBackRecords() {
   const navigate = useNavigate();
-  const { sessions, allResults, loading, error } = useNBackSessions(); // Use the custom hook
+  const {
+    sessions,
+    allResults,
+    loading,
+    error,
+    fetchSessions,
+    fetchAllResults,
+  } = useNBackStore();
   const [filterLevel, setFilterLevel] = useState<number | 'all'>('all');
   const [filterShapeGroup, setFilterShapeGroup] = useState<string | 'all'>('all');
 
+  useEffect(() => {
+    fetchSessions();
+    fetchAllResults();
+  }, [fetchSessions, fetchAllResults]);
+
   // Helper function to calculate accuracy for a session
   const calculateSessionAccuracy = (session: types.GameSession, results: types.NBackRecord[]) => {
-    const sessionSpecificResults = results.filter(r => r.sessionId === session.sessionId);
+    const sessionSpecificResults = results.filter((r: types.NBackRecord) => r.sessionId === session.sessionId);
     if (sessionSpecificResults.length === 0) return 0;
-    const correctCount = sessionSpecificResults.filter(r => r.isCorrect).length;
+    const correctCount = sessionSpecificResults.filter((r: types.NBackRecord) => r.isCorrect).length;
     return (correctCount / sessionSpecificResults.length) * 100;
   };
 
@@ -29,7 +41,7 @@ export function NBackRecords() {
     navigate(`/records/n-back/${sessionId}`); // Navigate to detail page
   };
 
-  const filteredSessions = sessions.filter(session => {
+  const filteredSessions = sessions.filter((session: types.GameSession) => {
     const settings = parseSettings(session.settings);
     if (!settings) return false;
 
@@ -39,11 +51,11 @@ export function NBackRecords() {
   });
 
   const chartData = {
-    labels: filteredSessions.map(session => new Date(session.playDatetime).toLocaleString()),
+    labels: filteredSessions.map((session: types.GameSession) => new Date(session.playDatetime).toLocaleString()),
     datasets: [
       {
         label: '정확도 (%)',
-        data: filteredSessions.map(session => calculateSessionAccuracy(session, allResults)),
+        data: filteredSessions.map((session: types.GameSession) => calculateSessionAccuracy(session, allResults)),
         fill: false,
         borderColor: 'rgb(75, 192, 192)',
         tension: 0.1,
@@ -80,7 +92,7 @@ export function NBackRecords() {
     },
   };
 
-  const uniqueShapeGroups = Array.from(new Set(sessions.map(s => parseSettings(s.settings)?.shapeGroup))).filter(Boolean) as string[];
+  const uniqueShapeGroups = Array.from(new Set(sessions.map((s: types.GameSession) => parseSettings(s.settings)?.shapeGroup))).filter(Boolean) as string[];
 
   return (
     <RecordPageLayout backPath="/records" title="도형 순서 기억하기 게임 기록" sidebarContent={<SessionList onSessionClick={handleSessionClick} />}>

@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { types } from '@wails/go/models';
-import { GetShapeGroups, StartNBackGame } from '@wails/go/main/App';
+import { getShapeGroups } from '@api/nback';
+import { useNBackStore } from '@stores/nbackStore';
 import { RoundButton } from '@components/game_setup/RoundButton';
 import { ShapeSetButton } from '@components/game_setup/ShapeSetButton';
 import { PageLayout } from '@layout/PageLayout';
@@ -9,6 +10,14 @@ import { Button } from '@components/common/Button';
 
 export function NBackGameSetup() {
   const navigate = useNavigate();
+  const {
+    gameState,
+    loading,
+    error: storeError,
+    startGame,
+    resetGameState,
+  } = useNBackStore();
+
   const [settings, setSettings] = useState<types.NBackSettings>({
     numTrials: 25,
     presentationTime: 3000, // ms
@@ -17,22 +26,23 @@ export function NBackGameSetup() {
     isRealMode: false,
   });
   const [availableGroups, setAvailableGroups] = useState<{ [key: string]: string[] }>({});
-  const [error, setError] = useState('');
 
   useEffect(() => {
-    GetShapeGroups().then(setAvailableGroups).catch(console.error);
-  }, []);
+    // Reset previous game state when entering setup
+    resetGameState();
+    getShapeGroups().then(setAvailableGroups).catch(console.error);
+  }, [resetGameState]);
+
+  useEffect(() => {
+    // When gameState is created by the store action, navigate to the game
+    if (gameState) {
+      navigate('/games/n-back/play');
+    }
+  }, [gameState, navigate]);
 
   const handleStartGame = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      const plainSettings = { ...settings };
-      const gameState = await StartNBackGame(plainSettings);
-      navigate('/games/n-back/play', { state: { gameState } });
-    } catch (err: any) {
-      console.error('Error starting game:', err);
-      setError('게임을 시작하는 중 오류가 발생했습니다.');
-    }
+    await startGame(settings);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -133,10 +143,10 @@ export function NBackGameSetup() {
             </label>
           </div>
           
-          {error && <p className="text-danger text-sm text-center">{error}</p>}
+          {storeError && <p className="text-danger text-sm text-center">{storeError}</p>}
 
-          <Button type="submit" className="w-full">
-            게임 시작
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? '게임 생성 중...' : '게임 시작'}
           </Button>
         </form>
       </div>

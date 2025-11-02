@@ -1,19 +1,25 @@
-import { FC, useState } from 'react';
+import { FC, useState, useEffect } from 'react';
 import { parseSettings, formatSettings } from '@utils/nbackHelpers';
-import { useNBackSessions } from '@hooks/useNBackSessions'; // Import the custom hook
+import { useNBackStore } from '@stores/nbackStore';
+import { types } from '@wails/go/models';
 import { Select } from '@components/common/Select';
-import { DropdownIcon } from '@components/common/DropdownIcon';
 
 interface SessionListProps {
   onSessionClick: (sessionId: number) => void;
 }
 
 export const SessionList: FC<SessionListProps> = ({ onSessionClick }) => {
-  const { sessions, loading, error } = useNBackSessions(); // Use the custom hook
+  const { sessions, loading, error, fetchSessions } = useNBackStore();
   const [filterLevel, setFilterLevel] = useState<number | 'all'>('all');
   const [filterShapeGroup, setFilterShapeGroup] = useState<string | 'all'>('all');
 
-  const filteredSessions = sessions.filter(session => {
+  useEffect(() => {
+    if (sessions.length === 0) {
+      fetchSessions();
+    }
+  }, [sessions.length, fetchSessions]);
+
+  const filteredSessions = sessions.filter((session: types.GameSession) => {
     const settings = parseSettings(session.settings);
     if (!settings) return false;
 
@@ -22,7 +28,7 @@ export const SessionList: FC<SessionListProps> = ({ onSessionClick }) => {
     return levelMatch && shapeGroupMatch;
   });
 
-  const uniqueShapeGroups = Array.from(new Set(sessions.map(s => parseSettings(s.settings)?.shapeGroup))).filter(Boolean) as string[];
+  const uniqueShapeGroups = Array.from(new Set(sessions.map((s: types.GameSession) => parseSettings(s.settings)?.shapeGroup))).filter(Boolean) as string[];
 
   return (
     <div className="p-2">

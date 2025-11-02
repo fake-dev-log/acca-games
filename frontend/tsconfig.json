@@ -25,9 +25,10 @@
       "@routes/*": ["./src/routes/*"],
       "@pages/*": ["./src/pages/*"],
       "@components/*": ["./src/components/*"],
-      "@hooks/*": ["./src/hooks/*"],
       "@layout/*": ["./src/components/layout/*"],
       "@utils/*": ["./src/utils/*"],
+      "@stores/*": ["./src/stores/*"],
+      "@api/*": ["./src/api/*"],
       "@wails/*": ["./wailsjs/*"]
     }
   },

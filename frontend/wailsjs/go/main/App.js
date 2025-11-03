@@ -6,6 +6,10 @@ export function GetAllNBackResults() {
   return window['go']['main']['App']['GetAllNBackResults']();
 }
 
+export function GetAllRpsResults() {
+  return window['go']['main']['App']['GetAllRpsResults']();
+}
+
 export function GetNBackGameSessions() {
   return window['go']['main']['App']['GetNBackGameSessions']();
 }

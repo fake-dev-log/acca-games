@@ -53,6 +53,65 @@ export function RpsSessionDetail() {
   const overallAccuracy = totalTrials > 0 ? (correctTrials / totalTrials) * 100 : 0;
   const avgResponseTime = totalTrials > 0 ? (sessionResults.reduce((sum, r) => sum + r.responseTimeMs, 0) / totalTrials).toFixed(2) : 'N/A';
 
+  const calculateAccuracyByRound = (round: number) => {
+    const roundResults = sessionResults.filter(r => r.round === round);
+    if (roundResults.length === 0) return 0;
+    const correctCount = roundResults.filter(r => r.isCorrect).length;
+    return (correctCount / roundResults.length) * 100;
+  };
+
+  const calculateAvgResponseTimeByRound = (round: number) => {
+    const roundResults = sessionResults.filter(r => r.round === round);
+    if (roundResults.length === 0) return 0;
+    const totalResponseTime = roundResults.reduce((sum, r) => sum + r.responseTimeMs, 0);
+    return totalResponseTime / roundResults.length;
+  };
+
+  const calculateAccuracyByPerspective = (holder: 'me' | 'opponent') => {
+    const perspectiveResults = sessionResults.filter(r => r.problemCardHolder === holder);
+    if (perspectiveResults.length === 0) return 0;
+    const correctCount = perspectiveResults.filter(r => r.isCorrect).length;
+    return (correctCount / perspectiveResults.length) * 100;
+  };
+
+  const accuracyByRoundData = {
+    labels: ['1라운드', '2라운드', '3라운드'],
+    datasets: [{
+      label: '정확도 (%)',
+      data: [1, 2, 3].map(calculateAccuracyByRound),
+      backgroundColor: 'rgba(75, 192, 192, 0.6)',
+    }],
+  };
+
+  const responseTimeByRoundData = {
+    labels: ['1라운드', '2라운드', '3라운드'],
+    datasets: [{
+      label: '평균 반응 시간 (ms)',
+      data: [1, 2, 3].map(calculateAvgResponseTimeByRound),
+      backgroundColor: 'rgba(255, 159, 64, 0.6)',
+    }],
+  };
+
+  const accuracyByPerspectiveData = {
+    labels: ['내가 선택 (상대 카드 공개)', '상대가 선택 (내 카드 공개)'],
+    datasets: [{
+      label: '정확도 (%)',
+      data: [calculateAccuracyByPerspective('me'), calculateAccuracyByPerspective('opponent')],
+      backgroundColor: ['rgba(153, 102, 255, 0.6)', 'rgba(54, 162, 235, 0.6)'],
+    }],
+  };
+
+  const chartOptions = (title: string, yLabel: string) => ({
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      title: { display: true, text: title },
+    },
+    scales: {
+      y: { beginAtZero: true, title: { display: true, text: yLabel } },
+    },
+  });
+
   const columns: Column<types.RpsResult>[] = [
     { header: '문제 번호', accessor: (row) => row.questionNum + 1 },
     { header: '라운드', accessor: (row) => row.round },
@@ -72,6 +131,11 @@ export function RpsSessionDetail() {
           <p>전체 정확도: {overallAccuracy.toFixed(2)}%</p>
           <p>평균 반응 시간: {avgResponseTime} ms</p>
         </Card>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card><Bar data={accuracyByRoundData} options={chartOptions('라운드별 정확도', '정확도 (%)')} /></Card>
+          <Card><Bar data={responseTimeByRoundData} options={chartOptions('라운드별 평균 반응 시간', '시간 (ms)')} /></Card>
+        </div>
+        <Card><Bar data={accuracyByPerspectiveData} options={chartOptions('상황별 정확도', '정확도 (%)')} /></Card>
         <Card title="라운드별 상세 기록">
           <ResultsTable columns={columns} data={sessionResults} />
         </Card>

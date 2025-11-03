@@ -77,6 +77,11 @@ func (a *App) GetRpsResultsForSession(sessionID int64) ([]types.RpsResult, error
 	return database.GetRpsResultsForSession(a.db, sessionID)
 }
 
+// GetAllRpsResults fetches all results across all RPS sessions.
+func (a *App) GetAllRpsResults() ([]types.RpsResult, error) {
+	return database.GetAllRpsResults(a.db)
+}
+
 
 // GetNBackGameSessions fetches all N-Back game sessions.
 func (a *App) GetNBackGameSessions() ([]types.GameSession, error) {

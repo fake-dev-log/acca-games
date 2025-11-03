@@ -5,14 +5,7 @@ import { types } from '@wails/go/models';
 import { GameLayout } from '@layout/GameLayout';
 import { Button } from '@components/common/Button';
 import { ProgressBar } from '@components/common/ProgressBar';
-
-// Placeholder components for cards
-const Card = ({ children, owner }: { children: React.ReactNode, owner: string }) => (
-  <div className="w-40 h-56 border-2 rounded-lg flex flex-col items-center justify-center bg-surface-light dark:bg-surface-dark shadow-lg">
-    <div className="text-lg font-bold mb-4">{owner}</div>
-    <div className="text-6xl">{children}</div>
-  </div>
-);
+import { Card } from '@components/common/Card';
 
 export function RpsGame() {
   const navigate = useNavigate();
@@ -26,6 +19,7 @@ export function RpsGame() {
   const [results, setResults] = useState<types.RpsResult[]>([]);
   const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null);
   const [isFinished, setIsFinished] = useState(false);
+  const [animateCards, setAnimateCards] = useState(false);
 
   const advanceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const feedbackTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -53,14 +47,18 @@ export function RpsGame() {
       const result = await submitAnswerToAction(choice, responseTime, currentTrial);
       if (result) {
         setResults(prev => [...prev, result]);
-        setFeedback(result.isCorrect ? 'correct' : 'incorrect');
+        if (!gameState?.settings.isRealMode) {
+          setFeedback(result.isCorrect ? 'correct' : 'incorrect');
+        }
       }
     } catch (err) {
       console.error('Error submitting answer:', err);
-      setFeedback('incorrect');
+      if (!gameState?.settings.isRealMode) {
+        setFeedback('incorrect');
+      }
     }
     feedbackTimerRef.current = setTimeout(advanceToNextTrial, 500);
-  }, [currentTrial, submitAnswerToAction, advanceToNextTrial]);
+  }, [currentTrial, submitAnswerToAction, advanceToNextTrial, gameState?.settings.isRealMode]);
 
   // Main Game Loop
   useEffect(() => {
@@ -75,9 +73,11 @@ export function RpsGame() {
 
     answeredRef.current = false;
     startTimeRef.current = Date.now();
+    setAnimateCards(true);
 
     advanceTimerRef.current = setTimeout(async () => {
       if (!answeredRef.current) {
+        answeredRef.current = true; // Prevent further inputs for this trial
         await submitAnswer('MISS', gameState.settings.timeLimitMs);
       }
     }, gameState.settings.timeLimitMs);
@@ -134,6 +134,7 @@ export function RpsGame() {
 
   const meCard = problem.problemCardHolder === 'me' ? '?' : problem.givenCard;
   const opponentCard = problem.problemCardHolder === 'opponent' ? '?' : problem.givenCard;
+  const animationClass = animateCards ? 'card-border-highlight-dark dark:card-border-highlight-light' : '';
 
   return (
     <GameLayout onExit={handleExit}>
@@ -143,9 +144,13 @@ export function RpsGame() {
         </div>
         <ProgressBar key={currentTrial} duration={gameState.settings.timeLimitMs} />
         <div className="flex items-center justify-center space-x-8 my-8">
-          <Card owner="나">{cardIcon(meCard)}</Card>
+          <Card title="나" bordered className="w-34" isAnimated={animateCards} onAnimationEnd={() => setAnimateCards(false)}>
+            <div className="text-6xl h-24 flex items-center justify-center">{cardIcon(meCard)}</div>
+          </Card>
           <div className="text-4xl font-bold">VS</div>
-          <Card owner="상대">{cardIcon(opponentCard)}</Card>
+          <Card title="상대" bordered className="w-34" isAnimated={animateCards} onAnimationEnd={() => setAnimateCards(false)}>
+            <div className="text-6xl h-24 flex items-center justify-center">{cardIcon(opponentCard)}</div>
+          </Card>
         </div>
         <div className="h-20 flex items-center justify-center text-6xl font-bold">
           {feedback === 'correct' && <div className="text-success fade-in-out-0-5s">✓</div>}
@@ -155,7 +160,26 @@ export function RpsGame() {
           <p>진행: {Math.min(currentTrial + 1, gameState.problems.length)} / {gameState.problems.length}</p>
         </div>
         <div className="mt-4 text-lg text-center text-text-light dark:text-text-dark">
-            <p>←: 가위, ↓: 바위, →: 보</p>
+          <div className="flex justify-center items-center space-x-4">
+            <Card className="p-2 w-24" bordered>
+              <div className="text-center">
+                <p className="font-bold">←</p>
+                <p className="text-2xl">{cardIcon('SCISSORS')}</p>
+              </div>
+            </Card>
+            <Card className="p-2 w-24" bordered>
+              <div className="text-center">
+                <p className="font-bold">↓</p>
+                <p className="text-2xl">{cardIcon('ROCK')}</p>
+              </div>
+            </Card>
+            <Card className="p-2 w-24" bordered>
+              <div className="text-center">
+                <p className="font-bold">→</p>
+                <p className="text-2xl">{cardIcon('PAPER')}</p>
+              </div>
+            </Card>
+          </div>
         </div>
       </div>
     </GameLayout>

@@ -3,6 +3,7 @@ import {
   SubmitRpsAnswer,
   GetRpsGameSessions,
   GetRpsResultsForSession,
+  GetAllRpsResults,
 } from '@wails/go/main/App';
 import { rps, types } from '@wails/go/models';
 
@@ -28,4 +29,8 @@ export const getRpsResultsForSession = (
   sessionId: number,
 ): Promise<types.RpsResult[]> => {
   return GetRpsResultsForSession(sessionId);
+};
+
+export const getAllRpsResults = (): Promise<types.RpsResult[]> => {
+  return GetAllRpsResults();
 };

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import { types } from '@wails/go/models';
 import { getShapeGroups } from '@api/nback';
 import { useNBackStore } from '@stores/nbackStore';
@@ -7,6 +8,10 @@ import { RoundButton } from '@components/game_setup/RoundButton';
 import { ShapeSetButton } from '@components/game_setup/ShapeSetButton';
 import { PageLayout } from '@layout/PageLayout';
 import { Button } from '@components/common/Button';
+import { RealModeToggle } from '@components/common/RealModeToggle';
+import { NumberInput } from '@components/common/NumberInput';
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 export function NBackGameSetup() {
   const navigate = useNavigate();
@@ -47,10 +52,9 @@ export function NBackGameSetup() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    const isNumericInput = ['numTrials', 'presentationTime'].includes(name);
     setSettings((prev: types.NBackSettings) => ({
       ...prev,
-      [name]: isNumericInput ? Number(value) : value,
+      [name]: Number(value),
     }));
   };
 
@@ -97,51 +101,31 @@ export function NBackGameSetup() {
             </div>
           </div>
 
-          <div>
-            <label htmlFor="numTrials" className="block text-base font-medium text-text-light dark:text-text-dark">
-              문제 개수 (10-50)
-            </label>
-            <input
-              type="number"
-              id="numTrials"
-              name="numTrials"
-              min="10"
-              max="50"
-              value={settings.numTrials}
-              onChange={handleInputChange}
-              className="mt-2 block w-full p-3 text-base border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-light dark:focus:ring-primary-dark focus:border-primary-light dark:focus:border-primary-dark bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark text-center"
-            />
-          </div>
+          <NumberInput
+            id="numTrials"
+            name="numTrials"
+            label="문제 개수 (10-50)"
+            value={settings.numTrials}
+            onChange={handleInputChange}
+            min={10}
+            max={50}
+          />
 
-          <div>
-            <label htmlFor="presentationTime" className="block text-base font-medium text-text-light dark:text-text-dark">
-              도형 제시 시간 (초, 1-10)
-            </label>
-            <input
-              type="number"
-              id="presentationTime"
-              name="presentationTime"
-              min="1"
-              max="10"
-              value={presentationTimeInSeconds}
-              onChange={(e) => setSettings((prev: types.NBackSettings) => ({...prev, presentationTime: Number(e.target.value) * 1000}))}
-              className="mt-2 block w-full p-3 text-base border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-light dark:focus:ring-primary-dark focus:focus:border-primary-light dark:focus:border-primary-dark bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark text-center"
-            />
-          </div>
+          <NumberInput
+            id="presentationTime"
+            name="presentationTime"
+            label="도형 제시 시간 (초, 1-10)"
+            value={presentationTimeInSeconds}
+            onChange={(e) => setSettings((prev: types.NBackSettings) => ({...prev, presentationTime: Number(e.target.value) * 1000}))}
+            min={1}
+            max={10}
+            step={0.1}
+          />
 
-          <div className="flex items-center justify-center pt-2">
-            <input
-              id="isRealMode"
-              name="isRealMode"
-              type="checkbox"
-              checked={settings.isRealMode}
-              onChange={(e) => setSettings(prev => ({ ...prev, isRealMode: e.target.checked }))}
-              className="h-4 w-4 text-primary-light dark:text-primary-dark border-gray-300 rounded focus:ring-primary-light dark:focus:ring-primary-dark bg-surface-light dark:bg-surface-dark"
-            />
-            <label htmlFor="isRealMode" className="ml-2 block text-base font-medium text-text-light dark:text-text-dark">
-              실전 모드 (피드백 없음)
-            </label>
-          </div>
+          <RealModeToggle
+            checked={settings.isRealMode}
+            onChange={(e) => setSettings(prev => ({ ...prev, isRealMode: e.target.checked }))}
+          />
           
           {storeError && <p className="text-danger text-sm text-center">{storeError}</p>}
 

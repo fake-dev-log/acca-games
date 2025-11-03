@@ -216,6 +216,7 @@ export namespace types {
 	    rounds: number[];
 	    questionsPerRound: number;
 	    timeLimitMs: number;
+	    isRealMode: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new RpsSettings(source);
@@ -226,6 +227,7 @@ export namespace types {
 	        this.rounds = source["rounds"];
 	        this.questionsPerRound = source["questionsPerRound"];
 	        this.timeLimitMs = source["timeLimitMs"];
+	        this.isRealMode = source["isRealMode"];
 	    }
 	}
 

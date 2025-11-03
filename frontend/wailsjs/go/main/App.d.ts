@@ -6,6 +6,8 @@ import {rps} from '../models';
 
 export function GetAllNBackResults():Promise<Array<types.NBackRecord>>;
 
+export function GetAllRpsResults():Promise<Array<types.RpsResult>>;
+
 export function GetNBackGameSessions():Promise<Array<types.GameSession>>;
 
 export function GetNBackResultsForSession(arg1:number):Promise<Array<types.NBackRecord>>;

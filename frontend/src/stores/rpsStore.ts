@@ -5,12 +5,14 @@ import {
   submitRpsAnswer,
   getRpsGameSessions,
   getRpsResultsForSession,
+  getAllRpsResults,
 } from '@api/rps';
 
 interface RpsState {
   gameState: rps.GameState | null;
   sessions: types.GameSession[];
   currentSessionResults: types.RpsResult[];
+  allResults: types.RpsResult[];
   loading: boolean;
   error: string | null;
 
@@ -23,12 +25,14 @@ interface RpsState {
   resetGameState: () => void;
   fetchSessions: () => Promise<void>;
   fetchResultsForSession: (sessionId: number) => Promise<void>;
+  fetchAllResults: () => Promise<void>;
 }
 
 export const useRpsStore = create<RpsState>((set) => ({
   gameState: null,
   sessions: [],
   currentSessionResults: [],
+  allResults: [],
   loading: false,
   error: null,
 
@@ -72,6 +76,16 @@ export const useRpsStore = create<RpsState>((set) => ({
       set({ currentSessionResults: results, loading: false });
     } catch (err) {
       set({ error: 'Failed to fetch RPS session results', loading: false });
+    }
+  },
+
+  fetchAllResults: async () => {
+    set({ loading: true, error: null });
+    try {
+      const allResults = await getAllRpsResults();
+      set({ allResults, loading: false });
+    } catch (err) {
+      set({ error: 'Failed to fetch all RPS results', loading: false });
     }
   },
 }));

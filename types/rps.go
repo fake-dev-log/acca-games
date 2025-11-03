@@ -2,9 +2,10 @@ package types
 
 // RpsSettings defines the settings for a Rock-Paper-Scissors game session.
 type RpsSettings struct {
-	Rounds          []int `json:"rounds"`          // e.g., [1, 2, 3] for all, or [1] for only round 1
+	Rounds            []int `json:"rounds"`          // e.g., [1, 2, 3] for all, or [1] for only round 1
 	QuestionsPerRound int   `json:"questionsPerRound"`
-	TimeLimitMs     int   `json:"timeLimitMs"`
+	TimeLimitMs       int   `json:"timeLimitMs"`
+	IsRealMode        bool  `json:"isRealMode"`
 }
 
 // RpsResult defines the structure for a single trial result in the RPS game.

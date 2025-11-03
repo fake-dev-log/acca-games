@@ -11,25 +11,30 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 
 export function RpsRecords() {
   const navigate = useNavigate();
-  const { sessions, loading, error, fetchSessions } = useRpsStore();
+  const { sessions, allResults, loading, error, fetchSessions, fetchAllResults } = useRpsStore();
 
   useEffect(() => {
     fetchSessions();
-  }, [fetchSessions]);
+    fetchAllResults();
+  }, [fetchSessions, fetchAllResults]);
 
   const handleSessionClick = (sessionId: number) => {
     navigate(`/records/rps/${sessionId}`);
   };
 
-  // Note: Accuracy calculation for RPS might need a different approach
-  // as there is no single 'allResults' equivalent yet.
-  // This is a placeholder.
+  const calculateSessionAccuracy = (session: types.GameSession, results: types.RpsResult[]) => {
+    const sessionSpecificResults = results.filter(r => r.sessionId === session.sessionId);
+    if (sessionSpecificResults.length === 0) return 0;
+    const correctCount = sessionSpecificResults.filter(r => r.isCorrect).length;
+    return (correctCount / sessionSpecificResults.length) * 100;
+  };
+
   const chartData = {
     labels: sessions.map(session => new Date(session.playDatetime).toLocaleString()),
     datasets: [
       {
         label: '정확도 (%)',
-        data: sessions.map(() => 0), // Placeholder data
+        data: sessions.map(session => calculateSessionAccuracy(session, allResults)),
         fill: false,
         borderColor: 'rgb(75, 192, 192)',
         tension: 0.1,
@@ -41,7 +46,13 @@ export function RpsRecords() {
     responsive: true,
     plugins: {
       legend: { position: 'top' as const },
-      title: { display: true, text: '세션별 정확도 추이 (구현 예정)' },
+      title: { display: true, text: '세션별 정확도 추이' },
+    },
+    scales: {
+      y: {
+        min: 0,
+        max: 100,
+      },
     },
   };
 

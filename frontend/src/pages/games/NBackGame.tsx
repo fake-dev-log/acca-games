@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, ComponentType } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { nback, types } from '@wails/go/models';
+import { useNavigate } from 'react-router-dom';
+import { types } from '@wails/go/models';
 import { useNBackStore } from '@stores/nbackStore';
 import { Circle } from '@components/shapes/nback/Circle';
 import { Square } from '@components/shapes/nback/Square';
@@ -20,6 +20,7 @@ import { Crown } from '@components/shapes/nback/Crown';
 import { Button } from '@components/common/Button';
 import { ProgressBar } from '@components/common/ProgressBar';
 import { GameLayout } from '@layout/GameLayout';
+import { Card } from '@components/common/Card';
 
 const shapeMap: { [key: string]: ComponentType } = {
   circle: Circle,
@@ -199,8 +200,6 @@ export function NBackGame() {
     return <p>2칸 앞과 같으면 <kbd>←</kbd>, 3칸 앞과 같으면 <kbd>→</kbd>, 모두 다르면 <kbd>Space</kbd></p>;
   };
 
-  const animationClass = animateCard ? 'card-border-highlight-dark dark:card-border-highlight-light' : '';
-
   return (
     <GameLayout onExit={handleExit}>
       <div className="w-80">
@@ -211,11 +210,14 @@ export function NBackGame() {
           key={currentTrial}
           duration={gameState.settings.presentationTime}
         />
-        <div 
+        <Card 
+          isAnimated={animateCard}
           onAnimationEnd={() => setAnimateCard(false)}
-          className={`w-80 h-80 border-2 bg-surface-light dark:bg-surface-dark flex items-center justify-center relative shadow-lg rounded-md border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] ${animationClass}`}>
+          bordered
+          className="w-80 h-80 flex items-center justify-center"
+        >
           {renderShape()}
-        </div>
+        </Card>
         <div className="h-20 flex items-center justify-center text-6xl font-bold">
             {showStart && !feedback && <div className="text-primary-light dark:text-primary-dark fade-in-out-1-5s">START</div>}
             {feedback === 'correct' && <div className="text-success fade-in-out-1s">✓</div>}

@@ -68,8 +68,6 @@
   /* Borders */
   --color-border-light:       #D1D5DB; /* gray-300 */
   --color-border-dark:        #5C6B5B;
-  --color-border-highlight-light: #8FAF8A;
-  --color-border-highlight-dark:  #A8D0A5;
 }
 
 
@@ -117,20 +115,21 @@ body {
   animation: fade-in-out 1.5s ease-in-out forwards;
 }
 
+/* Modify existing keyframes */
+@keyframes highlight-light {
+  0%, 40%, 80%, 100% { border-color: var(--color-primary-light); }
+  20%, 60% { border-color: var(--color-border-light); }
+}
+
+@keyframes highlight-dark {
+  0%, 40%, 80%, 100% { border-color: var(--color-primary-dark); }
+  20%, 60% { border-color: var(--color-border-dark); }
+}
+
 .card-border-highlight-light {
-  animation: border-highlight-light 0.5s ease-out forwards;
+  animation: highlight-light 1s ease-in-out forwards;
 }
 
 .card-border-highlight-dark {
-  animation: border-highlight-dark 0.5s ease-out forwards;
-}
-
-@keyframes border-highlight-light {
-  from { border-color: var(--color-border-highlight-light); }
-  to { border-color: var(--color-border-light); }
-}
-
-@keyframes border-highlight-dark {
-  from { border-color: var(--color-border-highlight-dark); }
-  to { border-color: var(--color-border-dark); }
+  animation: highlight-dark 1s ease-in-out forwards;
 }

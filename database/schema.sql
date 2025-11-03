@@ -6,7 +6,7 @@
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `game_sessions` (
   `session_id` INTEGER PRIMARY KEY AUTOINCREMENT,
-  `game_code` TEXT NOT NULL, -- 'RPS', 'SHAPE_ROTATE', 'NUMBER_PRESS', 'SHAPE_MEMORY'
+  `game_code` TEXT NOT NULL, -- 'RPS', 'SHAPE_ROTATE', 'NUMBER_PRESS', 'NBACK'
   `play_datetime` TEXT NOT NULL DEFAULT (datetime('now','localtime')), -- ISO8601 format
   `settings` TEXT -- Storing game settings as a JSON string
 );
@@ -65,10 +65,10 @@ CREATE TABLE IF NOT EXISTS `number_press_results` (
 );
 
 -- -----------------------------------------------------
--- Table `shape_memory_results` (Shape Sequence Memory)
+-- Table `nback_results` (Shape Sequence Memory)
 -- Stores results for each question in the Shape Memory (N-Back) game.
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `shape_memory_results` (
+CREATE TABLE IF NOT EXISTS `nback_results` (
   `result_id` INTEGER PRIMARY KEY AUTOINCREMENT,
   `session_id` INTEGER NOT NULL,
   `round` INTEGER NOT NULL,

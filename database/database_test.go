@@ -37,7 +37,7 @@ func TestDatabaseInitialization(t *testing.T) {
 		"game_sessions",
 		"number_press_results",
 		"rps_results",
-		"shape_memory_results",
+		"nback_results",
 		"shape_rotation_results",
 	}
 

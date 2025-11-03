@@ -92,6 +92,7 @@ func newNBackGame(settings types.NBackSettings) *NBackGameState {
 	group, ok := ShapeGroups[shapeGroupKey]
 	if !ok {
 		group = ShapeGroups["group1"]
+		shapeGroupKey = "group1" // Update shapeGroupKey to reflect the default
 	}
 
 	sequence := make([]string, settings.NumTrials)
@@ -109,8 +110,11 @@ func newNBackGame(settings types.NBackSettings) *NBackGameState {
 		sequence[i] = nextShape
 	}
 
+	modifiedSettings := settings
+	modifiedSettings.ShapeGroup = shapeGroupKey
+
 	return &NBackGameState{
-		Settings:      settings,
+		Settings:      modifiedSettings,
 		ShapeSequence: sequence,
 	}
 }

@@ -28,7 +28,7 @@ type GameSession struct {
 	Settings     string `json:"settings"` // JSON string of NBackSettings
 }
 
-// NBackRecord represents a row in the shape_memory_results table.
+// NBackRecord represents a row in the nback_results table.
 type NBackRecord struct {
 	ResultID       int64  `json:"resultId"`
 	SessionID      int64  `json:"sessionId"`

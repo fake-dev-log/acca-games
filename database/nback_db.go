@@ -15,7 +15,7 @@ func CreateNBackSession(db *sql.DB, settings types.NBackSettings) (int64, error)
 		return 0, fmt.Errorf("failed to marshal settings: %w", err)
 	}
 
-	result, err := db.Exec("INSERT INTO game_sessions (game_code, settings) VALUES (?, ?)", "SHAPE_MEMORY", string(settingsJSON))
+	result, err := db.Exec("INSERT INTO game_sessions (game_code, settings) VALUES (?, ?)", "NBACK", string(settingsJSON))
 	if err != nil {
 		return 0, fmt.Errorf("failed to insert new game session: %w", err)
 	}
@@ -31,7 +31,7 @@ func CreateNBackSession(db *sql.DB, settings types.NBackSettings) (int64, error)
 // SaveNBackResult saves a single trial's result to the database.
 func SaveNBackResult(db *sql.DB, result types.NBackResult) error {
 	_, err := db.Exec(`
-		INSERT INTO shape_memory_results (session_id, round, question_num, is_correct, response_time_ms, player_choice, correct_choice)
+		INSERT INTO nback_results (session_id, round, question_num, is_correct, response_time_ms, player_choice, correct_choice)
 		VALUES (?, ?, ?, ?, ?, ?, ?)`, 
 		result.SessionID, 
 		result.Round, 
@@ -49,7 +49,7 @@ func SaveNBackResult(db *sql.DB, result types.NBackResult) error {
 
 // GetNBackGameSessions fetches all N-Back game sessions.
 func GetNBackGameSessions(db *sql.DB) ([]types.GameSession, error) {
-	rows, err := db.Query("SELECT session_id, game_code, play_datetime, settings FROM game_sessions WHERE game_code = ? ORDER BY play_datetime DESC", "SHAPE_MEMORY")
+	rows, err := db.Query("SELECT session_id, game_code, play_datetime, settings FROM game_sessions WHERE game_code = ? ORDER BY play_datetime DESC", "NBACK")
 	if err != nil {
 		return nil, fmt.Errorf("failed to query game sessions: %w", err)
 	}
@@ -71,7 +71,7 @@ func GetNBackGameSessions(db *sql.DB) ([]types.GameSession, error) {
 func GetNBackResultsForSession(db *sql.DB, sessionID int64) ([]types.NBackRecord, error) {
 	rows, err := db.Query(`
 		SELECT result_id, session_id, round, question_num, is_correct, response_time_ms, player_choice, correct_choice
-		FROM shape_memory_results WHERE session_id = ? ORDER BY question_num ASC`, sessionID)
+		FROM nback_results WHERE session_id = ? ORDER BY question_num ASC`, sessionID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query N-Back results: %w", err)
 	}
@@ -102,7 +102,7 @@ func GetNBackResultsForSession(db *sql.DB, sessionID int64) ([]types.NBackRecord
 func GetAllNBackResults(db *sql.DB) ([]types.NBackRecord, error) {
 	rows, err := db.Query(`
 		SELECT result_id, session_id, round, question_num, is_correct, response_time_ms, player_choice, correct_choice
-		FROM shape_memory_results ORDER BY session_id ASC, question_num ASC`)
+		FROM nback_results ORDER BY session_id ASC, question_num ASC`)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query all N-Back results: %w", err)
 	}

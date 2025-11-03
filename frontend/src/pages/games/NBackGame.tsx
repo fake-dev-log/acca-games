@@ -149,7 +149,7 @@ export function NBackGame() {
     };
   }, [currentTrial, gameState, navigate, submitAnswer, advanceToNextTrial]);
 
-  const handleKeyPress = useCallback(async (e: KeyboardEvent) => {
+  const handleKeyPressCallback = useCallback(async (e: KeyboardEvent) => {
     if (!isInputAllowed || !['ArrowLeft', 'ArrowRight', ' '].includes(e.key)) return;
 
     setIsInputAllowed(false);
@@ -161,10 +161,14 @@ export function NBackGame() {
     await submitAnswer(choice, responseTime, currentTrial);
   }, [isInputAllowed, submitAnswer, currentTrial]);
 
+  const handleKeyPressRef = useRef(handleKeyPressCallback);
+  handleKeyPressRef.current = handleKeyPressCallback;
+
   useEffect(() => {
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [handleKeyPress]);
+    const handleKeyDown = (e: KeyboardEvent) => handleKeyPressRef.current(e);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const renderShape = () => {
     if (!currentShape) return <div className="w-48 h-48" />;

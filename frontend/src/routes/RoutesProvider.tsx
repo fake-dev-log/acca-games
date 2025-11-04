@@ -10,6 +10,10 @@ import { RpsGameSetup } from "@pages/games/RpsGameSetup";
 import { RpsGame } from "@pages/games/RpsGame";
 import { RpsRecords } from "@pages/records/RpsRecords";
 import { RpsSessionDetail } from "@pages/records/RpsSessionDetail";
+import { NumberPressingGameSetup } from "@pages/games/NumberPressingGameSetup";
+import { NumberPressingGame } from "@pages/games/NumberPressingGame";
+import { NumberPressingRecords } from "@pages/records/NumberPressingRecords";
+import { NumberPressingSessionDetail } from "@pages/records/NumberPressingSessionDetail";
 
 export default function RoutesProvider() {
 
@@ -40,6 +44,14 @@ export default function RoutesProvider() {
                     path={"/records/rps/:sessionId"}
                     element={<RpsSessionDetail />}
                 />
+                <Route
+                    path={"/records/number-pressing"}
+                    element={<NumberPressingRecords />}
+                />
+                <Route
+                    path={"/records/number-pressing/:sessionId"}
+                    element={<NumberPressingSessionDetail />}
+                />
                 <Route path={"/games"}>
                     <Route
                         path={""}
@@ -60,6 +72,14 @@ export default function RoutesProvider() {
                     <Route
                         path={"rps/play"}
                         element={<RpsGame />}
+                    />
+                    <Route
+                        path={"number-pressing/setup"}
+                        element={<NumberPressingGameSetup />}
+                    />
+                    <Route
+                        path={"number-pressing/play"}
+                        element={<NumberPressingGame />}
                     />
                 </Route>
             </Routes>

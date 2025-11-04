@@ -49,7 +49,7 @@ func SaveNBackResult(db *sql.DB, result types.NBackResult) error {
 
 // GetNBackGameSessions fetches all N-Back game sessions.
 func GetNBackGameSessions(db *sql.DB) ([]types.GameSession, error) {
-	rows, err := db.Query("SELECT session_id, game_code, play_datetime, settings FROM game_sessions WHERE game_code = ? ORDER BY play_datetime DESC", "NBACK")
+	rows, err := db.Query("SELECT id, game_code, play_datetime, settings FROM game_sessions WHERE game_code = ? ORDER BY play_datetime DESC", "NBACK")
 	if err != nil {
 		return nil, fmt.Errorf("failed to query game sessions: %w", err)
 	}
@@ -58,7 +58,7 @@ func GetNBackGameSessions(db *sql.DB) ([]types.GameSession, error) {
 	var sessions []types.GameSession
 	for rows.Next() {
 		var session types.GameSession
-		if err := rows.Scan(&session.SessionID, &session.GameCode, &session.PlayDatetime, &session.Settings); err != nil {
+		if err := rows.Scan(&session.ID, &session.GameCode, &session.PlayDatetime, &session.Settings); err != nil {
 			return nil, fmt.Errorf("failed to scan game session: %w", err)
 		}
 		sessions = append(sessions, session)
@@ -70,7 +70,7 @@ func GetNBackGameSessions(db *sql.DB) ([]types.GameSession, error) {
 // GetNBackResultsForSession fetches all N-Back results for a given session ID.
 func GetNBackResultsForSession(db *sql.DB, sessionID int64) ([]types.NBackRecord, error) {
 	rows, err := db.Query(`
-		SELECT result_id, session_id, round, question_num, is_correct, response_time_ms, player_choice, correct_choice
+		SELECT id, session_id, round, question_num, is_correct, response_time_ms, player_choice, correct_choice
 		FROM nback_results WHERE session_id = ? ORDER BY question_num ASC`, sessionID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query N-Back results: %w", err)
@@ -80,7 +80,7 @@ func GetNBackResultsForSession(db *sql.DB, sessionID int64) ([]types.NBackRecord
 	var records []types.NBackRecord
 	for rows.Next() {
 		var record types.NBackRecord
-		if err := rows.Scan(&record.ResultID, &record.SessionID, &record.Round, &record.QuestionNum, &record.IsCorrect, &record.ResponseTimeMs, &record.PlayerChoice, &record.CorrectChoice); err != nil {
+		if err := rows.Scan(&record.ID, &record.SessionID, &record.Round, &record.QuestionNum, &record.IsCorrect, &record.ResponseTimeMs, &record.PlayerChoice, &record.CorrectChoice); err != nil {
 			return nil, fmt.Errorf("failed to scan N-Back record: %w", err)
 		}
 		records = append(records, record)
@@ -101,7 +101,7 @@ func GetNBackResultsForSession(db *sql.DB, sessionID int64) ([]types.NBackRecord
 // GetAllNBackResults fetches all N-Back results across all sessions.
 func GetAllNBackResults(db *sql.DB) ([]types.NBackRecord, error) {
 	rows, err := db.Query(`
-		SELECT result_id, session_id, round, question_num, is_correct, response_time_ms, player_choice, correct_choice
+		SELECT id, session_id, round, question_num, is_correct, response_time_ms, player_choice, correct_choice
 		FROM nback_results ORDER BY session_id ASC, question_num ASC`)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query all N-Back results: %w", err)
@@ -111,7 +111,7 @@ func GetAllNBackResults(db *sql.DB) ([]types.NBackRecord, error) {
 	var records []types.NBackRecord
 	for rows.Next() {
 		var record types.NBackRecord
-		if err := rows.Scan(&record.ResultID, &record.SessionID, &record.Round, &record.QuestionNum, &record.IsCorrect, &record.ResponseTimeMs, &record.PlayerChoice, &record.CorrectChoice); err != nil {
+		if err := rows.Scan(&record.ID, &record.SessionID, &record.Round, &record.QuestionNum, &record.IsCorrect, &record.ResponseTimeMs, &record.PlayerChoice, &record.CorrectChoice); err != nil {
 			return nil, fmt.Errorf("failed to scan N-Back record: %w", err)
 		}
 		records = append(records, record)

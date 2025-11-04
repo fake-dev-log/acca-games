@@ -32,20 +32,21 @@ export function RpsSessionDetail() {
     }
   }, [sessionId, fetchResultsForSession, fetchSessions, sessions.length]);
 
-  const sessionInfo = sessions.find((s: types.GameSession) => s.sessionId === parseInt(sessionId!));
+  const sessionInfo = sessions.find((s: types.GameSession) => s.id === parseInt(sessionId!));
 
   const handleSessionClick = (id: number) => {
     navigate(`/records/rps/${id}`);
   };
 
   if (loading) {
-    return <RecordPageLayout backPath="/records/rps" title="세션 상세 기록" sidebarContent={<SessionList sessions={sessions} loading={loading} error={error} onSessionClick={handleSessionClick} />}><p>세션 상세 정보를 불러오는 중...</p></RecordPageLayout>;
+    return <RecordPageLayout backPath="/records/rps" title="세션 상세 기록" sidebarContent={<SessionList sessions={sessions} loading={loading} error={error} onSessionClick={handleSessionClick} activeSessionId={parseInt(sessionId!)} />}>
+        <p>세션 상세 정보를 불러오는 중...</p></RecordPageLayout>;
   }
   if (error) {
-    return <RecordPageLayout backPath="/records/rps" title="세션 상세 기록" sidebarContent={<SessionList sessions={sessions} loading={loading} error={error} onSessionClick={handleSessionClick} />}><p className="text-red-500">{error}</p></RecordPageLayout>;
+    return <RecordPageLayout backPath="/records/rps" title="세션 상세 기록" sidebarContent={<SessionList sessions={sessions} loading={loading} error={error} onSessionClick={handleSessionClick} activeSessionId={parseInt(sessionId!)} />}> <p className="text-red-500">{error}</p></RecordPageLayout>;
   }
   if (!sessionInfo) {
-    return <RecordPageLayout backPath="/records/rps" title="세션 상세 기록" sidebarContent={<SessionList sessions={sessions} loading={loading} error={error} onSessionClick={handleSessionClick} />}><p>세션을 찾을 수 없습니다.</p></RecordPageLayout>;
+    return <RecordPageLayout backPath="/records/rps" title="세션 상세 기록" sidebarContent={<SessionList sessions={sessions} loading={loading} error={error} onSessionClick={handleSessionClick} activeSessionId={parseInt(sessionId!)} />}> <p>세션을 찾을 수 없습니다.</p></RecordPageLayout>;
   }
 
   const totalTrials = sessionResults.length;
@@ -123,7 +124,7 @@ export function RpsSessionDetail() {
   ];
 
   return (
-    <RecordPageLayout backPath="/records/rps" title={`세션 상세 기록 (ID: ${sessionId})`} sidebarContent={<SessionList sessions={sessions} loading={loading} error={error} onSessionClick={handleSessionClick} />}>
+    <RecordPageLayout backPath="/records/rps" title={`세션 상세 기록 (ID: ${sessionId})`} sidebarContent={<SessionList sessions={sessions} loading={loading} error={error} onSessionClick={handleSessionClick} activeSessionId={parseInt(sessionId!)} />}>
       <div className="space-y-6">
         <Card title="요약 정보">
           <p>총 문제 수: {totalTrials}</p>

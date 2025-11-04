@@ -8,7 +8,6 @@ import { RecordPageLayout } from '@layout/RecordPageLayout';
 import { SessionList } from '@components/records/SessionList';
 import { ResultsTable, Column } from '@components/records/ResultsTable';
 import { Card } from '@components/common/Card';
-import { formatSettings } from '@utils/nbackHelpers'; // Import from nbackHelpers
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -33,7 +32,7 @@ export function NBackSessionDetail() {
     }
   }, [sessionId, fetchResultsForSession, fetchSessions, sessions.length]);
 
-  const sessionInfo = sessions.find((s: types.GameSession) => s.sessionId === parseInt(sessionId!));
+  const sessionInfo = sessions.find((s: types.GameSession) => s.id === parseInt(sessionId!));
 
   const calculateAccuracyByRound = (round: number) => {
     const roundResults = sessionResults.filter((r: types.NBackRecord) => r.round === round);
@@ -55,7 +54,7 @@ export function NBackSessionDetail() {
 
   if (loading) {
     return (
-      <RecordPageLayout backPath="/records/n-back" title="세션 상세 기록" sidebarContent={<SessionList sessions={sessions} loading={loading} error={error} onSessionClick={handleSessionClick} />}>
+      <RecordPageLayout backPath="/records/n-back" title="세션 상세 기록" sidebarContent={<SessionList sessions={sessions} loading={loading} error={error} onSessionClick={handleSessionClick} activeSessionId={parseInt(sessionId!)} />}>
         <p>세션 상세 정보를 불러오는 중...</p>
       </RecordPageLayout>
     );
@@ -63,7 +62,7 @@ export function NBackSessionDetail() {
 
   if (error) {
     return (
-      <RecordPageLayout backPath="/records/n-back" title="세션 상세 기록" sidebarContent={<SessionList sessions={sessions} loading={loading} error={error} onSessionClick={handleSessionClick} />}>
+      <RecordPageLayout backPath="/records/n-back" title="세션 상세 기록" sidebarContent={<SessionList sessions={sessions} loading={loading} error={error} onSessionClick={handleSessionClick} activeSessionId={parseInt(sessionId!)} />}>
         <p className="text-red-500">{error}</p>
       </RecordPageLayout>
     );
@@ -71,7 +70,7 @@ export function NBackSessionDetail() {
 
   if (!sessionInfo) {
     return (
-      <RecordPageLayout backPath="/records/n-back" title="세션 상세 기록" sidebarContent={<SessionList sessions={sessions} loading={loading} error={error} onSessionClick={handleSessionClick} />}>
+      <RecordPageLayout backPath="/records/n-back" title="세션 상세 기록" sidebarContent={<SessionList sessions={sessions} loading={loading} error={error} onSessionClick={handleSessionClick} activeSessionId={parseInt(sessionId!)} />}>
         <p>세션을 찾을 수 없습니다.</p>
       </RecordPageLayout>
     );
@@ -142,14 +141,13 @@ export function NBackSessionDetail() {
   ];
 
   return (
-    <RecordPageLayout backPath="/records/n-back" title={`세션 상세 기록 (ID: ${sessionId})`} sidebarContent={<SessionList sessions={sessions} loading={loading} error={error} onSessionClick={handleSessionClick} />}>
+    <RecordPageLayout backPath="/records/n-back" title={`세션 상세 기록 (ID: ${sessionId})`} sidebarContent={<SessionList sessions={sessions} loading={loading} error={error} onSessionClick={handleSessionClick} activeSessionId={parseInt(sessionId!)} />}>
       <div className="space-y-6">
         <Card title="요약 정보">
           <p>총 문제 수: {totalTrials}</p>
           <p>정답 수: {correctTrials}</p>
           <p>전체 정확도: {overallAccuracy.toFixed(2)}%</p>
           <p>평균 반응 시간: {avgResponseTime} ms</p>
-          {sessionInfo && <p>설정: {formatSettings(sessionInfo.settings)}</p>}
         </Card>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

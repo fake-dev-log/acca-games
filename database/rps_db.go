@@ -58,7 +58,7 @@ func SaveRpsResult(db *sql.DB, result types.RpsResult) error {
 // GetRpsResultsForSession fetches all results for a given RPS session ID.
 func GetRpsResultsForSession(db *sql.DB, sessionID int64) ([]types.RpsResult, error) {
 	rows, err := db.Query(`
-		SELECT session_id, round, question_num, problem_card_holder, given_card, 
+		SELECT id, session_id, round, question_num, problem_card_holder, given_card, 
 		       is_correct, response_time_ms, player_choice, correct_choice
 		FROM rps_results
 		WHERE session_id = ?
@@ -73,7 +73,7 @@ func GetRpsResultsForSession(db *sql.DB, sessionID int64) ([]types.RpsResult, er
 	for rows.Next() {
 		var r types.RpsResult
 		if err := rows.Scan(
-			&r.SessionID, &r.Round, &r.QuestionNum, &r.ProblemCardHolder, &r.GivenCard,
+			&r.ID, &r.SessionID, &r.Round, &r.QuestionNum, &r.ProblemCardHolder, &r.GivenCard,
 			&r.IsCorrect, &r.ResponseTimeMs, &r.PlayerChoice, &r.CorrectChoice,
 		); err != nil {
 			return nil, err
@@ -87,7 +87,7 @@ func GetRpsResultsForSession(db *sql.DB, sessionID int64) ([]types.RpsResult, er
 // GetAllRpsResults fetches all results across all RPS sessions.
 func GetAllRpsResults(db *sql.DB) ([]types.RpsResult, error) {
 	rows, err := db.Query(`
-		SELECT session_id, round, question_num, problem_card_holder, given_card, 
+		SELECT id, session_id, round, question_num, problem_card_holder, given_card, 
 		       is_correct, response_time_ms, player_choice, correct_choice
 		FROM rps_results
 		ORDER BY session_id, question_num ASC
@@ -101,7 +101,7 @@ func GetAllRpsResults(db *sql.DB) ([]types.RpsResult, error) {
 	for rows.Next() {
 		var r types.RpsResult
 		if err := rows.Scan(
-			&r.SessionID, &r.Round, &r.QuestionNum, &r.ProblemCardHolder, &r.GivenCard,
+			&r.ID, &r.SessionID, &r.Round, &r.QuestionNum, &r.ProblemCardHolder, &r.GivenCard,
 			&r.IsCorrect, &r.ResponseTimeMs, &r.PlayerChoice, &r.CorrectChoice,
 		); err != nil {
 			return nil, err

@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 
 export interface Column<T> {
   header: string;
-  accessor: (row: T) => ReactNode;
+  accessor: (row: T, index: number) => ReactNode;
 }
 
 interface ResultsTableProps<T> {
@@ -25,7 +25,7 @@ export const ResultsTable = <T extends {}>({ columns, data }: ResultsTableProps<
           {data.map((row, rowIndex) => (
             <tr key={rowIndex} className="hover:bg-primary hover:text-on-primary">
               {columns.map((col, colIndex) => (
-                <td key={colIndex} className="py-2 px-4 border-b text-center">{col.accessor(row)}</td>
+                <td key={colIndex} className="py-2 px-4 border-b text-center">{col.accessor(row, rowIndex)}</td>
               ))}
             </tr>
           ))}

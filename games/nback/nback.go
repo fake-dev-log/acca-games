@@ -6,26 +6,16 @@ import (
 	"database/sql"
 	"fmt"
 	"math/rand"
-	"time"
 )
 
-// NBackGameState represents the current state of the N-Back game.
+// NBackGameState holds the current state of the N-Back game.
 type NBackGameState struct {
 	Settings      types.NBackSettings `json:"settings"`
 	ShapeSequence []string            `json:"shapeSequence"`
-	SessionID     int64               `json:"sessionId"`
+	ID            int64               `json:"id"`
 }
 
-// ShapeGroups contains the definitions for all shape groups.
-var ShapeGroups = map[string][]string{
-	"group1": {"circle", "square", "triangle"},
-	"group2": {"trapezoid", "hourglass", "diamond"},
-	"group3": {"rhombus", "butterfly", "star"},
-	"group4": {"check", "horns", "pyramid"},
-	"group5": {"double_triangle", "x_shape", "crown"},
-}
-
-// Service handles the business logic for the N-Back game.
+// Service for the N-Back game.
 type Service struct {
 	db           *sql.DB
 	currentState *NBackGameState
@@ -36,122 +26,101 @@ func NewService(db *sql.DB) *Service {
 	return &Service{db: db}
 }
 
-// GetShapeGroups returns the available shape groups.
-func GetShapeGroups() map[string][]string {
-	return ShapeGroups
-}
-
-// StartGame starts a new N-Back game with the given settings.
+// StartGame initializes a new N-Back game session.
 func (s *Service) StartGame(settings types.NBackSettings) (*NBackGameState, error) {
-	dbSettings := types.NBackSettings{
-		NumTrials:        settings.NumTrials,
-		PresentationTime: settings.PresentationTime,
-		NBackLevel:       settings.NBackLevel,
-		ShapeGroup:       settings.ShapeGroup,
-		IsRealMode:       settings.IsRealMode,
-	}
+	shapeSequence := generateShapeSequence(settings.NumTrials, settings.ShapeGroup, settings.NBackLevel)
 
-	sessionID, err := database.CreateNBackSession(s.db, dbSettings)
+	sessionID, err := database.CreateNBackSession(s.db, settings)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create n-back session: %w", err)
+		return nil, fmt.Errorf("failed to create game session: %w", err)
 	}
 
-	s.currentState = newNBackGame(settings)
-	s.currentState.SessionID = sessionID
+	s.currentState = &NBackGameState{
+		Settings:      settings,
+		ShapeSequence: shapeSequence,
+		ID:            sessionID,
+	}
+
 	return s.currentState, nil
 }
 
-// SubmitAnswer checks the user's answer for a given trial, saves it to the DB, and returns the result.
+// SubmitAnswer processes a user's answer for a single trial.
 func (s *Service) SubmitAnswer(playerChoice string, responseTimeMs int, trialNum int) (*types.NBackResult, error) {
-	if s.currentState == nil || trialNum >= len(s.currentState.ShapeSequence) {
-		return nil, fmt.Errorf("game not started or already finished")
+	if s.currentState == nil {
+		return nil, fmt.Errorf("game not started")
 	}
 
-	result := s.currentState.checkAnswer(playerChoice, responseTimeMs, trialNum)
+	gs := s.currentState
+	correctChoice := determineCorrectChoice(gs.ShapeSequence, trialNum, gs.Settings.NBackLevel)
+	isCorrect := playerChoice == correctChoice
 
-	err := database.SaveNBackResult(s.db, *result)
-	if err != nil {
-		return nil, fmt.Errorf("failed to save n-back result: %w", err)
-	}
-	return result, nil
-}
-
-// newNBackGame initializes a new N-Back game state. (Internal helper)
-func newNBackGame(settings types.NBackSettings) *NBackGameState {
-	rand.Seed(time.Now().UnixNano())
-
-	shapeGroupKey := settings.ShapeGroup
-	if shapeGroupKey == "random" {
-		keys := make([]string, 0, len(ShapeGroups))
-		for k := range ShapeGroups {
-			keys = append(keys, k)
-		}
-		shapeGroupKey = keys[rand.Intn(len(keys))]
-	}
-
-	group, ok := ShapeGroups[shapeGroupKey]
-	if !ok {
-		group = ShapeGroups["group1"]
-		shapeGroupKey = "group1" // Update shapeGroupKey to reflect the default
-	}
-
-	sequence := make([]string, settings.NumTrials)
-	for i := 0; i < settings.NumTrials; i++ {
-		var nextShape string
-		for {
-			nextShape = group[rand.Intn(len(group))]
-			if i < 3 {
-				break
-			}
-			if !(nextShape == sequence[i-1] && nextShape == sequence[i-2] && nextShape == sequence[i-3]) {
-				break
-			}
-		}
-		sequence[i] = nextShape
-	}
-
-	modifiedSettings := settings
-	modifiedSettings.ShapeGroup = shapeGroupKey
-
-	return &NBackGameState{
-		Settings:      modifiedSettings,
-		ShapeSequence: sequence,
-	}
-}
-
-// checkAnswer evaluates the player's answer for a given trial. (Internal helper)
-func (gs *NBackGameState) checkAnswer(playerChoice string, responseTimeMs int, trial int) *types.NBackResult {
-	correctChoice := "SPACE"
-	isCorrect := false
-
-	if gs.Settings.NBackLevel == 1 {
-		if trial >= 2 && gs.ShapeSequence[trial] == gs.ShapeSequence[trial-2] {
-			correctChoice = "LEFT"
-		}
-	} else {
-		is2BackMatch := trial >= 2 && gs.ShapeSequence[trial] == gs.ShapeSequence[trial-2]
-		is3BackMatch := trial >= 3 && gs.ShapeSequence[trial] == gs.ShapeSequence[trial-3]
-
-		if is2BackMatch {
-			correctChoice = "LEFT"
-		} else if is3BackMatch {
-			correctChoice = "RIGHT"
-		}
-	}
-
-	if playerChoice == correctChoice {
-		isCorrect = true
-	}
-
-	result := &types.NBackResult{
-		SessionID:      gs.SessionID,
-		Round:          gs.Settings.NBackLevel,
-		QuestionNum:    trial + 1,
+	result := types.NBackResult{
+		SessionID:      gs.ID,
+		Round:          1, // N-Back doesn't have rounds in this context, so default to 1
+		QuestionNum:    trialNum,
 		IsCorrect:      isCorrect,
 		ResponseTimeMs: responseTimeMs,
 		PlayerChoice:   playerChoice,
 		CorrectChoice:  correctChoice,
 	}
 
-	return result
+	if err := database.SaveNBackResult(s.db, result); err != nil {
+		return nil, fmt.Errorf("failed to save result: %w", err)
+	}
+
+	return &result, nil
+}
+
+// --- Helper Functions ---
+
+var shapeGroups = map[string][]string{
+	"group1": {"circle", "triangle", "square"},
+	"group2": {"trapezoid", "hourglass", "diamond"},
+	"group3": {"rhombus", "butterfly", "star"},
+	"group4": {"check", "horns", "pyramid"},
+	"group5": {"double_triangle", "x_shape", "crown"},
+}
+
+// GetShapeGroups returns the map of available shape groups.
+func GetShapeGroups() map[string][]string {
+	return shapeGroups
+}
+
+// generateShapeSequence creates a sequence of shapes for the N-Back game.
+func generateShapeSequence(numTrials int, shapeGroup string, nBackLevel int) []string {
+	shapeSet := GetShapeGroups()[shapeGroup]
+	if len(shapeSet) == 0 {
+		shapeSet = GetShapeGroups()["group1"] // Fallback to group1
+	}
+
+	sequence := make([]string, numTrials)
+	for i := 0; i < numTrials; i++ {
+		sequence[i] = shapeSet[rand.Intn(len(shapeSet))]
+	}
+	return sequence
+}
+
+// determineCorrectChoice determines the correct user action for a given trial.
+func determineCorrectChoice(sequence []string, trialNum int, nBackLevel int) string {
+	if nBackLevel == 1 { // 2-back only
+		if trialNum < 2 {
+			return "SPACE" // Not enough history
+		}
+		if sequence[trialNum] == sequence[trialNum-2] {
+			return "LEFT"
+		} else {
+			return "SPACE"
+		}
+	} else { // 2-back and 3-back
+		match2Back := trialNum >= 2 && sequence[trialNum] == sequence[trialNum-2]
+		match3Back := trialNum >= 3 && sequence[trialNum] == sequence[trialNum-3]
+
+		if match2Back {
+			return "LEFT"
+		} else if match3Back {
+			return "RIGHT"
+		} else {
+			return "SPACE"
+		}
+	}
 }

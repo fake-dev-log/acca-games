@@ -29,6 +29,7 @@
       "@utils/*": ["./src/utils/*"],
       "@stores/*": ["./src/stores/*"],
       "@api/*": ["./src/api/*"],
+      "@hooks/*": ["./src/hooks/*"],
       "@wails/*": ["./wailsjs/*"]
     }
   },

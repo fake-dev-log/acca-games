@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
@@ -23,18 +23,20 @@ export function RpsRecords() {
   };
 
   const calculateSessionAccuracy = (session: types.GameSession, results: types.RpsResult[]) => {
-    const sessionSpecificResults = results.filter(r => r.sessionId === session.sessionId);
+    const sessionSpecificResults = results.filter(r => r.sessionId === session.id);
     if (sessionSpecificResults.length === 0) return 0;
     const correctCount = sessionSpecificResults.filter(r => r.isCorrect).length;
     return (correctCount / sessionSpecificResults.length) * 100;
   };
 
+  const sortedSessionsForChart = [...sessions].sort((a, b) => new Date(a.playDatetime).getTime() - new Date(b.playDatetime).getTime());
+
   const chartData = {
-    labels: sessions.map(session => new Date(session.playDatetime).toLocaleString()),
+    labels: sortedSessionsForChart.map(session => new Date(session.playDatetime).toLocaleString()),
     datasets: [
       {
         label: '정확도 (%)',
-        data: sessions.map(session => calculateSessionAccuracy(session, allResults)),
+        data: sortedSessionsForChart.map(session => calculateSessionAccuracy(session, allResults)),
         fill: false,
         borderColor: 'rgb(75, 192, 192)',
         tension: 0.1,

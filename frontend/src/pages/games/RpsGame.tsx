@@ -20,15 +20,18 @@ export function RpsGame() {
   const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null);
   const [isFinished, setIsFinished] = useState(false);
   const [animateCards, setAnimateCards] = useState(false);
+  const [progress, setProgress] = useState(100);
 
   const advanceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const feedbackTimerRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(0);
   const answeredRef = useRef(false);
+  const progressAnimatorRef = useRef<number | null>(null);
 
   const handleExit = () => {
     if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
     if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
+    if (progressAnimatorRef.current) cancelAnimationFrame(progressAnimatorRef.current);
     resetGameState();
     navigate('/games');
   };
@@ -44,7 +47,7 @@ export function RpsGame() {
 
   const submitAnswer = useCallback(async (choice: string, responseTime: number) => {
     try {
-      const result = await submitAnswerToAction(choice, responseTime, currentTrial);
+      const result = await submitAnswerToAction(choice, responseTime, currentTrial + 1);
       if (result) {
         setResults(prev => [...prev, result]);
         if (!gameState?.settings.isRealMode) {
@@ -72,10 +75,25 @@ export function RpsGame() {
     }
 
     answeredRef.current = false;
-    startTimeRef.current = Date.now();
     setAnimateCards(true);
 
+    // Timer and Progress Bar Logic
+    setProgress(100);
+    startTimeRef.current = Date.now();
+    if (progressAnimatorRef.current) cancelAnimationFrame(progressAnimatorRef.current);
+
+    const animateProgress = () => {
+      const elapsedTime = Date.now() - startTimeRef.current;
+      const newProgress = 100 - (elapsedTime / gameState.settings.timeLimitMs) * 100;
+      setProgress(Math.max(0, newProgress));
+      if (newProgress > 0) {
+        progressAnimatorRef.current = requestAnimationFrame(animateProgress);
+      }
+    };
+    progressAnimatorRef.current = requestAnimationFrame(animateProgress);
+
     advanceTimerRef.current = setTimeout(async () => {
+      if (progressAnimatorRef.current) cancelAnimationFrame(progressAnimatorRef.current);
       if (!answeredRef.current) {
         answeredRef.current = true; // Prevent further inputs for this trial
         await submitAnswer('MISS', gameState.settings.timeLimitMs);
@@ -85,6 +103,7 @@ export function RpsGame() {
     return () => {
       if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
       if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
+      if (progressAnimatorRef.current) cancelAnimationFrame(progressAnimatorRef.current);
     };
   }, [currentTrial, gameState, navigate, submitAnswer]);
 
@@ -93,6 +112,7 @@ export function RpsGame() {
     
     answeredRef.current = true;
     if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+    if (progressAnimatorRef.current) cancelAnimationFrame(progressAnimatorRef.current);
 
     const responseTime = Date.now() - startTimeRef.current;
     const choice = e.key === 'ArrowLeft' ? 'SCISSORS' : e.key === 'ArrowDown' ? 'ROCK' : 'PAPER';
@@ -142,7 +162,7 @@ export function RpsGame() {
         <div className="absolute top-6 text-center text-text-light dark:text-text-dark text-lg">
           <p>나는 항상 이겨야 합니다.</p>
         </div>
-        <ProgressBar key={currentTrial} duration={gameState.settings.timeLimitMs} />
+        <ProgressBar progress={progress} />
         <div className="flex items-center justify-center space-x-8 my-8">
           <Card title="나" bordered className="w-34" isAnimated={animateCards} onAnimationEnd={() => setAnimateCards(false)}>
             <div className="text-6xl h-24 flex items-center justify-center">{cardIcon(meCard)}</div>

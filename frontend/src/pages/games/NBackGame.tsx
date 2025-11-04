@@ -56,6 +56,7 @@ export function NBackGame() {
   const [showStart, setShowStart] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
   const [animateCard, setAnimateCard] = useState(false);
+  const [progress, setProgress] = useState(100);
 
   const advanceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const feedbackTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -63,11 +64,13 @@ export function NBackGame() {
   const answeredRef = useRef(false);
   const showStartTimerRef = useRef<NodeJS.Timeout | null>(null);
   const feedbackClearTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const progressAnimatorRef = useRef<number | null>(null);
 
   const handleExit = () => {
     if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
     if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
     if (feedbackClearTimerRef.current) clearTimeout(feedbackClearTimerRef.current);
+    if (progressAnimatorRef.current) cancelAnimationFrame(progressAnimatorRef.current);
     resetGameState();
     navigate('/games');
   };
@@ -130,7 +133,22 @@ export function NBackGame() {
     answeredRef.current = false;
     setCurrentShape(gameState.shapeSequence[currentTrial]);
     setAnimateCard(true);
+    
+    // Timer and Progress Bar Logic
+    setProgress(100);
     startTimeRef.current = Date.now();
+    if (progressAnimatorRef.current) cancelAnimationFrame(progressAnimatorRef.current);
+
+    const animateProgress = () => {
+      const elapsedTime = Date.now() - startTimeRef.current;
+      const newProgress = 100 - (elapsedTime / gameState.settings.presentationTime) * 100;
+      setProgress(Math.max(0, newProgress));
+      if (newProgress > 0) {
+        progressAnimatorRef.current = requestAnimationFrame(animateProgress);
+      }
+    };
+    progressAnimatorRef.current = requestAnimationFrame(animateProgress);
+
     setIsInputAllowed(isTrialActive);
 
     advanceTimerRef.current = setTimeout(async () => {
@@ -146,6 +164,7 @@ export function NBackGame() {
       if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
       if (showStartTimerRef.current) clearTimeout(showStartTimerRef.current);
       if (feedbackClearTimerRef.current) clearTimeout(feedbackClearTimerRef.current);
+      if (progressAnimatorRef.current) cancelAnimationFrame(progressAnimatorRef.current);
     };
   }, [currentTrial, gameState, navigate, submitAnswer, advanceToNextTrial]);
 
@@ -211,8 +230,7 @@ export function NBackGame() {
           <Instructions />
         </div>
         <ProgressBar
-          key={currentTrial}
-          duration={gameState.settings.presentationTime}
+          progress={progress}
         />
         <Card 
           isAnimated={animateCard}

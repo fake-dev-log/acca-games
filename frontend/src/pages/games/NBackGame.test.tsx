@@ -3,7 +3,7 @@ import { vi } from 'vitest';
 import { MemoryRouter, useNavigate } from 'react-router-dom';
 import { NBackGame } from './NBackGame';
 import { useNBackStore } from '@stores/nbackStore';
-import { nback, types } from '@wails/go/models';
+import { nback } from '@wails/go/models';
 
 // Mock react-router-dom
 vi.mock('react-router-dom', async () => {

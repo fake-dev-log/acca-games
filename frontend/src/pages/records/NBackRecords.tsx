@@ -31,7 +31,7 @@ export function NBackRecords() {
 
   // Helper function to calculate accuracy for a session
   const calculateSessionAccuracy = (session: types.GameSession, results: types.NBackRecord[]) => {
-    const sessionSpecificResults = results.filter((r: types.NBackRecord) => r.sessionId === session.sessionId);
+    const sessionSpecificResults = results.filter((r: types.NBackRecord) => r.sessionId === session.id);
     if (sessionSpecificResults.length === 0) return 0;
     const correctCount = sessionSpecificResults.filter((r: types.NBackRecord) => r.isCorrect).length;
     return (correctCount / sessionSpecificResults.length) * 100;
@@ -50,12 +50,14 @@ export function NBackRecords() {
     return levelMatch && shapeGroupMatch;
   });
 
+  const sortedSessionsForChart = [...filteredSessions].sort((a, b) => new Date(a.playDatetime).getTime() - new Date(b.playDatetime).getTime());
+
   const chartData = {
-    labels: filteredSessions.map((session: types.GameSession) => new Date(session.playDatetime).toLocaleString()),
+    labels: sortedSessionsForChart.map((session: types.GameSession) => new Date(session.playDatetime).toLocaleString()),
     datasets: [
       {
         label: '정확도 (%)',
-        data: filteredSessions.map((session: types.GameSession) => calculateSessionAccuracy(session, allResults)),
+        data: sortedSessionsForChart.map((session: types.GameSession) => calculateSessionAccuracy(session, allResults)),
         fill: false,
         borderColor: 'rgb(75, 192, 192)',
         tension: 0.1,

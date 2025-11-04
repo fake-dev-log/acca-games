@@ -3,6 +3,7 @@ package main
 import (
 	"acca-games/database"
 	"acca-games/games/nback"
+	"acca-games/games/number_pressing"
 	"acca-games/games/rps"
 	"acca-games/types"
 	"context"
@@ -12,10 +13,11 @@ import (
 
 // App struct
 type App struct {
-	ctx          context.Context
-	db           *sql.DB
-	nbackService *nback.Service
-	rpsService   *rps.Service
+	ctx                   context.Context
+	db                    *sql.DB
+	nbackService          *nback.Service
+	rpsService            *rps.Service
+	numberPressingService *number_pressing.Service
 }
 
 // NewApp creates a new App application struct
@@ -34,6 +36,7 @@ func (a *App) startup(ctx context.Context) {
 	a.db = db
 	a.nbackService = nback.NewService(a.db)
 	a.rpsService = rps.NewService(a.db)
+	a.numberPressingService = number_pressing.NewService(a.db)
 }
 
 func (a *App) shutdown(ctx context.Context) {
@@ -111,4 +114,39 @@ func (a *App) GetAllNBackResults() ([]types.NBackRecord, error) {
 		return nil, err
 	}
 	return records, nil
+}
+
+// StartNumberPressingGame starts a new Number Pressing game.
+func (a *App) StartNumberPressingGame(setup types.NumberPressingSetup) (*types.NumberPressingGameState, error) {
+	return a.numberPressingService.StartGame(setup)
+}
+
+// SubmitNumberPressingResultR1 saves a result for Round 1.
+func (a *App) SubmitNumberPressingResultR1(result types.NumberPressingResultR1) error {
+	return a.numberPressingService.SubmitResultR1(result)
+}
+
+// SubmitNumberPressingResultR2 saves a result for Round 2.
+func (a *App) SubmitNumberPressingResultR2(result types.NumberPressingResultR2) error {
+	return a.numberPressingService.SubmitResultR2(result)
+}
+
+// CalculateCorrectClicksR2 calculates the correct click sequence for a Round 2 problem.
+func (a *App) CalculateCorrectClicksR2(problem types.NumberPressingProblemR2) []int {
+	return number_pressing.CalculateCorrectClicksR2(problem)
+}
+
+// GetNumberPressingGameSessions fetches all Number Pressing game sessions.
+func (a *App) GetNumberPressingGameSessions() ([]types.GameSession, error) {
+	return database.GetNumberPressingGameSessions(a.db)
+}
+
+// GetNumberPressingResultsForSession fetches all results for a given Number Pressing session ID.
+func (a *App) GetNumberPressingResultsForSession(sessionID int64) (*types.NumberPressingResultsBundle, error) {
+	return database.GetNumberPressingResultsForSession(a.db, sessionID)
+}
+
+// GetAllNumberPressingResults fetches all results across all Number Pressing sessions.
+func (a *App) GetAllNumberPressingResults() (*types.NumberPressingResultsBundle, error) {
+	return database.GetAllNumberPressingResults(a.db)
 }

@@ -6,6 +6,7 @@ export default function Select() {
         <GridSelectionLayout backPath="/" title="게임 선택" gridCols="grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             <GridItemButton to="/games/n-back/setup" title="도형 순서 기억하기" description="N-Back" />
             <GridItemButton to="/games/rps/setup" title="가위바위보" description="Rock-Paper-Scissors" />
+            <GridItemButton to="/games/number-pressing/setup" title="숫자 누르기" description="Number Pressing" />
             {/* New games will be added here */}
         </GridSelectionLayout>
     )

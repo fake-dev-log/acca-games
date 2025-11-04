@@ -20,17 +20,10 @@ type NBackResult struct {
 	CorrectChoice  string `json:"correctChoice"`// "LEFT", "RIGHT", "SPACE"
 }
 
-// GameSession represents a row in the game_sessions table.
-type GameSession struct {
-	SessionID    int64  `json:"sessionId"`
-	GameCode     string `json:"gameCode"`
-	PlayDatetime string `json:"playDatetime"`
-	Settings     string `json:"settings"` // JSON string of NBackSettings
-}
 
 // NBackRecord represents a row in the nback_results table.
 type NBackRecord struct {
-	ResultID       int64  `json:"resultId"`
+	ID             int64  `json:"id"`
 	SessionID      int64  `json:"sessionId"`
 	Round          int    `json:"round"`
 	QuestionNum    int    `json:"questionNum"`

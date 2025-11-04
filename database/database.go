@@ -34,7 +34,7 @@ func InitializeDatabase() (*sql.DB, error) {
 
 // GetGameSessionsByCode fetches all game sessions for a specific game code.
 func GetGameSessionsByCode(db *sql.DB, gameCode string) ([]types.GameSession, error) {
-	rows, err := db.Query("SELECT session_id, game_code, play_datetime, settings FROM game_sessions WHERE game_code = ? ORDER BY play_datetime DESC", gameCode)
+	rows, err := db.Query("SELECT id, game_code, play_datetime, settings FROM game_sessions WHERE game_code = ? ORDER BY play_datetime DESC", gameCode)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func GetGameSessionsByCode(db *sql.DB, gameCode string) ([]types.GameSession, er
 	var sessions []types.GameSession
 	for rows.Next() {
 		var s types.GameSession
-		if err := rows.Scan(&s.SessionID, &s.GameCode, &s.PlayDatetime, &s.Settings); err != nil {
+		if err := rows.Scan(&s.ID, &s.GameCode, &s.PlayDatetime, &s.Settings); err != nil {
 			return nil, err
 		}
 		sessions = append(sessions, s)

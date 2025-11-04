@@ -10,6 +10,7 @@ type RpsSettings struct {
 
 // RpsResult defines the structure for a single trial result in the RPS game.
 type RpsResult struct {
+	ID                int64  `json:"id"`
 	SessionID         int64  `json:"sessionId"`
 	Round             int    `json:"round"`
 	QuestionNum       int    `json:"questionNum"`

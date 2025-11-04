@@ -4,13 +4,21 @@ import {types} from '../models';
 import {nback} from '../models';
 import {rps} from '../models';
 
+export function CalculateCorrectClicksR2(arg1:types.NumberPressingProblemR2):Promise<Array<number>>;
+
 export function GetAllNBackResults():Promise<Array<types.NBackRecord>>;
+
+export function GetAllNumberPressingResults():Promise<types.NumberPressingResultsBundle>;
 
 export function GetAllRpsResults():Promise<Array<types.RpsResult>>;
 
 export function GetNBackGameSessions():Promise<Array<types.GameSession>>;
 
 export function GetNBackResultsForSession(arg1:number):Promise<Array<types.NBackRecord>>;
+
+export function GetNumberPressingGameSessions():Promise<Array<types.GameSession>>;
+
+export function GetNumberPressingResultsForSession(arg1:number):Promise<types.NumberPressingResultsBundle>;
 
 export function GetRpsGameSessions():Promise<Array<types.GameSession>>;
 
@@ -20,8 +28,14 @@ export function GetShapeGroups():Promise<Record<string, Array<string>>>;
 
 export function StartNBackGame(arg1:types.NBackSettings):Promise<nback.NBackGameState>;
 
+export function StartNumberPressingGame(arg1:types.NumberPressingSetup):Promise<types.NumberPressingGameState>;
+
 export function StartRpsGame(arg1:types.RpsSettings):Promise<rps.GameState>;
 
 export function SubmitNBackAnswer(arg1:string,arg2:number,arg3:number):Promise<types.NBackResult>;
+
+export function SubmitNumberPressingResultR1(arg1:types.NumberPressingResultR1):Promise<void>;
+
+export function SubmitNumberPressingResultR2(arg1:types.NumberPressingResultR2):Promise<void>;
 
 export function SubmitRpsAnswer(arg1:string,arg2:number,arg3:number):Promise<types.RpsResult>;

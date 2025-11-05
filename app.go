@@ -9,6 +9,8 @@ import (
 	"context"
 	"database/sql"
 	"log"
+	"math/rand"
+	"time"
 )
 
 // App struct
@@ -28,6 +30,7 @@ func NewApp() *App {
 // startup is called when the app starts. The context is saved
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
+	rand.Seed(time.Now().UnixNano())
 	a.ctx = ctx
 	db, err := database.InitializeDatabase()
 	if err != nil {

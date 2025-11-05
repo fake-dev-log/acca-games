@@ -17,7 +17,7 @@ import { Pyramid } from '@components/shapes/nback/Pyramid';
 import { DoubleTriangle } from '@components/shapes/nback/DoubleTriangle';
 import { XShape } from '@components/shapes/nback/XShape';
 import { Crown } from '@components/shapes/nback/Crown';
-import { Button } from '@components/common/Button';
+import { GameEndButtons } from '@components/layout/GameEndButtons';
 import { ProgressBar } from '@components/common/ProgressBar';
 import { GameLayout } from '@layout/GameLayout';
 import { Card } from '@components/common/Card';
@@ -205,11 +205,7 @@ export function NBackGame() {
           <div className="flex flex-col m-auto text-center">
               <h1 className="text-2xl font-bold">게임 종료!</h1>
               <p className="text-xl mt-4">정확도: {accuracy.toFixed(2)}%</p>
-              <div className="mt-6 flex flex-col items-center space-y-2">
-                <Button onClick={() => navigate('/games/n-back/setup')} className="w-48">
-                    다시하기
-                </Button>
-              </div>
+              <GameEndButtons gameCode="n-back" />
           </div>
       )
   }

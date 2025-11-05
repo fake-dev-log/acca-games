@@ -51,7 +51,6 @@ export function NumberPressingGameSetup() {
             label="라운드 선택"
             value={selectedRound}
             onChange={(e) => setSelectedRound(e.target.value)}
-            disabled={settings.isRealMode}
           >
             <option value="all">전체 (1-2 라운드)</option>
             <option value="1">1라운드</option>
@@ -66,7 +65,6 @@ export function NumberPressingGameSetup() {
             onChange={(e) => setSettings(prev => ({ ...prev, problemsPerRound: Number(e.target.value) }))}
             min={5}
             max={30}
-            disabled={settings.isRealMode}
           />
 
           <NumberInput
@@ -77,7 +75,7 @@ export function NumberPressingGameSetup() {
             onChange={(e) => setSettings(prev => ({ ...prev, timeLimitR1: Number(e.target.value) }))}
             min={20}
             max={120}
-            disabled={settings.isRealMode || selectedRound === '2'}
+            disabled={selectedRound === '2'}
           />
 
           <NumberInput
@@ -88,26 +86,12 @@ export function NumberPressingGameSetup() {
             onChange={(e) => setSettings(prev => ({ ...prev, timeLimitR2: Number(e.target.value) }))}
             min={30}
             max={300}
-            disabled={settings.isRealMode || selectedRound === '1'}
+            disabled={selectedRound === '1'}
           />
 
           <RealModeToggle
             checked={settings.isRealMode}
-            onChange={(e) => {
-                const isChecked = e.target.checked;
-                setSettings(prev => ({
-                    ...prev,
-                    isRealMode: isChecked,
-                    // Reset to defaults if real mode is selected
-                    rounds: isChecked ? [1, 2] : prev.rounds,
-                    problemsPerRound: isChecked ? 10 : prev.problemsPerRound,
-                    timeLimitR1: isChecked ? 60 : prev.timeLimitR1,
-                    timeLimitR2: isChecked ? 120 : prev.timeLimitR2,
-                }));
-                if (isChecked) {
-                    setSelectedRound('all');
-                }
-            }}
+            onChange={(e) => setSettings(prev => ({ ...prev, isRealMode: e.target.checked }))}
           />
           
           {error && <p className="text-danger text-sm text-center">{error}</p>}

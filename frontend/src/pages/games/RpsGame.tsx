@@ -135,11 +135,7 @@ export function RpsGame() {
       <div className="flex flex-col m-auto text-center">
         <h1 className="text-2xl font-bold">게임 종료!</h1>
         <p className="text-xl mt-4">정확도: {accuracy.toFixed(2)}%</p>
-        <div className="mt-6 flex flex-col items-center space-y-2">
-          <Button onClick={() => navigate('/games/rps/setup')} className="w-48">
-            다시하기
-          </Button>
-        </div>
+        <GameEndButtons gameCode="rps" />
       </div>
     );
   }

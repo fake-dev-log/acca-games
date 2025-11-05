@@ -20,7 +20,7 @@ export const useTimer = (onTimeout?: () => void, timeoutSeconds: number = 0) => 
 
       intervalRef.current = setInterval(() => {
         setElapsedTime(Date.now() - startTimeRef.current);
-      }, 10);
+      }, 100);
     } else {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);

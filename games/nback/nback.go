@@ -93,11 +93,18 @@ func generateShapeSequence(numTrials int, shapeGroup string, nBackLevel int) []s
 		shapeSet = GetShapeGroups()["group1"] // Fallback to group1
 	}
 
-	sequence := make([]string, numTrials)
+	// Create a pool of shapes with a more balanced distribution.
+	shapePool := make([]string, 0, numTrials)
 	for i := 0; i < numTrials; i++ {
-		sequence[i] = shapeSet[rand.Intn(len(shapeSet))]
+		shapePool = append(shapePool, shapeSet[i%len(shapeSet)])
 	}
-	return sequence
+
+	// Shuffle the pool using Fisher-Yates algorithm.
+	rand.Shuffle(len(shapePool), func(i, j int) {
+		shapePool[i], shapePool[j] = shapePool[j], shapePool[i]
+	})
+
+	return shapePool
 }
 
 // determineCorrectChoice determines the correct user action for a given trial.

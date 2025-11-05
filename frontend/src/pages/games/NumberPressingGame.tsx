@@ -6,6 +6,7 @@ import { SubmitNumberPressingResultR1, SubmitNumberPressingResultR2, CalculateCo
 import { types } from '@wails/go/models';
 import { ProgressBar } from '@components/common/ProgressBar';
 import { Card } from '@components/common/Card';
+import { GameEndButtons } from '@components/layout/GameEndButtons';
 import { useTimer } from '@hooks/useTimer';
 
 // --- Helper Components ---
@@ -61,8 +62,8 @@ export function NumberPressingGame() {
     setStatus('round-end');
   }, []);
 
-  const timer = useTimer(handleTimeout, timeLimit / 1000);
-  const roundTimeLeft = timeLimit - timer.elapsedTime;
+  const { elapsedTime, start: startTimer, stop: stopTimer, reset: resetTimer } = useTimer(handleTimeout, timeLimit / 1000);
+  const roundTimeLeft = timeLimit - elapsedTime;
 
   const currentProblemsR1 = useMemo(() => gameState?.problemsR1 || [], [gameState]);
   const currentProblemR1 = useMemo(() => currentProblemsR1[currentProblemIndex], [currentProblemsR1, currentProblemIndex]);
@@ -73,8 +74,8 @@ export function NumberPressingGame() {
   const clearTimers = useCallback(() => {
     timersRef.current.forEach(clearTimeout);
     timersRef.current = [];
-    timer.reset();
-  }, [timer]);
+    resetTimer();
+  }, [resetTimer]);
 
   const handleExit = useCallback(() => {
     clearTimers();
@@ -83,7 +84,7 @@ export function NumberPressingGame() {
   }, [clearTimers, resetGameState, navigate]);
 
   const advanceToNextProblem = useCallback(() => {
-    timer.stop();
+    stopTimer();
     const problemsInRound = currentRound === 1 ? currentProblemsR1.length : currentProblemsR2.length;
     if (currentProblemIndex + 1 < problemsInRound) {
       setCurrentProblemIndex(prev => prev + 1);
@@ -91,10 +92,20 @@ export function NumberPressingGame() {
     } else {
       setStatus('round-end');
     }
-  }, [currentProblemIndex, currentRound, currentProblemsR1.length, currentProblemsR2.length, timer]);
+  }, [currentProblemIndex, currentRound, currentProblemsR1.length, currentProblemsR2.length, stopTimer]);
 
   const showFeedback = useCallback((isCorrect: boolean) => {
-    timer.stop();
+    stopTimer();
+
+    if (gameState?.setup.isRealMode) {
+      // In real mode, don't show feedback, just advance.
+      const advanceTimer = setTimeout(() => {
+        advanceToNextProblem();
+      }, 200); // Shorter delay without feedback
+      timersRef.current.push(advanceTimer);
+      return;
+    }
+
     setFeedback(isCorrect ? 'correct' : 'incorrect');
     setStatus('feedback');
     const feedbackTimer = setTimeout(() => {
@@ -102,7 +113,7 @@ export function NumberPressingGame() {
       advanceToNextProblem();
     }, 800);
     timersRef.current.push(feedbackTimer);
-  }, [advanceToNextProblem, timer]);
+  }, [advanceToNextProblem, stopTimer, gameState?.setup.isRealMode]);
 
   // --- Game Logic Handlers ---
   const handleR1Click = useCallback(async (clickedNumber: number) => {
@@ -178,9 +189,9 @@ export function NumberPressingGame() {
     if (status === 'playing') {
       problemStartTimeRef.current = Date.now();
       if (currentProblemIndex === 0) { // Only reset timer at the start of a new round
-        timer.reset();
+        resetTimer();
       }
-      timer.start();
+      startTimer();
 
       if (currentRound === 2 && currentProblemR2) {
         const numbers = Array.from({ length: 9 }, (_, i) => i + 1);
@@ -211,7 +222,7 @@ export function NumberPressingGame() {
         const readyTimer = setTimeout(() => setStatus('playing'), 1500);
         timersRef.current.push(readyTimer);
     }
-  }, [status, currentRound, currentProblemIndex, currentProblemR2, gameState, clearTimers, timer]);
+  }, [status, currentRound, currentProblemIndex, currentProblemR2, gameState, clearTimers, startTimer, resetTimer]);
 
   // --- Render Logic ---
   if (!gameState || currentRound === null) return <div>Loading...</div>;
@@ -221,8 +232,7 @@ export function NumberPressingGame() {
       <div className="flex flex-col m-auto text-center">
         <h1 className="text-2xl font-bold">게임 종료!</h1>
         <p className="text-xl mt-4">수고하셨습니다.</p>
-        <button onClick={() => navigate('/records/number-pressing')} className="mt-4 px-4 py-2 bg-primary-light text-white rounded">기록 보기</button>
-        <button onClick={() => navigate('/games/number-pressing/setup')} className="mt-2 px-4 py-2 bg-gray-500 text-white rounded">다시하기</button>
+        <GameEndButtons gameCode="number-pressing" />
       </div>
     );
   }
@@ -232,31 +242,28 @@ export function NumberPressingGame() {
 
   const renderGameContent = () => {
     if (status === 'ready') {
-      // For Round 1, just show the ready message.
-      // For Round 2, show the fixed 1-9 grid as disabled buttons.
-      if (currentRound === 1) {
-        return (
-          <div className="flex flex-col items-center">
-            <Card className="mb-4 p-4 text-center">
-              <p className="text-lg font-semibold">활성화된 숫자를 누르세요.</p>
-            </Card>
-            <div className="text-4xl font-bold">라운드 {currentRound} 준비</div>
+      const message = currentRound === 1
+        ? '활성화된 숫자를 누르세요.'
+        : '제시되는 조건에 맞게 숫자를 누르세요.';
+
+      return (
+        <div className="flex flex-col items-center">
+          <Card className="mb-4 p-4 text-center w-full">
+            <p className="text-xl font-bold">라운드 {currentRound} 준비</p>
+            <p className="text-base mt-1">{message}</p>
+          </Card>
+          <div className="grid grid-cols-3 gap-4">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
+              <NumberButton
+                key={num}
+                number={num}
+                onClick={currentRound === 1 ? handleR1Click : handleR2Click}
+                disabled={true}
+              />
+            ))}
           </div>
-        );
-      } else if (currentRound === 2) {
-        return (
-          <div className="flex flex-col items-center">
-            <Card className="mb-4 p-4 text-center">
-              <p className="text-lg font-semibold">조건 로딩 중...</p>
-            </Card>
-            <div className="grid grid-cols-3 gap-4">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
-                <NumberButton key={num} number={num} onClick={handleR2Click} disabled={true} />
-              ))}
-            </div>
-          </div>
-        );
-      }
+        </div>
+      );
     }
     if (status === 'round-end') {
       return <div className="text-4xl font-bold">라운드 {currentRound} 종료</div>;
@@ -339,5 +346,3 @@ export function NumberPressingGame() {
     </GameLayout>
   );
 }
-
-

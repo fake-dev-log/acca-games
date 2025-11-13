@@ -36,14 +36,11 @@ CREATE TABLE IF NOT EXISTS `rps_results` (
 CREATE TABLE IF NOT EXISTS `shape_rotation_results` (
   `id` INTEGER PRIMARY KEY AUTOINCREMENT,
   `session_id` INTEGER NOT NULL,
-  `round` INTEGER NOT NULL,
-  `question_num` INTEGER NOT NULL,
-  `is_correct` INTEGER NOT NULL, -- 0 for false, 1 for true
-  `solve_time_ms` INTEGER NOT NULL,
+  `problem_id` INTEGER NOT NULL,
+  `user_solution` TEXT NOT NULL,
+  `is_correct` BOOLEAN NOT NULL,
+  `solve_time` INTEGER NOT NULL,
   `click_count` INTEGER NOT NULL,
-  `min_required_steps` INTEGER NOT NULL,
-  `player_submission` TEXT, -- Storing player's answer sequence as a JSON string
-  `correct_submission` TEXT NOT NULL, -- Storing correct answer sequence as a JSON string
   FOREIGN KEY (`session_id`) REFERENCES `game_sessions` (`id`) ON DELETE CASCADE
 );
 

@@ -19,7 +19,7 @@ func NewService(db *sql.DB) *Service {
 }
 
 func (s *Service) StartGame(setup types.NumberPressingSetup) (*types.NumberPressingGameState, error) {
-	sessionID, err := database.CreateGameSession(s.db, "NUMBER_PRESSING", setup)
+	sessionID, err := database.CreateGameSession(s.db, types.GameCodeNumberPressing, setup)
 	if err != nil {
 		return nil, err
 	}

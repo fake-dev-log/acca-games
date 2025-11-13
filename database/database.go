@@ -1,7 +1,7 @@
 package database
 
 import (
-	"acca-games/types"
+	"encoding/json"
 	"database/sql"
 	_ "embed"
 	_ "github.com/mattn/go-sqlite3"
@@ -32,22 +32,24 @@ func InitializeDatabase() (*sql.DB, error) {
 	return NewDatabase("./acca_games.db")
 }
 
-// GetGameSessionsByCode fetches all game sessions for a specific game code.
-func GetGameSessionsByCode(db *sql.DB, gameCode string) ([]types.GameSession, error) {
-	rows, err := db.Query("SELECT id, game_code, play_datetime, settings FROM game_sessions WHERE game_code = ? ORDER BY play_datetime DESC", gameCode)
+// CreateGameSession creates a new game session and returns the session ID.
+func CreateGameSession(db *sql.DB, gameCode string, settings interface{}) (int64, error) {
+	settingsJSON, err := json.Marshal(settings)
 	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var sessions []types.GameSession
-	for rows.Next() {
-		var s types.GameSession
-		if err := rows.Scan(&s.ID, &s.GameCode, &s.PlayDatetime, &s.Settings); err != nil {
-			return nil, err
-		}
-		sessions = append(sessions, s)
+		return 0, err
 	}
 
-	return sessions, nil
+	stmt, err := db.Prepare("INSERT INTO game_sessions (game_code, settings) VALUES (?, ?)")
+	if err != nil {
+		return 0, err
+	}
+	defer stmt.Close()
+
+	res, err := stmt.Exec(gameCode, string(settingsJSON))
+	if err != nil {
+		return 0, err
+	}
+
+	return res.LastInsertId()
 }
+

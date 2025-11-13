@@ -49,7 +49,11 @@ describe('RpsGame component', () => {
       { problemCardHolder: 'opponent', givenCard: 'PAPER', round: 1 },
     ],
     sessionId: 1,
-    gameCode: 'RPS',
+import { GameCodes } from '@constants/gameCodes';
+// ... other imports
+
+// ... inside the test
+    gameCode: GameCodes.RPS,
   };
 
   it('renders loading state if gameState is null', () => {

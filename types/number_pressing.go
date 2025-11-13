@@ -30,6 +30,7 @@ type NumberPressingGameState struct {
 
 // NumberPressingResultR1 holds the result for a single Round 1 problem.
 type NumberPressingResultR1 struct {
+	ID        int64                   `json:"id"`
 	SessionID int64                   `json:"sessionID"`
 	Problem   NumberPressingProblemR1 `json:"problem"`
 	TimeTaken float64                 `json:"timeTaken"` // in seconds
@@ -38,6 +39,7 @@ type NumberPressingResultR1 struct {
 
 // NumberPressingResultR2 holds the result for a single Round 2 problem.
 type NumberPressingResultR2 struct {
+	ID            int64                   `json:"id"`
 	SessionID     int64                   `json:"sessionID"`
 	Problem       NumberPressingProblemR2 `json:"problem"`
 	PlayerClicks  []int                   `json:"playerClicks"`
@@ -51,3 +53,31 @@ type NumberPressingResultsBundle struct {
 	ResultsR1 []NumberPressingResultR1 `json:"resultsR1"`
 	ResultsR2 []NumberPressingResultR2 `json:"resultsR2"`
 }
+
+// NumberPressingSessionWithResults holds a game session and all its results.
+type NumberPressingSessionWithResults struct {
+	GameSession
+	Results NumberPressingResultsBundle `json:"results"`
+}
+
+// PaginatedNumberPressingSessions holds a page of sessions and the total count.
+
+
+
+type PaginatedNumberPressingSessions struct {
+
+
+
+	Sessions   []NumberPressingSessionWithResults `json:"sessions"`
+
+
+
+	TotalCount int                                `json:"totalCount"`
+
+
+
+}
+
+
+
+

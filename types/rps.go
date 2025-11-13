@@ -21,3 +21,15 @@ type RpsResult struct {
 	PlayerChoice      string `json:"playerChoice"`      // 'ROCK', 'PAPER', 'SCISSORS', or 'MISS'
 	CorrectChoice     string `json:"correctChoice"`     // 'ROCK', 'PAPER', 'SCISSORS'
 }
+
+// RpsSessionWithResults holds a game session and all its results.
+type RpsSessionWithResults struct {
+	GameSession
+	Results []RpsResult `json:"results"`
+}
+
+// PaginatedRpsSessions holds a page of sessions and the total count.
+type PaginatedRpsSessions struct {
+	Sessions   []RpsSessionWithResults `json:"sessions"`
+	TotalCount int                     `json:"totalCount"`
+}

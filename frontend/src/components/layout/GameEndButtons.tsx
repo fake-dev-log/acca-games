@@ -1,14 +1,14 @@
 import { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@components/common/Button';
+import { GameCodeSlug } from "@constants/gameCodes";
 
 interface GameEndButtonsProps {
-  gameCode: 'n-back' | 'rps' | 'number-pressing';
+  gameCode: GameCodeSlug;
 }
 
 export const GameEndButtons: FC<GameEndButtonsProps> = ({ gameCode }) => {
   const navigate = useNavigate();
-
   const handleViewRecords = () => {
     navigate(`/records/${gameCode}`);
   };

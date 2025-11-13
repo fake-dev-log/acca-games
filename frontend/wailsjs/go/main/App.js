@@ -6,44 +6,36 @@ export function CalculateCorrectClicksR2(arg1) {
   return window['go']['main']['App']['CalculateCorrectClicksR2'](arg1);
 }
 
-export function GetAllNBackResults() {
-  return window['go']['main']['App']['GetAllNBackResults']();
+export function GetPaginatedNBackSessionsWithResults(arg1, arg2) {
+  return window['go']['main']['App']['GetPaginatedNBackSessionsWithResults'](arg1, arg2);
 }
 
-export function GetAllNumberPressingResults() {
-  return window['go']['main']['App']['GetAllNumberPressingResults']();
+export function GetPaginatedNumberPressingSessionsWithResults(arg1, arg2) {
+  return window['go']['main']['App']['GetPaginatedNumberPressingSessionsWithResults'](arg1, arg2);
 }
 
-export function GetAllRpsResults() {
-  return window['go']['main']['App']['GetAllRpsResults']();
+export function GetPaginatedRpsSessionsWithResults(arg1, arg2) {
+  return window['go']['main']['App']['GetPaginatedRpsSessionsWithResults'](arg1, arg2);
 }
 
-export function GetNBackGameSessions() {
-  return window['go']['main']['App']['GetNBackGameSessions']();
+export function GetPaginatedShapeRotationSessionsWithResults(arg1, arg2) {
+  return window['go']['main']['App']['GetPaginatedShapeRotationSessionsWithResults'](arg1, arg2);
 }
 
-export function GetNBackResultsForSession(arg1) {
-  return window['go']['main']['App']['GetNBackResultsForSession'](arg1);
-}
-
-export function GetNumberPressingGameSessions() {
-  return window['go']['main']['App']['GetNumberPressingGameSessions']();
-}
-
-export function GetNumberPressingResultsForSession(arg1) {
-  return window['go']['main']['App']['GetNumberPressingResultsForSession'](arg1);
-}
-
-export function GetRpsGameSessions() {
-  return window['go']['main']['App']['GetRpsGameSessions']();
-}
-
-export function GetRpsResultsForSession(arg1) {
-  return window['go']['main']['App']['GetRpsResultsForSession'](arg1);
+export function GetSessionResults(arg1, arg2) {
+  return window['go']['main']['App']['GetSessionResults'](arg1, arg2);
 }
 
 export function GetShapeGroups() {
   return window['go']['main']['App']['GetShapeGroups']();
+}
+
+export function GetShapeRotationProblems(arg1, arg2) {
+  return window['go']['main']['App']['GetShapeRotationProblems'](arg1, arg2);
+}
+
+export function SaveShapeRotationSession(arg1) {
+  return window['go']['main']['App']['SaveShapeRotationSession'](arg1);
 }
 
 export function StartNBackGame(arg1) {
@@ -72,4 +64,8 @@ export function SubmitNumberPressingResultR2(arg1) {
 
 export function SubmitRpsAnswer(arg1, arg2, arg3) {
   return window['go']['main']['App']['SubmitRpsAnswer'](arg1, arg2, arg3);
+}
+
+export function SubmitShapeRotationAnswerAsync(arg1, arg2, arg3, arg4, arg5) {
+  return window['go']['main']['App']['SubmitShapeRotationAnswerAsync'](arg1, arg2, arg3, arg4, arg5);
 }

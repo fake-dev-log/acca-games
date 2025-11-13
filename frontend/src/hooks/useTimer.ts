@@ -32,7 +32,7 @@ export const useTimer = (onTimeout?: () => void, timeoutSeconds: number = 0) => 
         clearInterval(intervalRef.current);
       }
     };
-  }, [isActive, elapsedTime]);
+  }, [isActive]);
 
   useEffect(() => {
     // Clear any existing timeout when dependencies change

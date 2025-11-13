@@ -49,7 +49,7 @@ func (s *Service) StartGame(settings types.RpsSettings) (*GameState, error) {
 		}
 	}
 
-	sessionID, err := database.CreateGameSession(s.db, "RPS", settings)
+	sessionID, err := database.CreateGameSession(s.db, types.GameCodeRPS, settings)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +58,7 @@ func (s *Service) StartGame(settings types.RpsSettings) (*GameState, error) {
 		Settings:   settings,
 		Problems:   problems,
 		ID:         sessionID,
-		GameCode:   "RPS",
+		GameCode:   types.GameCodeRPS,
 	}
 
 	return s.currentState, nil

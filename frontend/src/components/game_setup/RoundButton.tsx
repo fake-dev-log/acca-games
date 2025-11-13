@@ -17,7 +17,14 @@ export const RoundButton: FC<RoundButtonProps> = ({ level, text, isSelected, onC
       type="button"
       onClick={() => onClick(level)}
       className={`${baseClasses} ${isSelected ? selectedClasses : unselectedClasses}`}>
-      {text}
+        {level > 0 ? (
+          <div>
+            <p>{level}라운드</p>
+            <p className="font-light text-xs">{text}</p>
+          </div>)
+          : <p>{text}</p>
+        }
+
     </button>
   );
 };

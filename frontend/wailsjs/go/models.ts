@@ -98,53 +98,49 @@ export namespace rps {
 
 }
 
+export namespace shape_rotation {
+	
+	export class ShapeRotationProblemWithFinalShape {
+	    ID: number;
+	    Round: number;
+	    InitialShape: string;
+	    FinalShape: string;
+	    InitialGridPath?: string;
+	    FinalGridPath?: string;
+	    InitialShapeCenterX: number;
+	    InitialShapeCenterY: number;
+	    FinalShapeCenterX: number;
+	    FinalShapeCenterY: number;
+	    MinMoves: number;
+	    Solution: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new ShapeRotationProblemWithFinalShape(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.ID = source["ID"];
+	        this.Round = source["Round"];
+	        this.InitialShape = source["InitialShape"];
+	        this.FinalShape = source["FinalShape"];
+	        this.InitialGridPath = source["InitialGridPath"];
+	        this.FinalGridPath = source["FinalGridPath"];
+	        this.InitialShapeCenterX = source["InitialShapeCenterX"];
+	        this.InitialShapeCenterY = source["InitialShapeCenterY"];
+	        this.FinalShapeCenterX = source["FinalShapeCenterX"];
+	        this.FinalShapeCenterY = source["FinalShapeCenterY"];
+	        this.MinMoves = source["MinMoves"];
+	        this.Solution = source["Solution"];
+	    }
+	}
+
+}
+
 export namespace types {
 	
-	export class GameSession {
-	    id: number;
-	    gameCode: string;
-	    playDatetime: string;
-	    settings: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new GameSession(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.id = source["id"];
-	        this.gameCode = source["gameCode"];
-	        this.playDatetime = source["playDatetime"];
-	        this.settings = source["settings"];
-	    }
-	}
-	export class NBackRecord {
-	    id: number;
-	    sessionId: number;
-	    round: number;
-	    questionNum: number;
-	    isCorrect: boolean;
-	    responseTimeMs: number;
-	    playerChoice: string;
-	    correctChoice: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new NBackRecord(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.id = source["id"];
-	        this.sessionId = source["sessionId"];
-	        this.round = source["round"];
-	        this.questionNum = source["questionNum"];
-	        this.isCorrect = source["isCorrect"];
-	        this.responseTimeMs = source["responseTimeMs"];
-	        this.playerChoice = source["playerChoice"];
-	        this.correctChoice = source["correctChoice"];
-	    }
-	}
 	export class NBackResult {
+	    id: number;
 	    sessionId: number;
 	    round: number;
 	    questionNum: number;
@@ -159,6 +155,7 @@ export namespace types {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
 	        this.sessionId = source["sessionId"];
 	        this.round = source["round"];
 	        this.questionNum = source["questionNum"];
@@ -167,6 +164,57 @@ export namespace types {
 	        this.playerChoice = source["playerChoice"];
 	        this.correctChoice = source["correctChoice"];
 	    }
+	}
+	export class CustomTime {
+	
+	
+	    static createFrom(source: any = {}) {
+	        return new CustomTime(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	
+	    }
+	}
+	export class NBackSessionWithResults {
+	    id: number;
+	    gameCode: string;
+	    // Go type: CustomTime
+	    playDatetime: any;
+	    settings: string;
+	    results: NBackResult[];
+	
+	    static createFrom(source: any = {}) {
+	        return new NBackSessionWithResults(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.gameCode = source["gameCode"];
+	        this.playDatetime = this.convertValues(source["playDatetime"], null);
+	        this.settings = source["settings"];
+	        this.results = this.convertValues(source["results"], NBackResult);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	export class NBackSettings {
 	    numTrials: number;
@@ -273,6 +321,7 @@ export namespace types {
 	
 	
 	export class NumberPressingResultR1 {
+	    id: number;
 	    sessionID: number;
 	    problem: NumberPressingProblemR1;
 	    timeTaken: number;
@@ -284,6 +333,7 @@ export namespace types {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
 	        this.sessionID = source["sessionID"];
 	        this.problem = this.convertValues(source["problem"], NumberPressingProblemR1);
 	        this.timeTaken = source["timeTaken"];
@@ -309,6 +359,7 @@ export namespace types {
 		}
 	}
 	export class NumberPressingResultR2 {
+	    id: number;
 	    sessionID: number;
 	    problem: NumberPressingProblemR2;
 	    playerClicks: number[];
@@ -322,6 +373,7 @@ export namespace types {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
 	        this.sessionID = source["sessionID"];
 	        this.problem = this.convertValues(source["problem"], NumberPressingProblemR2);
 	        this.playerClicks = source["playerClicks"];
@@ -380,7 +432,110 @@ export namespace types {
 		    return a;
 		}
 	}
+	export class NumberPressingSessionWithResults {
+	    id: number;
+	    gameCode: string;
+	    // Go type: CustomTime
+	    playDatetime: any;
+	    settings: string;
+	    results: NumberPressingResultsBundle;
 	
+	    static createFrom(source: any = {}) {
+	        return new NumberPressingSessionWithResults(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.gameCode = source["gameCode"];
+	        this.playDatetime = this.convertValues(source["playDatetime"], null);
+	        this.settings = source["settings"];
+	        this.results = this.convertValues(source["results"], NumberPressingResultsBundle);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	export class PaginatedNBackSessions {
+	    sessions: NBackSessionWithResults[];
+	    totalCount: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new PaginatedNBackSessions(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.sessions = this.convertValues(source["sessions"], NBackSessionWithResults);
+	        this.totalCount = source["totalCount"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class PaginatedNumberPressingSessions {
+	    sessions: NumberPressingSessionWithResults[];
+	    totalCount: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new PaginatedNumberPressingSessions(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.sessions = this.convertValues(source["sessions"], NumberPressingSessionWithResults);
+	        this.totalCount = source["totalCount"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class RpsResult {
 	    id: number;
 	    sessionId: number;
@@ -411,6 +566,174 @@ export namespace types {
 	        this.correctChoice = source["correctChoice"];
 	    }
 	}
+	export class RpsSessionWithResults {
+	    id: number;
+	    gameCode: string;
+	    // Go type: CustomTime
+	    playDatetime: any;
+	    settings: string;
+	    results: RpsResult[];
+	
+	    static createFrom(source: any = {}) {
+	        return new RpsSessionWithResults(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.gameCode = source["gameCode"];
+	        this.playDatetime = this.convertValues(source["playDatetime"], null);
+	        this.settings = source["settings"];
+	        this.results = this.convertValues(source["results"], RpsResult);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class PaginatedRpsSessions {
+	    sessions: RpsSessionWithResults[];
+	    totalCount: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new PaginatedRpsSessions(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.sessions = this.convertValues(source["sessions"], RpsSessionWithResults);
+	        this.totalCount = source["totalCount"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class ShapeRotationResult {
+	    id: number;
+	    sessionId: number;
+	    problemId: number;
+	    userSolution: string[];
+	    isCorrect: boolean;
+	    solveTime: number;
+	    clickCount: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new ShapeRotationResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.sessionId = source["sessionId"];
+	        this.problemId = source["problemId"];
+	        this.userSolution = source["userSolution"];
+	        this.isCorrect = source["isCorrect"];
+	        this.solveTime = source["solveTime"];
+	        this.clickCount = source["clickCount"];
+	    }
+	}
+	export class ShapeRotationSessionWithResults {
+	    id: number;
+	    gameCode: string;
+	    // Go type: CustomTime
+	    playDatetime: any;
+	    settings: string;
+	    results: ShapeRotationResult[];
+	
+	    static createFrom(source: any = {}) {
+	        return new ShapeRotationSessionWithResults(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.gameCode = source["gameCode"];
+	        this.playDatetime = this.convertValues(source["playDatetime"], null);
+	        this.settings = source["settings"];
+	        this.results = this.convertValues(source["results"], ShapeRotationResult);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class PaginatedShapeRotationSessions {
+	    sessions: ShapeRotationSessionWithResults[];
+	    totalCount: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new PaginatedShapeRotationSessions(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.sessions = this.convertValues(source["sessions"], ShapeRotationSessionWithResults);
+	        this.totalCount = source["totalCount"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	
 	export class RpsSettings {
 	    rounds: number[];
 	    questionsPerRound: number;
@@ -426,6 +749,26 @@ export namespace types {
 	        this.rounds = source["rounds"];
 	        this.questionsPerRound = source["questionsPerRound"];
 	        this.timeLimitMs = source["timeLimitMs"];
+	        this.isRealMode = source["isRealMode"];
+	    }
+	}
+	
+	
+	export class ShapeRotationSettings {
+	    numProblems: number;
+	    timeLimit: number;
+	    round: number;
+	    isRealMode: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new ShapeRotationSettings(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.numProblems = source["numProblems"];
+	        this.timeLimit = source["timeLimit"];
+	        this.round = source["round"];
 	        this.isRealMode = source["isRealMode"];
 	    }
 	}

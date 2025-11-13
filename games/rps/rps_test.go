@@ -51,8 +51,8 @@ func TestService_StartGame(t *testing.T) {
 		t.Fatal("StartGame returned nil gameState")
 	}
 
-	if gameState.SessionID == 0 {
-		t.Errorf("Expected a non-zero SessionID, got %v", gameState.SessionID)
+	if gameState.ID == 0 {
+		t.Errorf("Expected a non-zero SessionID, got %v", gameState.ID)
 	}
 
 	expectedNumProblems := len(settings.Rounds) * settings.QuestionsPerRound
@@ -63,13 +63,13 @@ func TestService_StartGame(t *testing.T) {
 	// Verify that a session was created in the database
 	var gameCode string
 	var dbSettings string
-	err = db.QueryRow("SELECT game_code, settings FROM game_sessions WHERE session_id = ?", gameState.SessionID).Scan(&gameCode, &dbSettings)
+	err = db.QueryRow("SELECT game_code, settings FROM game_sessions WHERE id = ?", gameState.ID).Scan(&gameCode, &dbSettings)
 	if err != nil {
 		t.Fatalf("Failed to query game_sessions table: %v", err)
 	}
 
-	if gameCode != "RPS" {
-		t.Errorf("Expected game_code 'RPS', got %s", gameCode)
+	if gameCode != types.GameCodeRPS {
+		t.Errorf("Expected game_code '%s', got %s", types.GameCodeRPS, gameCode)
 	}
 }
 
@@ -149,7 +149,7 @@ func TestService_SubmitAnswer(t *testing.T) {
 			var dbResult types.RpsResult
 			err = db.QueryRow(`
 				SELECT is_correct, correct_choice FROM rps_results WHERE session_id = ? AND question_num = ?`,
-				gameState.SessionID, tt.questionNum,
+				gameState.ID, tt.questionNum,
 			).Scan(&dbResult.IsCorrect, &dbResult.CorrectChoice)
 
 			if err != nil {

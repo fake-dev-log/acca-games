@@ -10,7 +10,7 @@ interface CardProps {
 }
 
 export const Card = ({ children, title, className = '', bordered = false, isAnimated = false, onAnimationEnd }: CardProps) => {
-  const borderClass = bordered ? 'border-2 border-primary-light dark:border-primary-dark' : '';
+  const borderClass = bordered ? 'border-2 border-border-light dark:border-border-dark' : '';
   const animationClass = isAnimated ? 'card-border-highlight-dark dark:card-border-highlight-light' : '';
 
   return (

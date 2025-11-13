@@ -2,31 +2,10 @@ package database
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 
 	"acca-games/types"
 )
-
-// CreateNBackSession creates a new game session for an N-Back game.
-func CreateNBackSession(db *sql.DB, settings types.NBackSettings) (int64, error) {
-	settingsJSON, err := json.Marshal(settings)
-	if err != nil {
-		return 0, fmt.Errorf("failed to marshal settings: %w", err)
-	}
-
-	result, err := db.Exec("INSERT INTO game_sessions (game_code, settings) VALUES (?, ?)", "NBACK", string(settingsJSON))
-	if err != nil {
-		return 0, fmt.Errorf("failed to insert new game session: %w", err)
-	}
-
-	sessionID, err := result.LastInsertId()
-	if err != nil {
-		return 0, fmt.Errorf("failed to get last insert ID: %w", err)
-	}
-
-	return sessionID, nil
-}
 
 // SaveNBackResult saves a single trial's result to the database.
 func SaveNBackResult(db *sql.DB, result types.NBackResult) error {
@@ -47,83 +26,111 @@ func SaveNBackResult(db *sql.DB, result types.NBackResult) error {
 	return nil
 }
 
-// GetNBackGameSessions fetches all N-Back game sessions.
-func GetNBackGameSessions(db *sql.DB) ([]types.GameSession, error) {
-	rows, err := db.Query("SELECT id, game_code, play_datetime, settings FROM game_sessions WHERE game_code = ? ORDER BY play_datetime DESC", "NBACK")
-	if err != nil {
-		return nil, fmt.Errorf("failed to query game sessions: %w", err)
-	}
-	defer rows.Close()
 
-	var sessions []types.GameSession
-	for rows.Next() {
-		var session types.GameSession
-		if err := rows.Scan(&session.ID, &session.GameCode, &session.PlayDatetime, &session.Settings); err != nil {
-			return nil, fmt.Errorf("failed to scan game session: %w", err)
-		}
-		sessions = append(sessions, session)
-	}
-
-	return sessions, nil
-}
 
 // GetNBackResultsForSession fetches all N-Back results for a given session ID.
-func GetNBackResultsForSession(db *sql.DB, sessionID int64) ([]types.NBackRecord, error) {
+func GetNBackResultsForSession(db *sql.DB, sessionID int64) ([]types.NBackResult, error) {
 	rows, err := db.Query(`
 		SELECT id, session_id, round, question_num, is_correct, response_time_ms, player_choice, correct_choice
 		FROM nback_results WHERE session_id = ? ORDER BY question_num ASC`, sessionID)
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to query N-Back results: %w", err)
 	}
 	defer rows.Close()
 
-	var records []types.NBackRecord
+	var results []types.NBackResult
+
 	for rows.Next() {
-		var record types.NBackRecord
-		if err := rows.Scan(&record.ID, &record.SessionID, &record.Round, &record.QuestionNum, &record.IsCorrect, &record.ResponseTimeMs, &record.PlayerChoice, &record.CorrectChoice); err != nil {
-			return nil, fmt.Errorf("failed to scan N-Back record: %w", err)
+		var result types.NBackResult
+		
+		if err := rows.Scan(&result.ID, &result.SessionID, &result.Round, &result.QuestionNum, &result.IsCorrect, &result.ResponseTimeMs, &result.PlayerChoice, &result.CorrectChoice); err != nil {
+			return nil, fmt.Errorf("failed to scan N-Back results: %w", err)
 		}
-		records = append(records, record)
+		results = append(results, result)
 	}
 
 	if err = rows.Err(); err != nil {
 		return nil, fmt.Errorf("error after scanning rows: %w", err)
 	}
 
-	// Explicitly return an empty slice if no records were found
-	if len(records) == 0 {
-		return []types.NBackRecord{}, nil
-	}
-
-	return records, nil
+	return results, nil
 }
 
-// GetAllNBackResults fetches all N-Back results across all sessions.
-func GetAllNBackResults(db *sql.DB) ([]types.NBackRecord, error) {
-	rows, err := db.Query(`
-		SELECT id, session_id, round, question_num, is_correct, response_time_ms, player_choice, correct_choice
-		FROM nback_results ORDER BY session_id ASC, question_num ASC`)
+// GetPaginatedNBackSessionsWithResults fetches paginated sessions with their results.
+func GetPaginatedNBackSessionsWithResults(db *sql.DB, page int, limit int) (*types.PaginatedNBackSessions, error) {
+	offset := (page - 1) * limit
+
+	// First, get the total count of sessions
+	var totalCount int
+
+	err := db.QueryRow("SELECT COUNT(*) FROM game_sessions WHERE game_code = ?", types.GameCodeNBack).Scan(&totalCount)
+
 	if err != nil {
-		return nil, fmt.Errorf("failed to query all N-Back results: %w", err)
+		return nil, fmt.Errorf("failed to get total n-back session count: %w", err)
+	}
+
+	// Then, fetch the paginated session data
+	query := `
+		SELECT
+			s.id, s.game_code, s.play_datetime, s.settings,
+			r.id, r.session_id, r.round, r.question_num, r.is_correct, r.response_time_ms, r.player_choice, r.correct_choice
+		FROM game_sessions s
+		JOIN nback_results r ON s.id = r.session_id
+		WHERE s.id IN (
+			SELECT id FROM game_sessions
+			WHERE game_code = ?
+			ORDER BY play_datetime DESC
+			LIMIT ? OFFSET ?
+		)
+		ORDER BY s.play_datetime DESC, r.question_num ASC
+	`
+
+	rows, err := db.Query(query, types.GameCodeNBack, limit, offset)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to query paginated n-back sessions with results: %w", err)
 	}
 	defer rows.Close()
 
-	var records []types.NBackRecord
+	sessionMap := make(map[int64]*types.NBackSessionWithResults)
+	var sessionOrder []int64
+
 	for rows.Next() {
-		var record types.NBackRecord
-		if err := rows.Scan(&record.ID, &record.SessionID, &record.Round, &record.QuestionNum, &record.IsCorrect, &record.ResponseTimeMs, &record.PlayerChoice, &record.CorrectChoice); err != nil {
-			return nil, fmt.Errorf("failed to scan N-Back record: %w", err)
+		var s types.GameSession
+		var r types.NBackResult
+		var settingsJSON string
+
+		if err := rows.Scan(
+			&s.ID, &s.GameCode, &s.PlayDatetime, &settingsJSON,
+			&r.ID, &r.SessionID, &r.Round, &r.QuestionNum, &r.IsCorrect, &r.ResponseTimeMs, &r.PlayerChoice, &r.CorrectChoice,
+		); err != nil {
+			return nil, fmt.Errorf("failed to scan n-back session/result: %w", err)
 		}
-		records = append(records, record)
+		s.Settings = settingsJSON
+
+		if _, ok := sessionMap[s.ID]; !ok {
+			sessionMap[s.ID] = &types.NBackSessionWithResults{
+				GameSession: s,
+				Results:     []types.NBackResult{},
+			}
+			sessionOrder = append(sessionOrder, s.ID)
+		}
+		sessionMap[s.ID].Results = append(sessionMap[s.ID].Results, r)
 	}
 
 	if err = rows.Err(); err != nil {
 		return nil, fmt.Errorf("error after scanning rows: %w", err)
 	}
 
-	if len(records) == 0 {
-		return []types.NBackRecord{}, nil
+	// Preserve the order
+	sessions := make([]types.NBackSessionWithResults, len(sessionOrder))
+	for i, id := range sessionOrder {
+		sessions[i] = *sessionMap[id]
 	}
 
-	return records, nil
+	return &types.PaginatedNBackSessions{
+		Sessions:   sessions,
+		TotalCount: totalCount,
+	}, nil
 }

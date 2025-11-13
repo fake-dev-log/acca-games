@@ -1,7 +1,5 @@
 import {
-  GetAllNBackResults,
-  GetNBackGameSessions,
-  GetNBackResultsForSession,
+  GetPaginatedNBackSessionsWithResults,
   GetShapeGroups,
   StartNBackGame,
   SubmitNBackAnswer,
@@ -26,16 +24,9 @@ export const submitNBackAnswer = (
   return SubmitNBackAnswer(playerChoice, responseTimeMs, trialNum);
 };
 
-export const getNBackGameSessions = (): Promise<types.GameSession[]> => {
-  return GetNBackGameSessions();
-};
-
-export const getNBackResultsForSession = (
-  sessionId: number,
-): Promise<types.NBackRecord[]> => {
-  return GetNBackResultsForSession(sessionId);
-};
-
-export const getAllNBackResults = (): Promise<types.NBackRecord[]> => {
-  return GetAllNBackResults();
+export const getPaginatedNBackSessionsWithResults = (
+  page: number,
+  limit: number,
+): Promise<types.PaginatedNBackSessions> => {
+  return GetPaginatedNBackSessionsWithResults(page, limit);
 };

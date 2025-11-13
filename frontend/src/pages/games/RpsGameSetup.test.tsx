@@ -86,6 +86,10 @@ describe('RpsGameSetup component', () => {
 
     rerender(<MemoryRouter><RpsGameSetup /></MemoryRouter>);
 
-    expect(mockNavigate).toHaveBeenCalledWith('/games/rps/play');
+import { GameCodeSlugs } from '@constants/gameCodes';
+// ... other imports
+
+// ... inside the test
+    expect(mockNavigate).toHaveBeenCalledWith(`/games/${GameCodeSlugs.RPS}/play`);
   });
 });

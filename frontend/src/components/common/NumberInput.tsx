@@ -1,11 +1,11 @@
-import { FC } from 'react';
+import { ChangeEvent, FC } from 'react';
 
 interface NumberInputProps {
   id: string;
   name: string;
   label: string;
   value: number;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
   min?: number | string;
   max?: number | string;
   step?: number | string;

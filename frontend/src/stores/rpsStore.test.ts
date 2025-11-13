@@ -3,6 +3,7 @@ import { vi } from 'vitest';
 import { startRpsGame, submitRpsAnswer, getRpsGameSessions } from '@api/rps';
 import { types, rps } from '@wails/go/models';
 import { act } from '@testing-library/react';
+import { GameCodes } from '@constants/gameCodes';
 
 // Mock the API module
 vi.mock('@api/rps', () => ({
@@ -24,9 +25,7 @@ describe('useRpsStore', () => {
   });
 
   describe('startGame', () => {
-    it('should start a game and update the state', async () => {
-      const mockSettings: types.RpsSettings = { rounds: [1], questionsPerRound: 5, timeLimitMs: 3000, isRealMode: false };
-      const mockGameState: rps.GameState = { settings: mockSettings, problems: [], sessionId: 1, gameCode: 'RPS' };
+const mockGameState: rps.GameState = { settings: mockSettings, problems: [], id: 1, gameCode: GameCodes.RPS };
       (startRpsGame as jest.Mock).mockResolvedValue(mockGameState);
 
       await act(async () => {
@@ -61,7 +60,7 @@ describe('useRpsStore', () => {
     it('should reset the game state', async () => {
       // First, set a game state
       const mockSettings: types.RpsSettings = { rounds: [1], questionsPerRound: 5, timeLimitMs: 3000, isRealMode: false };
-      const mockGameState: rps.GameState = { settings: mockSettings, problems: [], sessionId: 1, gameCode: 'RPS' };
+      const mockGameState: rps.GameState = { settings: mockSettings, problems: [], id: 1, gameCode: GameCodes.RPS };
       (startRpsGame as jest.Mock).mockResolvedValue(mockGameState);
       await act(async () => {
         await useRpsStore.getState().startGame(mockSettings);
@@ -81,7 +80,7 @@ describe('useRpsStore', () => {
   describe('fetchSessions', () => {
     it('should fetch sessions and update the state', async () => {
       const mockSessions: types.GameSession[] = [
-        { sessionId: 1, gameCode: 'RPS', playDatetime: '2023-01-01', settings: '' },
+        { id: 1, gameCode: GameCodes.RPS, playDatetime: '2023-01-01', settings: '' },
       ];
       (getRpsGameSessions as jest.Mock).mockResolvedValue(mockSessions);
 

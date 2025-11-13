@@ -1,9 +1,7 @@
 import {
   StartRpsGame,
   SubmitRpsAnswer,
-  GetRpsGameSessions,
-  GetRpsResultsForSession,
-  GetAllRpsResults,
+  GetPaginatedRpsSessionsWithResults,
 } from '@wails/go/main/App';
 import { rps, types } from '@wails/go/models';
 
@@ -21,16 +19,9 @@ export const submitRpsAnswer = (
   return SubmitRpsAnswer(playerChoice, responseTimeMs, questionNum);
 };
 
-export const getRpsGameSessions = (): Promise<types.GameSession[]> => {
-  return GetRpsGameSessions();
-};
-
-export const getRpsResultsForSession = (
-  sessionId: number,
-): Promise<types.RpsResult[]> => {
-  return GetRpsResultsForSession(sessionId);
-};
-
-export const getAllRpsResults = (): Promise<types.RpsResult[]> => {
-  return GetAllRpsResults();
+export const getPaginatedRpsSessionsWithResults = (
+  page: number,
+  limit: number,
+): Promise<types.PaginatedRpsSessions> => {
+  return GetPaginatedRpsSessionsWithResults(page, limit);
 };

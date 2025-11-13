@@ -1,0 +1,195 @@
+import { useEffect, useRef, useCallback, useState, FC } from 'react';
+import { useNavigate } from 'react-router-dom';
+import useShapeRotationStore from '../stores/shapeRotationStore';
+import { SubmitShapeRotationAnswerAsync } from '@wails/go/main/App';
+import { GameLayout } from '@components/layout/GameLayout';
+import ShapeDisplay from '@components/shapes/shape_rotation/ShapeDisplay';
+import { Button } from '@components/common/Button';
+import { ProgressBar } from '@components/common/ProgressBar';
+import { SolutionTray } from '@components/game_setup/SolutionTray';
+import { FaArrowRotateLeft, FaArrowRotateRight } from "react-icons/fa6";
+import { RiFlipHorizontalFill, RiFlipVerticalFill } from "react-icons/ri";
+
+const ShapeRotationGame: FC = () => {
+  const navigate = useNavigate();
+  const {
+    sessionId,
+    settings,
+    problems,
+    currentProblemIndex,
+    userSolution,
+    clickCount,
+    addTransform,
+    undoTransform,
+    clearTransforms,
+    nextProblem,
+    setGameMode,
+    resetGame,
+  } = useShapeRotationStore();
+
+  const [progress, setProgress] = useState(100);
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [isNewProblem, setIsNewProblem] = useState(true);
+  const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const startTimeRef = useRef<number>(0);
+
+  const currentProblem = problems[currentProblemIndex];
+  const answeredRef = useRef(false);
+
+  const stopTimer = useCallback(() => {
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+      timerIntervalRef.current = null;
+    }
+  }, []);
+
+  const handleExit = useCallback(() => {
+    stopTimer();
+    resetGame();
+    navigate('/games');
+  }, [stopTimer, resetGame, navigate]);
+
+  const handleSubmit = useCallback(async () => {
+    if (answeredRef.current || !sessionId) return;
+    answeredRef.current = true;
+    stopTimer();
+
+    const solveTime = elapsedTime;
+    SubmitShapeRotationAnswerAsync(sessionId, currentProblem, userSolution, solveTime, clickCount);
+
+    if (currentProblemIndex < problems.length - 1) {
+      nextProblem();
+    } else {
+      setGameMode('result');
+    }
+  }, [sessionId, currentProblem, userSolution, clickCount, elapsedTime, currentProblemIndex, problems.length, nextProblem, setGameMode, stopTimer]);
+
+  const startTimer = useCallback(() => {
+    startTimeRef.current = Date.now();
+    timerIntervalRef.current = setInterval(() => {
+      setElapsedTime(Date.now() - startTimeRef.current);
+    }, 100);
+  }, []);
+  
+  const resetTimer = useCallback(() => {
+    stopTimer();
+    setElapsedTime(0);
+  }, [stopTimer]);
+
+  useEffect(() => {
+    if (!currentProblem) {
+      handleExit();
+      return;
+    }
+    answeredRef.current = false;
+    resetTimer();
+    startTimer();
+    
+    setIsNewProblem(true);
+    const flashTimer = setTimeout(() => setIsNewProblem(false), 1000);
+
+    return () => {
+      stopTimer();
+      clearTimeout(flashTimer);
+    }
+  }, [currentProblem, startTimer, stopTimer, resetTimer, handleExit]);
+
+  useEffect(() => {
+    const timeLimitMs = settings.timeLimit * 1000;
+    if (elapsedTime >= timeLimitMs && timeLimitMs > 0) {
+      handleSubmit();
+    }
+    const newProgress = 100 - (elapsedTime / timeLimitMs) * 100;
+    setProgress(Math.max(0, newProgress));
+  }, [elapsedTime, settings.timeLimit, handleSubmit]);
+
+  if (!currentProblem) {
+    return <GameLayout onExit={handleExit}><div>문제를 불러오는 중...</div></GameLayout>;
+  }
+
+  const timeLimitMs = settings.timeLimit * 1000;
+  const remainingTime = Math.max(0, timeLimitMs - elapsedTime);
+
+  const animationClass = isNewProblem ? 'div-border-flash-light dark:div-border-flash-dark' : 'border-transparent';
+
+  return (
+    <GameLayout onExit={handleExit}>
+      <div className="w-full h-full flex flex-col items-center justify-center">
+        <div className="w-full mt-4">
+          <div className="text-center text-lg font-bold mb-2">남은 시간: {(remainingTime / 1000).toFixed(1)}초</div>
+          <ProgressBar progress={progress}/>
+        </div>
+        <div className="w-full grid grid-cols-2 gap-8 flex-grow">
+          {/* Left Column: Shapes */}
+          <div className={`flex flex-row items-center justify-center gap-4 p-4 rounded-lg border-2 ${animationClass}`}>
+            <div className="flex items-center justify-center gap-4 flex-grow">
+              <div className="flex flex-col items-center gap-2">
+                <h3 className="text-2xl font-bold">전</h3>
+                <ShapeDisplay 
+                  shapeString={currentProblem.InitialShape} 
+                  gridPath={currentProblem.InitialGridPath}
+                  centerX={currentProblem.InitialShapeCenterX} 
+                  centerY={currentProblem.InitialShapeCenterY} />
+              </div>
+              <div className="border-l-2 border-gray-300 h-40"></div>
+              <div className="flex flex-col items-center gap-2">
+                <h3 className="text-2xl font-bold">후</h3>
+                <ShapeDisplay 
+                  shapeString={currentProblem.FinalShape} 
+                  gridPath={currentProblem.FinalGridPath}
+                  centerX={currentProblem.FinalShapeCenterX} 
+                  centerY={currentProblem.FinalShapeCenterY} />
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Controls */}
+          <div className="flex flex-col justify-center gap-6">
+            <div>
+              <h4 className="font-bold text-lg mb-2">변환 (클릭 {clickCount}/20)</h4>
+              <div className="grid grid-cols-2 gap-4">
+                <Button onClick={() => addTransform('rotate_left_45')}>
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <FaArrowRotateLeft size={"64"}/>
+                    왼쪽 45° 회전
+                  </div>
+                </Button>
+                <Button onClick={() => addTransform('rotate_right_45')}>
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <FaArrowRotateRight size={"64"}/>
+                    오른쪽 45° 회전
+                  </div>
+                </Button>
+                <Button onClick={() => addTransform('flip_horizontal')}>
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <RiFlipHorizontalFill size={"64"} />
+                    좌우 반전
+                  </div>
+                </Button>
+                <Button onClick={() => addTransform('flip_vertical')}>
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <RiFlipVerticalFill size={"64"} />
+                    상하 반전
+                  </div>
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <h4 className="font-bold text-lg mb-2">나의 풀이 (최소 {currentProblem.MinMoves}번)</h4>
+              <SolutionTray solution={userSolution} maxSlots={20}/>
+              <div className="grid grid-cols-2 gap-4 mt-2">
+                <Button onClick={undoTransform}>하나 지우기</Button>
+                <Button onClick={clearTransforms}>전체 지우기</Button>
+              </div>
+            </div>
+
+            <Button onClick={handleSubmit} className="w-full mt-4">답안 제출</Button>
+          </div>
+        </div>
+      </div>
+    </GameLayout>
+  );
+};
+
+export default ShapeRotationGame;

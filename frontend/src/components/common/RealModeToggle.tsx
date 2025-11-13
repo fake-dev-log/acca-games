@@ -1,8 +1,8 @@
-import { FC } from 'react';
+import { ChangeEvent, FC } from 'react';
 
 interface RealModeToggleProps {
   checked: boolean;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
 export const RealModeToggle: FC<RealModeToggleProps> = ({ checked, onChange }) => {

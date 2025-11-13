@@ -5,13 +5,46 @@ import (
 	"acca-games/games/nback"
 	"acca-games/games/number_pressing"
 	"acca-games/games/rps"
+	"acca-games/games/shape_rotation"
 	"acca-games/types"
 	"context"
 	"database/sql"
+	"encoding/json"
+	"fmt"
 	"log"
 	"math/rand"
 	"time"
 )
+
+// GetSessionResults fetches results for a given session and game, returning them as a JSON string.
+func (a *App) GetSessionResults(gameCode string, sessionID int64) (string, error) {
+	var data interface{}
+	var err error
+
+	switch gameCode {
+	case types.GameCodeShapeRotation:
+		data, err = database.GetShapeRotationResultsForSession(a.db, sessionID)
+	case types.GameCodeRPS:
+		data, err = database.GetRpsResultsForSession(a.db, sessionID)
+	case types.GameCodeNBack:
+		data, err = database.GetNBackResultsForSession(a.db, sessionID)
+	case types.GameCodeNumberPressing:
+		data, err = database.GetNumberPressingResultsForSession(a.db, sessionID)
+	default:
+		return "", fmt.Errorf("unknown game code: %s", gameCode)
+	}
+
+	if err != nil {
+		return "", err
+	}
+
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		return "", err
+	}
+
+	return string(jsonData), nil
+}
 
 // App struct
 type App struct {
@@ -20,6 +53,10 @@ type App struct {
 	nbackService          *nback.Service
 	rpsService            *rps.Service
 	numberPressingService *number_pressing.Service
+}
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
 }
 
 // NewApp creates a new App application struct
@@ -59,8 +96,8 @@ func (a *App) StartNBackGame(settings types.NBackSettings) (*nback.NBackGameStat
 }
 
 // SubmitNBackAnswer checks the user's answer for a given trial, saves it to the DB, and returns the result.
-func (a *App) SubmitNBackAnswer(playerChoice string, responseTimeMs int, trialNum int) (*types.NBackResult, error) {
-	return a.nbackService.SubmitAnswer(playerChoice, responseTimeMs, trialNum)
+func (a *App) SubmitNBackAnswer(playerChoice string, responseTimeMs int, questionNum int) (*types.NBackResult, error) {
+	return a.nbackService.SubmitAnswer(playerChoice, responseTimeMs, questionNum)
 }
 
 // StartRpsGame starts a new Rock-Paper-Scissors game with the given settings.
@@ -73,50 +110,21 @@ func (a *App) SubmitRpsAnswer(playerChoice string, responseTimeMs int, questionN
 	return a.rpsService.SubmitAnswer(playerChoice, responseTimeMs, questionNum)
 }
 
-// GetRpsGameSessions fetches all Rock-Paper-Scissors game sessions.
-func (a *App) GetRpsGameSessions() ([]types.GameSession, error) {
-	return database.GetGameSessionsByCode(a.db, "RPS")
+var validGameCodes = map[string]bool{
+	types.GameCodeShapeRotation:  true,
+	types.GameCodeRPS:            true,
+	types.GameCodeNBack:          true,
+	types.GameCodeNumberPressing: true,
 }
 
-// GetRpsResultsForSession fetches all results for a given RPS session ID.
-func (a *App) GetRpsResultsForSession(sessionID int64) ([]types.RpsResult, error) {
-	return database.GetRpsResultsForSession(a.db, sessionID)
+// GetPaginatedNBackSessionsWithResults fetches paginated N-Back sessions with their results.
+func (a *App) GetPaginatedNBackSessionsWithResults(page int, limit int) (*types.PaginatedNBackSessions, error) {
+	return database.GetPaginatedNBackSessionsWithResults(a.db, page, limit)
 }
 
-// GetAllRpsResults fetches all results across all RPS sessions.
-func (a *App) GetAllRpsResults() ([]types.RpsResult, error) {
-	return database.GetAllRpsResults(a.db)
-}
-
-
-// GetNBackGameSessions fetches all N-Back game sessions.
-func (a *App) GetNBackGameSessions() ([]types.GameSession, error) {
-	sessions, err := database.GetNBackGameSessions(a.db)
-	if err != nil {
-		log.Printf("Error getting N-Back game sessions: %v", err)
-		return nil, err
-	}
-	return sessions, nil
-}
-
-// GetNBackResultsForSession fetches all N-Back results for a given session ID.
-func (a *App) GetNBackResultsForSession(sessionID int64) ([]types.NBackRecord, error) {
-	records, err := database.GetNBackResultsForSession(a.db, sessionID)
-	if err != nil {
-		log.Printf("Error getting N-Back results for session %d: %v", sessionID, err)
-		return nil, err
-	}
-	return records, nil
-}
-
-// GetAllNBackResults fetches all N-Back results across all sessions.
-func (a *App) GetAllNBackResults() ([]types.NBackRecord, error) {
-	records, err := database.GetAllNBackResults(a.db)
-	if err != nil {
-		log.Printf("Error getting all N-Back results: %v", err)
-		return nil, err
-	}
-	return records, nil
+// GetPaginatedRpsSessionsWithResults fetches paginated RPS sessions with their results.
+func (a *App) GetPaginatedRpsSessionsWithResults(page int, limit int) (*types.PaginatedRpsSessions, error) {
+	return database.GetPaginatedRpsSessionsWithResults(a.db, page, limit)
 }
 
 // StartNumberPressingGame starts a new Number Pressing game.
@@ -139,17 +147,44 @@ func (a *App) CalculateCorrectClicksR2(problem types.NumberPressingProblemR2) []
 	return number_pressing.CalculateCorrectClicksR2(problem)
 }
 
-// GetNumberPressingGameSessions fetches all Number Pressing game sessions.
-func (a *App) GetNumberPressingGameSessions() ([]types.GameSession, error) {
-	return database.GetNumberPressingGameSessions(a.db)
+// GetPaginatedNumberPressingSessionsWithResults fetches paginated Number Pressing sessions with their results.
+func (a *App) GetPaginatedNumberPressingSessionsWithResults(page int, limit int) (*types.PaginatedNumberPressingSessions, error) {
+	return database.GetPaginatedNumberPressingSessionsWithResults(a.db, page, limit)
 }
 
-// GetNumberPressingResultsForSession fetches all results for a given Number Pressing session ID.
-func (a *App) GetNumberPressingResultsForSession(sessionID int64) (*types.NumberPressingResultsBundle, error) {
-	return database.GetNumberPressingResultsForSession(a.db, sessionID)
+// GetShapeRotationProblems returns a list of problems for the Shape Rotation game.
+func (a *App) GetShapeRotationProblems(round int, numProblems int) ([]shape_rotation.ShapeRotationProblemWithFinalShape, error) {
+	return shape_rotation.GetProblems(round, numProblems)
 }
 
-// GetAllNumberPressingResults fetches all results across all Number Pressing sessions.
-func (a *App) GetAllNumberPressingResults() (*types.NumberPressingResultsBundle, error) {
-	return database.GetAllNumberPressingResults(a.db)
+// SaveShapeRotationSession saves a new Shape Rotation game session.
+func (a *App) SaveShapeRotationSession(settings types.ShapeRotationSettings) (int64, error) {
+	return database.SaveShapeRotationSession(a.db, settings)
+}
+
+// SubmitShapeRotationAnswerAsync verifies and saves a result in the background.
+func (a *App) SubmitShapeRotationAnswerAsync(sessionID int64, problem shape_rotation.ShapeRotationProblemWithFinalShape, userSolution []string, solveTime int, clickCount int) error {
+	go func() {
+		isCorrect := shape_rotation.VerifySolution(problem, userSolution)
+
+		result := types.ShapeRotationResult{
+			SessionID:    sessionID,
+			ProblemID:    problem.ID,
+			UserSolution: userSolution,
+			IsCorrect:    isCorrect,
+			SolveTime:    solveTime,
+			ClickCount:   clickCount,
+		}
+
+		err := database.SaveShapeRotationResult(a.db, result)
+		if err != nil {
+			log.Printf("Error saving shape rotation result: %v", err)
+		}
+	}()
+	return nil
+}
+
+// GetPaginatedShapeRotationSessionsWithResults fetches paginated Shape Rotation sessions with their results.
+func (a *App) GetPaginatedShapeRotationSessionsWithResults(page int, limit int) (*types.PaginatedShapeRotationSessions, error) {
+	return database.GetPaginatedShapeRotationSessionsWithResults(a.db, page, limit)
 }

@@ -30,7 +30,7 @@ func NewService(db *sql.DB) *Service {
 func (s *Service) StartGame(settings types.NBackSettings) (*NBackGameState, error) {
 	shapeSequence := generateShapeSequence(settings.NumTrials, settings.ShapeGroup, settings.NBackLevel)
 
-	sessionID, err := database.CreateNBackSession(s.db, settings)
+	sessionID, err := database.CreateGameSession(s.db, types.GameCodeNBack, settings)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create game session: %w", err)
 	}
@@ -45,19 +45,19 @@ func (s *Service) StartGame(settings types.NBackSettings) (*NBackGameState, erro
 }
 
 // SubmitAnswer processes a user's answer for a single trial.
-func (s *Service) SubmitAnswer(playerChoice string, responseTimeMs int, trialNum int) (*types.NBackResult, error) {
+func (s *Service) SubmitAnswer(playerChoice string, responseTimeMs int, questionNum int) (*types.NBackResult, error) {
 	if s.currentState == nil {
 		return nil, fmt.Errorf("game not started")
 	}
 
 	gs := s.currentState
-	correctChoice := determineCorrectChoice(gs.ShapeSequence, trialNum, gs.Settings.NBackLevel)
+	correctChoice := determineCorrectChoice(gs.ShapeSequence, questionNum, gs.Settings.NBackLevel)
 	isCorrect := playerChoice == correctChoice
 
 	result := types.NBackResult{
 		SessionID:      gs.ID,
 		Round:          1, // N-Back doesn't have rounds in this context, so default to 1
-		QuestionNum:    trialNum,
+		QuestionNum:    questionNum,
 		IsCorrect:      isCorrect,
 		ResponseTimeMs: responseTimeMs,
 		PlayerChoice:   playerChoice,
@@ -108,19 +108,19 @@ func generateShapeSequence(numTrials int, shapeGroup string, nBackLevel int) []s
 }
 
 // determineCorrectChoice determines the correct user action for a given trial.
-func determineCorrectChoice(sequence []string, trialNum int, nBackLevel int) string {
+func determineCorrectChoice(sequence []string, questionNum int, nBackLevel int) string {
 	if nBackLevel == 1 { // 2-back only
-		if trialNum < 2 {
+		if questionNum < 2 {
 			return "SPACE" // Not enough history
 		}
-		if sequence[trialNum] == sequence[trialNum-2] {
+		if sequence[questionNum] == sequence[questionNum-2] {
 			return "LEFT"
 		} else {
 			return "SPACE"
 		}
 	} else { // 2-back and 3-back
-		match2Back := trialNum >= 2 && sequence[trialNum] == sequence[trialNum-2]
-		match3Back := trialNum >= 3 && sequence[trialNum] == sequence[trialNum-3]
+		match2Back := questionNum >= 2 && sequence[questionNum] == sequence[questionNum-2]
+		match3Back := questionNum >= 3 && sequence[questionNum] == sequence[questionNum-3]
 
 		if match2Back {
 			return "LEFT"

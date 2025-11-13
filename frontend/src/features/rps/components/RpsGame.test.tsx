@@ -2,20 +2,21 @@ import { render, screen, act, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 import { MemoryRouter, useNavigate } from 'react-router-dom';
 import { RpsGame } from './RpsGame';
-import { useRpsStore } from '@stores/rpsStore';
-import { rps, types } from '@wails/go/models';
+import { useRpsStore } from '@features/rps/stores/rpsStore';
+import { rps } from '@wails/go/models';
+import { GameCodes } from '@constants/gameCodes';
 
 // Mock dependencies
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
   return { ...actual as any, useNavigate: vi.fn() };
 });
-vi.mock('@stores/rpsStore');
+vi.mock('@features/rps/stores/rpsStore');
 
 describe('RpsGame component', () => {
   const mockNavigate = vi.fn();
   const mockSubmitAnswer = vi.fn();
-  const mockResetGameState = vi.fn();
+  const mockResetGame = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -24,7 +25,8 @@ describe('RpsGame component', () => {
     (useRpsStore as jest.Mock).mockReturnValue({
       gameState: null,
       submitAnswer: mockSubmitAnswer,
-      resetGameState: mockResetGameState,
+      resetGame: mockResetGame,
+      setGameMode: vi.fn(),
     });
   });
 
@@ -45,14 +47,10 @@ describe('RpsGame component', () => {
       isRealMode: false,
     },
     problems: [
-      { problemCardHolder: 'me', givenCard: 'ROCK', round: 1 },
-      { problemCardHolder: 'opponent', givenCard: 'PAPER', round: 1 },
+      { round: 1, questionNum: 1, problemCardHolder: 'me', givenCard: 'ROCK', correctChoice: 'PAPER' },
+      { round: 1, questionNum: 2, problemCardHolder: 'opponent', givenCard: 'PAPER', correctChoice: 'ROCK' },
     ],
-    sessionId: 1,
-import { GameCodes } from '@constants/gameCodes';
-// ... other imports
-
-// ... inside the test
+    id: 1,
     gameCode: GameCodes.RPS,
   };
 
@@ -62,7 +60,7 @@ import { GameCodes } from '@constants/gameCodes';
   });
 
   it('renders game UI when gameState is present', () => {
-    (useRpsStore as jest.Mock).mockReturnValue({ ...useRpsStore(), gameState: mockGameState });
+    (useRpsStore as jest.Mock).mockReturnValue({ gameState: mockGameState });
     renderWithRouter(<RpsGame />);
 
     expect(screen.getByText('나는 항상 이겨야 합니다.')).toBeInTheDocument();

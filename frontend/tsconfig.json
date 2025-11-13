@@ -27,7 +27,6 @@
       "@components/*": ["./src/components/*"],
       "@constants/*" : ["./src/constants/*"],
       "@layout/*": ["./src/components/layout/*"],
-      "@stores/*": ["./src/stores/*"],
       "@features/*": ["./src/features/*"],
       "@utils/*": ["./src/utils/*"],
       "@api/*": ["./src/api/*"],

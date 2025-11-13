@@ -4,10 +4,7 @@ package shape_rotation
 // This is used internally for game data and is not a user-facing type.
 type ShapeRotationProblem struct {
 	ID           int
-	Round        int
 	InitialShape string
-	MinMoves     int
-	Solution     []string
 }
 
 var canonicalShapes = map[string]string{
@@ -24,38 +21,35 @@ var canonicalShapes = map[string]string{
 var GridProblems = []ShapeRotationProblem{
 	{
 		ID:           10,
-		Round:        2,
 		InitialShape: "0110/0110/0110/1110", // Boot shape
-		MinMoves:     2,
-		Solution:     []string{"rotate_right_45", "flip_horizontal"},
 	},
 	{
 		ID:           11,
-		Round:        2,
 		InitialShape: "0100/1110/0110/0010", // Fish shape
-		MinMoves:     2,
-		Solution:     []string{"rotate_left_45", "flip_vertical"},
 	},
 	{
 		ID:           12,
-		Round:        2,
 		InitialShape: "0011/0110/1100/1000", // Snake shape
-		MinMoves:     1,
-		Solution:     []string{"rotate_right_45"},
 	},
 	{
 		ID:           13,
-		Round:        2,
 		InitialShape: "1110/1100/1000/1000", // Gun shape
-		MinMoves:     2,
-		Solution:     []string{"flip_vertical", "rotate_left_45"},
 	},
 	{
 		ID:           14,
-		Round:        2,
 		InitialShape: "1000/1000/1010/1100", // L-shape with a dot
-		MinMoves:     1,
-		Solution:     []string{"flip_horizontal"},
+	},
+	{
+		ID:           15,
+		InitialShape: "1000/1100/0100/0110", // Asymmetric L-ish
+	},
+	{
+		ID:           16,
+		InitialShape: "1000/1100/1110/0111", // Staircase-like
+	},
+	{
+		ID:           17,
+		InitialShape: "1000/0100/0010/0011", // Diagonal with offset
 	},
 }
 

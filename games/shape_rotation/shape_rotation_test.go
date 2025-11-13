@@ -54,8 +54,11 @@ func TestVerifySolution_Round1_Incorrect(t *testing.T) {
 
 func TestVerifySolution_Round2_Correct(t *testing.T) {
 	// Use the first problem from the predefined GridProblems
-	gridProblem := GridProblems[0] // ID: 10, Solution: {"rotate_right_45", "flip_horizontal"}
-	correctSolution := gridProblem.Solution
+	gridProblem := GridProblems[0] // ID: 10, InitialShape: "0110/0110/0110/1110" (Boot shape)
+
+	// Define a specific solution and minMoves for this test case
+	correctSolution := []string{"rotate_right_45", "flip_horizontal"}
+	minMoves := 2
 
 	// Generate the problem dynamically to get the final shape
 	initialPoints, _ := ParseGridToCornerPoints(gridProblem.InitialShape)
@@ -68,7 +71,7 @@ func TestVerifySolution_Round2_Correct(t *testing.T) {
 		Round:        2,
 		InitialShape: "", // Not used by VerifySolution for Round 2
 		FinalShape:   finalShapePath,
-		MinMoves:     gridProblem.MinMoves,
+		MinMoves:     minMoves,
 		Solution:     correctSolution,
 	}
 
@@ -78,9 +81,12 @@ func TestVerifySolution_Round2_Correct(t *testing.T) {
 }
 
 func TestVerifySolution_Round2_Incorrect(t *testing.T) {
-	gridProblem := GridProblems[0]
-	correctSolution := gridProblem.Solution
-	incorrectSolution := []string{"rotate_left_45"}
+	gridProblem := GridProblems[0] // ID: 10, InitialShape: "0110/0110/0110/1110" (Boot shape)
+
+	// Define a specific correct solution and minMoves for this test case
+	correctSolution := []string{"rotate_right_45", "flip_horizontal"}
+	minMoves := 2
+	incorrectSolution := []string{"rotate_left_45"} // Still an incorrect solution
 
 	initialPoints, _ := ParseGridToCornerPoints(gridProblem.InitialShape)
 	gridCenter := float64(GridSize*CellSize) / 2
@@ -91,7 +97,7 @@ func TestVerifySolution_Round2_Incorrect(t *testing.T) {
 		ID:         gridProblem.ID,
 		Round:      2,
 		FinalShape: finalShapePath,
-		MinMoves:   gridProblem.MinMoves,
+		MinMoves:   minMoves,
 	}
 
 	if VerifySolution(problem, incorrectSolution) {

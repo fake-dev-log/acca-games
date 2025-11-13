@@ -110,7 +110,7 @@ export function NBackGame() {
         return;
       }
   
-      const requiredBuffer = gameState.settings.nBackLevel === 1 ? 2 : 3;
+      const requiredBuffer = 2;
       const isTrialActive = currentTrial >= requiredBuffer;
   
       if (currentTrial === requiredBuffer && !gameState.settings.isRealMode) {

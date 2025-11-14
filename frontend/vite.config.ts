@@ -22,6 +22,7 @@ export default defineConfig({
       '@utils': path.resolve(__dirname, './src/utils'),
       '@api': path.resolve(__dirname, './src/api'),
       '@hooks': path.resolve(__dirname, './src/hooks'),
+      "@type": path.resolve(__dirname, "./src/type"),
       '@wails': path.resolve(__dirname, './wailsjs'),
     },
   },

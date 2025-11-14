@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"encoding/json"
 
 	"acca-games/types"
 )
@@ -107,7 +108,12 @@ func GetPaginatedNBackSessionsWithResults(db *sql.DB, page int, limit int) (*typ
 		); err != nil {
 			return nil, fmt.Errorf("failed to scan n-back session/result: %w", err)
 		}
-		s.Settings = settingsJSON
+		// Double marshal settingsJSON to ensure it's treated as a string by Wails
+		doubleMarshaledSettings, err := json.Marshal(settingsJSON)
+		if err != nil {
+			return nil, fmt.Errorf("failed to double marshal settings: %w", err)
+		}
+		s.Settings = string(doubleMarshaledSettings)
 
 		if _, ok := sessionMap[s.ID]; !ok {
 			sessionMap[s.ID] = &types.NBackSessionWithResults{
@@ -134,3 +140,114 @@ func GetPaginatedNBackSessionsWithResults(db *sql.DB, page int, limit int) (*typ
 		TotalCount: totalCount,
 	}, nil
 }
+
+// GetNBackSessionStats calculates and returns aggregated statistics for a given N-Back game session.
+func GetNBackSessionStats(db *sql.DB, sessionID int64) (*types.NBackSessionStats, error) {
+	results, err := GetNBackResultsForSession(db, sessionID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get n-back results for session %d: %w", sessionID, err)
+	}
+
+	if len(results) == 0 {
+		return nil, fmt.Errorf("no n-back results found for session %d", sessionID)
+	}
+
+	stats := &types.NBackSessionStats{
+		SessionID: sessionID,
+	}
+
+	roundStatsMap := make(map[int]*types.NBackRoundStats)
+	var totalResponseTimeMs int
+
+	for _, r := range results {
+		stats.TotalQuestions++
+		totalResponseTimeMs += r.ResponseTimeMs
+		if r.IsCorrect {
+			stats.TotalCorrect++
+		}
+
+		// Aggregate per-round stats
+		if _, ok := roundStatsMap[r.Round]; !ok {
+			roundStatsMap[r.Round] = &types.NBackRoundStats{
+				Round: r.Round,
+				NBackLevelStats: []types.NBackLevelStat{}, // Initialize slice
+			}
+		}
+		roundStats := roundStatsMap[r.Round]
+		roundStats.TotalQuestions++
+		roundStats.AverageResponseTimeMs += float64(r.ResponseTimeMs)
+		if r.IsCorrect {
+			roundStats.TotalCorrect++
+		}
+
+		// Aggregate per-N-back-level stats for Round 2
+		if r.Round == 2 {
+			nBackLevel := 0
+			if r.CorrectChoice == "LEFT" { // Assuming LEFT is 2-back
+				nBackLevel = 2
+			} else if r.CorrectChoice == "RIGHT" { // Assuming RIGHT is 3-back
+				nBackLevel = 3
+			}
+
+			if nBackLevel != 0 {
+				foundNBackLevelStat := false
+				for i, nls := range roundStats.NBackLevelStats {
+					if nls.NBackLevel == nBackLevel {
+						roundStats.NBackLevelStats[i].TotalQuestions++
+						roundStats.NBackLevelStats[i].AverageResponseTimeMs += float64(r.ResponseTimeMs)
+						if r.IsCorrect {
+							roundStats.NBackLevelStats[i].TotalCorrect++
+						}
+						foundNBackLevelStat = true
+						break
+					}
+				}
+				if !foundNBackLevelStat {
+					newNLS := types.NBackLevelStat{
+						NBackLevel: nBackLevel,
+						TotalQuestions: 1,
+						AverageResponseTimeMs: float64(r.ResponseTimeMs),
+					}
+					if r.IsCorrect {
+						newNLS.TotalCorrect = 1
+					}
+					roundStats.NBackLevelStats = append(roundStats.NBackLevelStats, newNLS)
+				}
+			}
+		}
+	}
+
+	// Calculate overall averages and accuracies
+	if stats.TotalQuestions > 0 {
+		stats.OverallAccuracy = float64(stats.TotalCorrect) / float64(stats.TotalQuestions) * 100
+		stats.AverageResponseTimeMs = float64(totalResponseTimeMs) / float64(stats.TotalQuestions)
+	}
+
+	// Finalize per-round and per-N-back-level stats
+	for _, roundStats := range roundStatsMap {
+		if roundStats.TotalQuestions > 0 {
+			roundStats.Accuracy = float64(roundStats.TotalCorrect) / float64(roundStats.TotalQuestions) * 100
+			roundStats.AverageResponseTimeMs /= float64(roundStats.TotalQuestions)
+		}
+
+		for i, nls := range roundStats.NBackLevelStats {
+			if nls.TotalQuestions > 0 {
+				roundStats.NBackLevelStats[i].Accuracy = float64(nls.TotalCorrect) / float64(nls.TotalQuestions) * 100
+				roundStats.NBackLevelStats[i].AverageResponseTimeMs /= float64(nls.TotalQuestions)
+			}
+		}
+		stats.RoundStats = append(stats.RoundStats, *roundStats)
+	}
+
+	// Sort round stats by round number
+	for i := 0; i < len(stats.RoundStats)-1; i++ {
+		for j := i + 1; j < len(stats.RoundStats); j++ {
+			if stats.RoundStats[i].Round > stats.RoundStats[j].Round {
+				stats.RoundStats[i], stats.RoundStats[j] = stats.RoundStats[j], stats.RoundStats[i]
+			}
+		}
+	}
+
+	return stats, nil
+}
+

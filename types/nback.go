@@ -32,3 +32,33 @@ type PaginatedNBackSessions struct {
 	Sessions   []NBackSessionWithResults `json:"sessions"`
 	TotalCount int                       `json:"totalCount"`
 }
+
+// NBackLevelStat holds statistics for a specific N-back level within Round 2.
+type NBackLevelStat struct {
+	NBackLevel          int     `json:"nBackLevel"` // 2 or 3
+	TotalQuestions      int     `json:"totalQuestions"`
+	TotalCorrect        int     `json:"totalCorrect"`
+	Accuracy            float64 `json:"accuracy"`
+	AverageResponseTimeMs float64 `json:"averageResponseTimeMs"`
+}
+
+// NBackRoundStats holds statistics for a single round of an N-Back game session.
+type NBackRoundStats struct {
+	Round                 int              `json:"round"`
+	TotalQuestions        int              `json:"totalQuestions"`
+	TotalCorrect          int              `json:"totalCorrect"`
+	Accuracy              float64          `json:"accuracy"`
+	AverageResponseTimeMs float64          `json:"averageResponseTimeMs"`
+	NBackLevelStats       []NBackLevelStat `json:"nBackLevelStats,omitempty"` // Only for Round 2
+}
+
+// NBackSessionStats holds aggregated statistics for an entire N-Back game session.
+type NBackSessionStats struct {
+	SessionID             int64             `json:"sessionId"`
+	TotalQuestions        int               `json:"totalQuestions"`
+	TotalCorrect          int               `json:"totalCorrect"`
+	OverallAccuracy       float64           `json:"overallAccuracy"`
+	AverageResponseTimeMs float64           `json:"averageResponseTimeMs"`
+	RoundStats            []NBackRoundStats `json:"roundStats"`
+}
+

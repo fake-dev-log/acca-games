@@ -190,3 +190,114 @@ func GetPaginatedNumberPressingSessionsWithResults(db *sql.DB, page int, limit i
 		TotalCount: totalCount,
 	}, nil
 }
+
+// GetNumberPressingSessionStats calculates and returns aggregated statistics for a given Number Pressing game session.
+func GetNumberPressingSessionStats(db *sql.DB, sessionID int64) (*types.NumberPressingSessionStats, error) {
+	bundle, err := GetNumberPressingResultsForSession(db, sessionID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get number pressing results for session %d: %w", sessionID, err)
+	}
+
+	if len(bundle.ResultsR1) == 0 && len(bundle.ResultsR2) == 0 {
+		return nil, fmt.Errorf("no number pressing results found for session %d", sessionID)
+	}
+
+	stats := &types.NumberPressingSessionStats{
+		SessionID: sessionID,
+	}
+
+	// --- Aggregate Round 1 Stats ---
+	r1Stats := types.NumberPressingRoundStats{Round: 1}
+	var r1TotalTime float64
+	for _, r := range bundle.ResultsR1 {
+		r1Stats.TotalQuestions++
+		r1TotalTime += r.TimeTaken
+		if r.IsCorrect {
+			r1Stats.TotalCorrect++
+		}
+	}
+	if r1Stats.TotalQuestions > 0 {
+		r1Stats.Accuracy = float64(r1Stats.TotalCorrect) / float64(r1Stats.TotalQuestions) * 100
+		r1Stats.AverageTimeTakenSec = r1TotalTime / float64(r1Stats.TotalQuestions)
+	}
+	if r1Stats.TotalQuestions > 0 {
+		stats.RoundStats = append(stats.RoundStats, r1Stats)
+	}
+
+	// --- Aggregate Round 2 Stats ---
+	r2Stats := types.NumberPressingRoundStats{Round: 2}
+	var r2TotalTime float64
+	conditionStatsMap := make(map[string]*types.NumberPressingConditionStat)
+
+	for _, r := range bundle.ResultsR2 {
+		r2Stats.TotalQuestions++
+		r2TotalTime += r.TimeTaken
+		if r.IsCorrect {
+			r2Stats.TotalCorrect++
+		}
+
+		// Construct condition string for R2
+		var conditionParts []string
+		if len(r.Problem.DoubleClick) > 0 {
+			dc, _ := json.Marshal(r.Problem.DoubleClick)
+			conditionParts = append(conditionParts, fmt.Sprintf("DC:%s", string(dc)))
+		}
+		if len(r.Problem.Skip) > 0 {
+			s, _ := json.Marshal(r.Problem.Skip)
+			conditionParts = append(conditionParts, fmt.Sprintf("S:%s", string(s)))
+		}
+		conditionStr := strings.Join(conditionParts, ", ")
+		if conditionStr == "" {
+			conditionStr = "No Specific Condition" // Fallback for problems without special conditions
+		}
+
+		if _, ok := conditionStatsMap[conditionStr]; !ok {
+			conditionStatsMap[conditionStr] = &types.NumberPressingConditionStat{
+				ConditionType: conditionStr,
+			}
+		}
+		condStat := conditionStatsMap[conditionStr]
+		condStat.TotalQuestions++
+		condStat.AverageTimeTakenSec += r.TimeTaken
+		if r.IsCorrect {
+			condStat.TotalCorrect++
+		}
+	}
+
+	if r2Stats.TotalQuestions > 0 {
+		r2Stats.Accuracy = float64(r2Stats.TotalCorrect) / float64(r2Stats.TotalQuestions) * 100
+		r2Stats.AverageTimeTakenSec = r2TotalTime / float64(r2Stats.TotalQuestions)
+
+		// Finalize condition stats
+		for _, condStat := range conditionStatsMap {
+			if condStat.TotalQuestions > 0 {
+				condStat.Accuracy = float64(condStat.TotalCorrect) / float64(condStat.TotalQuestions) * 100
+				condStat.AverageTimeTakenSec /= float64(condStat.TotalQuestions)
+			}
+			r2Stats.ConditionStats = append(r2Stats.ConditionStats, *condStat)
+		}
+		// Sort condition stats by condition type for consistent display
+		for i := 0; i < len(r2Stats.ConditionStats)-1; i++ {
+			for j := i + 1; j < len(r2Stats.ConditionStats); j++ {
+				if r2Stats.ConditionStats[i].ConditionType > r2Stats.ConditionStats[j].ConditionType {
+					r2Stats.ConditionStats[i], r2Stats.ConditionStats[j] = r2Stats.ConditionStats[j], r2Stats.ConditionStats[i]
+				}
+			}
+		}
+		stats.RoundStats = append(stats.RoundStats, r2Stats)
+	}
+
+	// --- Aggregate Overall Session Stats ---
+	for _, roundStat := range stats.RoundStats {
+		stats.TotalQuestions += roundStat.TotalQuestions
+		stats.TotalCorrect += roundStat.TotalCorrect
+		stats.AverageTimeTakenSec += roundStat.AverageTimeTakenSec * float64(roundStat.TotalQuestions) // Sum of total times
+	}
+	if stats.TotalQuestions > 0 {
+		stats.OverallAccuracy = float64(stats.TotalCorrect) / float64(stats.TotalQuestions) * 100
+		stats.AverageTimeTakenSec /= float64(stats.TotalQuestions) // Divide by total questions for overall average
+	}
+
+	return stats, nil
+}
+

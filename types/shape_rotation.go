@@ -30,3 +30,25 @@ type PaginatedShapeRotationSessions struct {
 	Sessions   []ShapeRotationSessionWithResults `json:"sessions"`
 	TotalCount int                               `json:"totalCount"`
 }
+
+// ShapeRotationRoundStats holds statistics for a single round of a Shape Rotation game session.
+type ShapeRotationRoundStats struct {
+	Round               int     `json:"round"`
+	TotalQuestions      int     `json:"totalQuestions"`
+	TotalCorrect        int     `json:"totalCorrect"`
+	Accuracy            float64 `json:"accuracy"`
+	AverageSolveTimeMs  float64 `json:"averageSolveTimeMs"`
+	AverageClickCount   float64 `json:"averageClickCount"`
+}
+
+// ShapeRotationSessionStats holds aggregated statistics for an entire Shape Rotation game session.
+type ShapeRotationSessionStats struct {
+	SessionID           int64                     `json:"sessionId"`
+	TotalQuestions      int                       `json:"totalQuestions"`
+	TotalCorrect        int                       `json:"totalCorrect"`
+	OverallAccuracy     float64                   `json:"overallAccuracy"`
+	AverageSolveTimeMs  float64                   `json:"averageSolveTimeMs"`
+	AverageClickCount   float64                   `json:"averageClickCount"`
+	RoundStats          []ShapeRotationRoundStats `json:"roundStats"`
+}
+

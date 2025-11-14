@@ -21,7 +21,7 @@ describe('ShapeRotationRecords component', () => {
     id: 1,
     gameCode: 'SHAPE_ROTATION',
     playDatetime: '2023-10-30T10:00:00Z',
-    settings: { round: 1, numProblems: 2, timeLimit: 180, isRealMode: false },
+    settings: JSON.stringify({ round: 1, numProblems: 2, timeLimit: 180, isRealMode: false }),
     results: [
       { problem: { InitialShape: 'F', FinalShape: 'G', MinMoves: 1 }, isCorrect: true, solveTime: 10, clickCount: 1, userSolution: ['rotate_left_45'] },
     ],

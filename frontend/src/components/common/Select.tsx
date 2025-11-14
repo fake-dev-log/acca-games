@@ -3,10 +3,11 @@ import { DropdownIcon } from './DropdownIcon';
 
 interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label: string;
-  children: ReactNode;
+  options?: { value: string; label: string }[]; // Make options optional
+  children?: ReactNode; // Make children optional
 }
 
-export const Select = ({ label, children, ...props }: SelectProps) => {
+export const Select = ({ label, options, children, ...props }: SelectProps) => {
   return (
     <div>
       <label htmlFor={props.id} className="block text-sm font-medium text-on-surface">{label}</label>
@@ -15,7 +16,15 @@ export const Select = ({ label, children, ...props }: SelectProps) => {
           {...props}
           className="block w-full p-2 border rounded-md bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark appearance-none focus:outline-none focus:ring-primary-light dark:focus:ring-primary-dark focus:border-primary-light dark:focus:border-primary-dark pr-10"
         >
-          {children}
+          {options ? (
+            options.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))
+          ) : (
+            children
+          )}
         </select>
         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
           <DropdownIcon />

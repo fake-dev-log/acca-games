@@ -1,19 +1,12 @@
-import { formatSettings as formatNbackSettings } from '@utils/nbackHelpers';
+import { formatSettings as formatNbackSettings, parseSettings as parseNbackSettings } from '@utils/nbackHelpers';
 import { formatSettings as formatNumberPressingSettings, parseSettings as parseNumberPressingSettings } from '@utils/numberPressingHelpers';
 import { formatSettings as formatRpsSettings, parseSettings as parseRpsSettings } from '@utils/rpsHelpers';
-import { formatSettings as formatShapeRotationSettings } from '@utils/shapeRotationHelpers';
+import { formatSettings as formatShapeRotationSettings, parseSettings as parseShapeRotationSettings } from '@utils/shapeRotationHelpers';
 import { GameCodes } from "@constants/gameCodes";
-
-// Define a local interface for the session data since types.GameSession is not directly available.
-interface SessionInfo {
-  id: number;
-  gameCode: string;
-  playDatetime: any;
-  settings: any;
-}
+import { BaseGameSessionInfo } from '@type/common'; // Import the new base interface
 
 interface SessionListProps {
-  sessions: SessionInfo[];
+  sessions: BaseGameSessionInfo[];
   loading: boolean;
   error: string | null;
   onSessionClick: (id: number) => void;
@@ -22,28 +15,34 @@ interface SessionListProps {
 
 export function SessionList({ sessions, loading, error, onSessionClick, activeSessionId }: SessionListProps) {
 
-  const renderSettings = (session: SessionInfo, isExpanded: boolean) => {
+  const renderSettings = (session: BaseGameSessionInfo, isExpanded: boolean) => {
     try {
       let settingsArray: string[] = [];
+      let parsedSettings: any = null; // Use 'any' for now, as it could be different types
+
       switch (session.gameCode) {
         case GameCodes.N_BACK:
-          // Settings are already parsed in the store
-          if (session.settings) settingsArray = formatNbackSettings(session.settings);
+          parsedSettings = parseNbackSettings(session.settings);
+          if (parsedSettings) settingsArray = formatNbackSettings(parsedSettings);
           break;
         case GameCodes.NUMBER_PRESSING:
-           // Settings are already parsed in the store
-          if (session.settings) settingsArray = formatNumberPressingSettings(session.settings);
+          parsedSettings = parseNumberPressingSettings(session.settings);
+          if (parsedSettings) settingsArray = formatNumberPressingSettings(parsedSettings);
           break;
         case GameCodes.RPS:
-           // Settings are already parsed in the store
-           if (session.settings) settingsArray = formatRpsSettings(session.settings);
-           break;
+          parsedSettings = parseRpsSettings(session.settings);
+          if (parsedSettings) settingsArray = formatRpsSettings(parsedSettings);
+          break;
         case GameCodes.SHAPE_ROTATION:
-          // Settings are already parsed in the store
-          if (session.settings) settingsArray = formatShapeRotationSettings(session.settings);
+          parsedSettings = parseShapeRotationSettings(session.settings);
+          if (parsedSettings) settingsArray = formatShapeRotationSettings(parsedSettings);
           break;
         default:
-          return <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{JSON.stringify(session.settings)}</p>;
+          return <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{session.settings}</p>;
+      }
+
+      if (!parsedSettings) {
+        return <p className="text-sm text-red-500 dark:text-red-400 truncate">설정 파싱 오류</p>;
       }
 
       if (isExpanded) {

@@ -122,9 +122,19 @@ func (a *App) GetPaginatedNBackSessionsWithResults(page int, limit int) (*types.
 	return database.GetPaginatedNBackSessionsWithResults(a.db, page, limit)
 }
 
+// GetNBackSessionStats fetches aggregated statistics for a given N-Back session ID.
+func (a *App) GetNBackSessionStats(sessionID int64) (*types.NBackSessionStats, error) {
+	return database.GetNBackSessionStats(a.db, sessionID)
+}
+
 // GetPaginatedRpsSessionsWithResults fetches paginated RPS sessions with their results.
 func (a *App) GetPaginatedRpsSessionsWithResults(page int, limit int) (*types.PaginatedRpsSessions, error) {
 	return database.GetPaginatedRpsSessionsWithResults(a.db, page, limit)
+}
+
+// GetRpsSessionStats fetches aggregated statistics for a given RPS session ID.
+func (a *App) GetRpsSessionStats(sessionID int64) (*types.RpsSessionStats, error) {
+	return database.GetRpsSessionStats(a.db, sessionID)
 }
 
 // StartNumberPressingGame starts a new Number Pressing game.
@@ -150,6 +160,11 @@ func (a *App) CalculateCorrectClicksR2(problem types.NumberPressingProblemR2) []
 // GetPaginatedNumberPressingSessionsWithResults fetches paginated Number Pressing sessions with their results.
 func (a *App) GetPaginatedNumberPressingSessionsWithResults(page int, limit int) (*types.PaginatedNumberPressingSessions, error) {
 	return database.GetPaginatedNumberPressingSessionsWithResults(a.db, page, limit)
+}
+
+// GetNumberPressingSessionStats fetches aggregated statistics for a given Number Pressing session ID.
+func (a *App) GetNumberPressingSessionStats(sessionID int64) (*types.NumberPressingSessionStats, error) {
+	return database.GetNumberPressingSessionStats(a.db, sessionID)
 }
 
 // GetShapeRotationProblems returns a list of problems for the Shape Rotation game.
@@ -187,4 +202,9 @@ func (a *App) SubmitShapeRotationAnswerAsync(sessionID int64, problem shape_rota
 // GetPaginatedShapeRotationSessionsWithResults fetches paginated Shape Rotation sessions with their results.
 func (a *App) GetPaginatedShapeRotationSessionsWithResults(page int, limit int) (*types.PaginatedShapeRotationSessions, error) {
 	return database.GetPaginatedShapeRotationSessionsWithResults(a.db, page, limit)
+}
+
+// GetShapeRotationSessionStats fetches aggregated statistics for a given Shape Rotation session ID.
+func (a *App) GetShapeRotationSessionStats(sessionID int64) (*types.ShapeRotationSessionStats, error) {
+	return database.GetShapeRotationSessionStats(a.db, sessionID)
 }

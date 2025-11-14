@@ -33,3 +33,33 @@ type PaginatedRpsSessions struct {
 	Sessions   []RpsSessionWithResults `json:"sessions"`
 	TotalCount int                     `json:"totalCount"`
 }
+
+// RpsProblemCardHolderStat holds statistics for 'me' or 'opponent' as the problem card holder.
+type RpsProblemCardHolderStat struct {
+	ProblemCardHolder   string  `json:"problemCardHolder"` // 'me' or 'opponent'
+	TotalQuestions      int     `json:"totalQuestions"`
+	TotalCorrect        int     `json:"totalCorrect"`
+	Accuracy            float64 `json:"accuracy"`
+	AverageResponseTimeMs float64 `json:"averageResponseTimeMs"`
+}
+
+// RpsRoundStats holds statistics for a single round of an RPS game session.
+type RpsRoundStats struct {
+	Round                 int                          `json:"round"`
+	TotalQuestions        int                          `json:"totalQuestions"`
+	TotalCorrect          int                          `json:"totalCorrect"`
+	Accuracy              float64                      `json:"accuracy"`
+	AverageResponseTimeMs float64                      `json:"averageResponseTimeMs"`
+	ProblemCardHolderStats []RpsProblemCardHolderStat `json:"problemCardHolderStats"`
+}
+
+// RpsSessionStats holds aggregated statistics for an entire RPS game session.
+type RpsSessionStats struct {
+	SessionID             int64           `json:"sessionId"`
+	TotalQuestions        int             `json:"totalQuestions"`
+	TotalCorrect          int             `json:"totalCorrect"`
+	OverallAccuracy       float64         `json:"overallAccuracy"`
+	AverageResponseTimeMs float64         `json:"averageResponseTimeMs"`
+	RoundStats            []RpsRoundStats `json:"roundStats"`
+}
+

@@ -110,7 +110,12 @@ func GetPaginatedShapeRotationSessionsWithResults(db *sql.DB, page int, limit in
 		); err != nil {
 			return nil, fmt.Errorf("failed to scan shape rotation session/result: %w", err)
 		}
-		s.Settings = settingsJSON
+		// Double marshal settingsJSON to ensure it's treated as a string by Wails
+		doubleMarshaledSettings, err := json.Marshal(settingsJSON)
+		if err != nil {
+			return nil, fmt.Errorf("failed to double marshal settings: %w", err)
+		}
+		s.Settings = string(doubleMarshaledSettings)
 		json.Unmarshal([]byte(solutionJSON), &r.UserSolution)
 
 		if _, ok := sessionMap[s.ID]; !ok {
@@ -137,3 +142,83 @@ func GetPaginatedShapeRotationSessionsWithResults(db *sql.DB, page int, limit in
 		TotalCount: totalCount,
 	}, nil
 }
+
+// GetShapeRotationSessionStats calculates and returns aggregated statistics for a given Shape Rotation game session.
+func GetShapeRotationSessionStats(db *sql.DB, sessionID int64) (*types.ShapeRotationSessionStats, error) {
+	// First, get the game session to retrieve settings, especially the round number
+	var gameSession types.GameSession
+	var settingsJSON string
+	err := db.QueryRow("SELECT id, game_code, play_datetime, settings FROM game_sessions WHERE id = ?", sessionID).Scan(
+		&gameSession.ID, &gameSession.GameCode, &gameSession.PlayDatetime, &settingsJSON,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get game session %d: %w", sessionID, err)
+	}
+	// Double marshal settingsJSON to ensure it's treated as a string by Wails
+	doubleMarshaledSettings, err := json.Marshal(settingsJSON)
+	if err != nil {
+		return nil, fmt.Errorf("failed to double marshal settings: %w", err)
+	}
+	gameSession.Settings = string(doubleMarshaledSettings)
+
+	var srSettings types.ShapeRotationSettings
+	if err := json.Unmarshal([]byte(gameSession.Settings), &srSettings); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal shape rotation settings for session %d: %w", sessionID, err)
+	}
+
+	results, err := GetShapeRotationResultsForSession(db, sessionID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get shape rotation results for session %d: %w", sessionID, err)
+	}
+
+	if len(results) == 0 {
+		return nil, fmt.Errorf("no shape rotation results found for session %d", sessionID)
+	}
+
+	stats := &types.ShapeRotationSessionStats{
+		SessionID: sessionID,
+	}
+
+	var totalSolveTime int
+	var totalClickCount int
+
+	// Since Shape Rotation game has only one round per session (as per settings),
+	// we can aggregate all results into a single round stat.
+	roundStats := types.ShapeRotationRoundStats{
+		Round: srSettings.Round,
+	}
+
+	for _, r := range results {
+		stats.TotalQuestions++
+		totalSolveTime += r.SolveTime
+		totalClickCount += r.ClickCount
+		if r.IsCorrect {
+			stats.TotalCorrect++
+		}
+
+		roundStats.TotalQuestions++
+		roundStats.AverageSolveTimeMs += float64(r.SolveTime)
+		roundStats.AverageClickCount += float64(r.ClickCount)
+		if r.IsCorrect {
+			roundStats.TotalCorrect++
+		}
+	}
+
+	// Calculate overall averages and accuracies
+	if stats.TotalQuestions > 0 {
+		stats.OverallAccuracy = float64(stats.TotalCorrect) / float64(stats.TotalQuestions) * 100
+		stats.AverageSolveTimeMs = float64(totalSolveTime) / float64(stats.TotalQuestions)
+		stats.AverageClickCount = float64(totalClickCount) / float64(stats.TotalQuestions)
+	}
+
+	// Finalize per-round stats
+	if roundStats.TotalQuestions > 0 {
+		roundStats.Accuracy = float64(roundStats.TotalCorrect) / float64(roundStats.TotalQuestions) * 100
+		roundStats.AverageSolveTimeMs /= float64(roundStats.TotalQuestions)
+		roundStats.AverageClickCount /= float64(roundStats.TotalQuestions)
+	}
+	stats.RoundStats = append(stats.RoundStats, roundStats)
+
+	return stats, nil
+}
+

@@ -7,6 +7,10 @@ import {rps} from '../models';
 
 export function CalculateCorrectClicksR2(arg1:types.NumberPressingProblemR2):Promise<Array<number>>;
 
+export function GetNBackSessionStats(arg1:number):Promise<types.NBackSessionStats>;
+
+export function GetNumberPressingSessionStats(arg1:number):Promise<types.NumberPressingSessionStats>;
+
 export function GetPaginatedNBackSessionsWithResults(arg1:number,arg2:number):Promise<types.PaginatedNBackSessions>;
 
 export function GetPaginatedNumberPressingSessionsWithResults(arg1:number,arg2:number):Promise<types.PaginatedNumberPressingSessions>;
@@ -15,11 +19,15 @@ export function GetPaginatedRpsSessionsWithResults(arg1:number,arg2:number):Prom
 
 export function GetPaginatedShapeRotationSessionsWithResults(arg1:number,arg2:number):Promise<types.PaginatedShapeRotationSessions>;
 
+export function GetRpsSessionStats(arg1:number):Promise<types.RpsSessionStats>;
+
 export function GetSessionResults(arg1:string,arg2:number):Promise<string>;
 
 export function GetShapeGroups():Promise<Record<string, Array<string>>>;
 
 export function GetShapeRotationProblems(arg1:number,arg2:number):Promise<Array<shape_rotation.ShapeRotationProblemWithFinalShape>>;
+
+export function GetShapeRotationSessionStats(arg1:number):Promise<types.ShapeRotationSessionStats>;
 
 export function SaveShapeRotationSession(arg1:types.ShapeRotationSettings):Promise<number>;
 

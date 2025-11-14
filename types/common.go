@@ -5,5 +5,5 @@ type GameSession struct {
 	ID           int64     `json:"id"`
 	GameCode     string    `json:"gameCode"`
 	PlayDatetime CustomTime `json:"playDatetime"`
-	Settings     string    `json:"settings"`
+	Settings     string    `json:"settings"` // Reverted to string
 }

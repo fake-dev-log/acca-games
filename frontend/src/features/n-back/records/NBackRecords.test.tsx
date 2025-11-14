@@ -55,7 +55,7 @@ describe('NBackRecords component', () => {
     const mockSession = types.NBackSessionWithResults.createFrom({
       id: 1,
       play_datetime: '2023-10-27T10:00:00Z',
-      settings: { numTrials: 20, nBackLevel: 1 },
+      settings: JSON.stringify({ numTrials: 20, nBackLevel: 1, presentationTime: 1000, shapeGroup: 'group1', isRealMode: false }), // Updated to JSON string with full settings
       results: [
         { isCorrect: true, responseTimeMs: 500 },
         { isCorrect: false, responseTimeMs: 600 },

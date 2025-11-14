@@ -81,3 +81,123 @@ type PaginatedNumberPressingSessions struct {
 
 
 
+
+
+
+// NumberPressingConditionStat holds statistics for a specific condition type in Round 2.
+
+
+
+type NumberPressingConditionStat struct {
+
+
+
+	ConditionType     string  `json:"conditionType"` // e.g., "doubleClick: [1,2], skip: [3,4]"
+
+
+
+	TotalQuestions    int     `json:"totalQuestions"`
+
+
+
+	TotalCorrect      int     `json:"totalCorrect"`
+
+
+
+	Accuracy          float64 `json:"accuracy"`
+
+
+
+	AverageTimeTakenSec float64 `json:"averageTimeTakenSec"`
+
+
+
+}
+
+
+
+
+
+
+
+// NumberPressingRoundStats holds statistics for a single round (R1 or R2) of a Number Pressing game session.
+
+
+
+type NumberPressingRoundStats struct {
+
+
+
+	Round             int                           `json:"round"`
+
+
+
+	TotalQuestions    int                           `json:"totalQuestions"`
+
+
+
+	TotalCorrect      int                           `json:"totalCorrect"`
+
+
+
+	Accuracy          float64                       `json:"accuracy"`
+
+
+
+	AverageTimeTakenSec float64                       `json:"averageTimeTakenSec"`
+
+
+
+	ConditionStats    []NumberPressingConditionStat `json:"conditionStats,omitempty"` // Only for Round 2
+
+
+
+}
+
+
+
+
+
+
+
+// NumberPressingSessionStats holds aggregated statistics for an entire Number Pressing game session.
+
+
+
+type NumberPressingSessionStats struct {
+
+
+
+	SessionID           int64                      `json:"sessionId"`
+
+
+
+	TotalQuestions      int                        `json:"totalQuestions"`
+
+
+
+	TotalCorrect        int                        `json:"totalCorrect"`
+
+
+
+	OverallAccuracy     float64                    `json:"overallAccuracy"`
+
+
+
+	AverageTimeTakenSec float64                    `json:"averageTimeTakenSec"`
+
+
+
+	RoundStats          []NumberPressingRoundStats `json:"roundStats"`
+
+
+
+}
+
+
+
+
+
+
+
+

@@ -21,7 +21,7 @@ describe('NumberPressingRecords component', () => {
     id: 1,
     gameCode: 'NUMBER_PRESSING',
     playDatetime: '2023-10-29T10:00:00Z',
-    settings: { rounds: [1], problemsPerRound: 2, timeLimitR1: 30, timeLimitR2: 60, isRealMode: false },
+    settings: JSON.stringify({ rounds: [1], problemsPerRound: 2, timeLimitR1: 30, timeLimitR2: 60, isRealMode: false }),
     results: {
       resultsR1: [{ problem: { targetNumber: 1 }, isCorrect: true, timeTaken: 1.5 }],
       resultsR2: [],

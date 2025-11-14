@@ -4,6 +4,7 @@ import (
 	"acca-games/types"
 	"database/sql"
 	"fmt"
+	"encoding/json"
 )
 
 // SaveRpsResult saves a single result from a Rock-Paper-Scissors game trial.
@@ -113,7 +114,12 @@ func GetPaginatedRpsSessionsWithResults(db *sql.DB, page int, limit int) (*types
 		); err != nil {
 			return nil, fmt.Errorf("failed to scan rps session/result: %w", err)
 		}
-		s.Settings = settingsJSON
+		// Double marshal settingsJSON to ensure it's treated as a string by Wails
+		doubleMarshaledSettings, err := json.Marshal(settingsJSON)
+		if err != nil {
+			return nil, fmt.Errorf("failed to double marshal settings: %w", err)
+		}
+		s.Settings = string(doubleMarshaledSettings)
 
 		if _, ok := sessionMap[s.ID]; !ok {
 			sessionMap[s.ID] = &types.RpsSessionWithResults{
@@ -139,3 +145,106 @@ func GetPaginatedRpsSessionsWithResults(db *sql.DB, page int, limit int) (*types
 		TotalCount: totalCount,
 	}, nil
 }
+
+// GetRpsSessionStats calculates and returns aggregated statistics for a given RPS game session.
+func GetRpsSessionStats(db *sql.DB, sessionID int64) (*types.RpsSessionStats, error) {
+	results, err := GetRpsResultsForSession(db, sessionID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get rps results for session %d: %w", sessionID, err)
+	}
+
+	if len(results) == 0 {
+		return nil, fmt.Errorf("no rps results found for session %d", sessionID)
+	}
+
+	stats := &types.RpsSessionStats{
+		SessionID: sessionID,
+	}
+
+	// Temporary maps for aggregation
+	roundStatsMap := make(map[int]*types.RpsRoundStats)
+	
+	var totalResponseTimeMs int
+	
+	for _, r := range results {
+		stats.TotalQuestions++
+		totalResponseTimeMs += r.ResponseTimeMs
+		if r.IsCorrect {
+			stats.TotalCorrect++
+		}
+
+		// Aggregate per-round stats
+		if _, ok := roundStatsMap[r.Round]; !ok {
+			roundStatsMap[r.Round] = &types.RpsRoundStats{
+				Round: r.Round,
+				ProblemCardHolderStats: []types.RpsProblemCardHolderStat{}, // Initialize slice
+			}
+		}
+		roundStats := roundStatsMap[r.Round]
+		roundStats.TotalQuestions++
+		roundStats.AverageResponseTimeMs += float64(r.ResponseTimeMs)
+		if r.IsCorrect {
+			roundStats.TotalCorrect++
+		}
+
+		// Aggregate per-problem-card-holder stats within each round
+		foundProblemCardHolderStat := false
+		for i, pchs := range roundStats.ProblemCardHolderStats {
+			if pchs.ProblemCardHolder == r.ProblemCardHolder {
+				roundStats.ProblemCardHolderStats[i].TotalQuestions++
+				roundStats.ProblemCardHolderStats[i].AverageResponseTimeMs += float64(r.ResponseTimeMs)
+				if r.IsCorrect {
+					roundStats.ProblemCardHolderStats[i].TotalCorrect++
+				}
+				foundProblemCardHolderStat = true
+				break
+			}
+		}
+		if !foundProblemCardHolderStat {
+			newPCHS := types.RpsProblemCardHolderStat{
+				ProblemCardHolder: r.ProblemCardHolder,
+				TotalQuestions:    1,
+				AverageResponseTimeMs: float64(r.ResponseTimeMs),
+			}
+			if r.IsCorrect {
+				newPCHS.TotalCorrect = 1
+			}
+			roundStats.ProblemCardHolderStats = append(roundStats.ProblemCardHolderStats, newPCHS)
+		}
+	}
+
+	// Calculate overall averages and accuracies
+	if stats.TotalQuestions > 0 {
+		stats.OverallAccuracy = float64(stats.TotalCorrect) / float64(stats.TotalQuestions) * 100
+		stats.AverageResponseTimeMs = float64(totalResponseTimeMs) / float64(stats.TotalQuestions)
+	}
+
+	// Finalize per-round and per-problem-card-holder stats
+	for _, roundStats := range roundStatsMap {
+		if roundStats.TotalQuestions > 0 {
+			roundStats.Accuracy = float64(roundStats.TotalCorrect) / float64(roundStats.TotalQuestions) * 100
+			roundStats.AverageResponseTimeMs /= float64(roundStats.TotalQuestions)
+		}
+
+		for i, pchs := range roundStats.ProblemCardHolderStats {
+			if pchs.TotalQuestions > 0 {
+				roundStats.ProblemCardHolderStats[i].Accuracy = float64(pchs.TotalCorrect) / float64(pchs.TotalQuestions) * 100
+				roundStats.ProblemCardHolderStats[i].AverageResponseTimeMs /= float64(pchs.TotalQuestions)
+			}
+		}
+		stats.RoundStats = append(stats.RoundStats, *roundStats)
+	}
+
+	// Sort round stats by round number
+	// This is important for consistent display on the frontend
+	for i := 0; i < len(stats.RoundStats)-1; i++ {
+		for j := i + 1; j < len(stats.RoundStats); j++ {
+			if stats.RoundStats[i].Round > stats.RoundStats[j].Round {
+				stats.RoundStats[i], stats.RoundStats[j] = stats.RoundStats[j], stats.RoundStats[i]
+			}
+		}
+	}
+
+	return stats, nil
+}
+

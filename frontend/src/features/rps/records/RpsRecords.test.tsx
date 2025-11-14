@@ -21,7 +21,7 @@ describe('RpsRecords component', () => {
     id: 1,
     gameCode: 'RPS',
     playDatetime: '2023-10-28T10:00:00Z',
-    settings: { rounds: [1], questionsPerRound: 2, timeLimitMs: 1000, isRealMode: false },
+    settings: JSON.stringify({ rounds: [1], questionsPerRound: 2, timeLimitMs: 1000, isRealMode: false }),
     results: [
       { questionNum: 1, round: 1, playerChoice: 'ROCK', correctChoice: 'ROCK', isCorrect: true, responseTimeMs: 500 },
     ],

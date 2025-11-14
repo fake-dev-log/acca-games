@@ -1,78 +1,55 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Line } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
-import { types } from '@wails/go/models';
-import { RecordPageLayout } from '@layout/RecordPageLayout';
-import { SessionList } from '@components/records/SessionList';
 import { useNBackStore } from '../stores/nbackStore';
 import { GameCodeSlugs } from '@constants/gameCodes';
-import { Pagination } from '@components/common/Pagination';
-
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+import { GameRecordsDashboard } from '@components/records/GameRecordsDashboard';
+import { types } from '@wails/go/models';
 
 export function NBackRecords() {
-  const navigate = useNavigate();
-  const { paginatedSessions, loading, error, fetchPaginatedSessions } = useNBackStore();
-  const [currentPage, setCurrentPage] = useState(1);
-  const sessionsPerPage = 10;
-
-  useEffect(() => {
-    fetchPaginatedSessions(currentPage, sessionsPerPage);
-  }, [fetchPaginatedSessions, currentPage]);
-
-  const handleSessionClick = (sessionId: number) => {
-    navigate(`/records/${GameCodeSlugs.N_BACK}/${sessionId}`);
-  };
-
-  const calculateSessionAccuracy = (session: types.NBackSessionWithResults) => {
+  const calculateSessionMetrics = (session: types.NBackSessionWithResults) => {
     const totalResults = session.results.length;
-    if (totalResults === 0) return 0;
     const correctCount = session.results.filter(r => r.isCorrect).length;
-    return (correctCount / totalResults) * 100;
+    const totalResponseTime = session.results.reduce((sum, r) => sum + r.responseTimeMs, 0);
+
+    const overallAccuracy = totalResults > 0 ? (correctCount / totalResults) * 100 : 0;
+    const averageResponseTimeMs = totalResults > 0 ? totalResponseTime / totalResults : 0;
+
+    const round1Results = session.results.filter(r => r.round === 1);
+    const round1Correct = round1Results.filter(r => r.isCorrect).length;
+    const round1TotalResponseTime = round1Results.reduce((sum, r) => sum + r.responseTimeMs, 0);
+    const round1Accuracy = round1Results.length > 0 ? (round1Correct / round1Results.length) * 100 : 0;
+    const round1AverageResponseTimeMs = round1Results.length > 0 ? round1TotalResponseTime / round1Results.length : 0;
+
+    const round2Results = session.results.filter(r => r.round === 2);
+    const round2Correct = round2Results.filter(r => r.isCorrect).length;
+    const round2TotalResponseTime = round2Results.reduce((sum, r) => sum + r.responseTimeMs, 0);
+    const round2Accuracy = round2Results.length > 0 ? (round2Correct / round2Results.length) * 100 : 0;
+    const round2AverageResponseTimeMs = round2Results.length > 0 ? round2TotalResponseTime / round2Results.length : 0;
+
+    return {
+      overallAccuracy: overallAccuracy,
+      averageResponseTimeMs: averageResponseTimeMs,
+      round1Accuracy: round1Accuracy,
+      round1AverageResponseTimeMs: round1AverageResponseTimeMs,
+      round2Accuracy: round2Accuracy,
+      round2AverageResponseTimeMs: round2AverageResponseTimeMs,
+    };
   };
 
-  const sortedSessions = [...paginatedSessions.sessions].sort((a, b) => new Date(String(a.playDatetime)).getTime() - new Date(String(b.playDatetime)).getTime());
-
-  const chartData = {
-    labels: sortedSessions.map(session => new Date(String(session.playDatetime)).toLocaleString()),
-    datasets: [
-      {
-        label: '정확도 (%)',
-        data: sortedSessions.map(session => calculateSessionAccuracy(session)),
-        fill: false,
-        borderColor: 'rgb(75, 192, 192)',
-        tension: 0.1,
-      },
-    ],
-  };
-
-  const chartOptions = {
-    responsive: true,
-    plugins: {
-      legend: { position: 'top' as const },
-      title: { display: true, text: '세션별 정확도 추이' },
-    },
-    scales: {
-      y: {
-        min: 0,
-        max: 100,
-      },
-    },
-  };
-
-  const sessionsForList = paginatedSessions.sessions.map(({ results, ...sessionInfo }) => sessionInfo);
-  const totalPages = Math.ceil(paginatedSessions.totalCount / sessionsPerPage);
+  const metricOptions = [
+    { value: 'overallAccuracy', label: '전체 정확도 (%)' },
+    { value: 'averageResponseTimeMs', label: '평균 반응 시간 (ms)' },
+    { value: 'round1Accuracy', label: '1라운드 정확도 (%)' },
+    { value: 'round1AverageResponseTimeMs', label: '1라운드 평균 반응 시간 (ms)' },
+    { value: 'round2Accuracy', label: '2라운드 정확도 (%)' },
+    { value: 'round2AverageResponseTimeMs', label: '2라운드 평균 반응 시간 (ms)' },
+  ];
 
   return (
-    <RecordPageLayout backPath="/records" title="N-Back 게임 기록" sidebarContent={<SessionList sessions={sessionsForList} loading={loading} error={error} onSessionClick={handleSessionClick} />}>
-      <h2 className="text-2xl font-bold mb-4">대시보드</h2>
-      {loading && <p>데이터를 불러오는 중...</p>}
-      {error && <p className="text-red-500">{error}</p>}
-      <div className="mt-8 flex-grow flex items-center justify-center">
-        {paginatedSessions.sessions.length > 0 ? <Line data={chartData} options={chartOptions} /> : <p>표시할 기록이 없습니다.</p>}
-      </div>
-      <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
-    </RecordPageLayout>
+    <GameRecordsDashboard
+      gameCodeSlug={GameCodeSlugs.N_BACK}
+      gameTitle="N-Back 게임 기록"
+      useStoreHook={useNBackStore}
+      calculateSessionMetrics={calculateSessionMetrics}
+      metricOptions={metricOptions}
+    />
   );
 }

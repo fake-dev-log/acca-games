@@ -6,6 +6,14 @@ export function CalculateCorrectClicksR2(arg1) {
   return window['go']['main']['App']['CalculateCorrectClicksR2'](arg1);
 }
 
+export function GetNBackSessionStats(arg1) {
+  return window['go']['main']['App']['GetNBackSessionStats'](arg1);
+}
+
+export function GetNumberPressingSessionStats(arg1) {
+  return window['go']['main']['App']['GetNumberPressingSessionStats'](arg1);
+}
+
 export function GetPaginatedNBackSessionsWithResults(arg1, arg2) {
   return window['go']['main']['App']['GetPaginatedNBackSessionsWithResults'](arg1, arg2);
 }
@@ -22,6 +30,10 @@ export function GetPaginatedShapeRotationSessionsWithResults(arg1, arg2) {
   return window['go']['main']['App']['GetPaginatedShapeRotationSessionsWithResults'](arg1, arg2);
 }
 
+export function GetRpsSessionStats(arg1) {
+  return window['go']['main']['App']['GetRpsSessionStats'](arg1);
+}
+
 export function GetSessionResults(arg1, arg2) {
   return window['go']['main']['App']['GetSessionResults'](arg1, arg2);
 }
@@ -32,6 +44,10 @@ export function GetShapeGroups() {
 
 export function GetShapeRotationProblems(arg1, arg2) {
   return window['go']['main']['App']['GetShapeRotationProblems'](arg1, arg2);
+}
+
+export function GetShapeRotationSessionStats(arg1) {
+  return window['go']['main']['App']['GetShapeRotationSessionStats'](arg1);
 }
 
 export function SaveShapeRotationSession(arg1) {

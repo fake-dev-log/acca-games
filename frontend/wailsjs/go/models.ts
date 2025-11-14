@@ -139,6 +139,26 @@ export namespace shape_rotation {
 
 export namespace types {
 	
+	export class NBackLevelStat {
+	    nBackLevel: number;
+	    totalQuestions: number;
+	    totalCorrect: number;
+	    accuracy: number;
+	    averageResponseTimeMs: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new NBackLevelStat(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.nBackLevel = source["nBackLevel"];
+	        this.totalQuestions = source["totalQuestions"];
+	        this.totalCorrect = source["totalCorrect"];
+	        this.accuracy = source["accuracy"];
+	        this.averageResponseTimeMs = source["averageResponseTimeMs"];
+	    }
+	}
 	export class NBackResult {
 	    id: number;
 	    sessionId: number;
@@ -164,6 +184,86 @@ export namespace types {
 	        this.playerChoice = source["playerChoice"];
 	        this.correctChoice = source["correctChoice"];
 	    }
+	}
+	export class NBackRoundStats {
+	    round: number;
+	    totalQuestions: number;
+	    totalCorrect: number;
+	    accuracy: number;
+	    averageResponseTimeMs: number;
+	    nBackLevelStats?: NBackLevelStat[];
+	
+	    static createFrom(source: any = {}) {
+	        return new NBackRoundStats(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.round = source["round"];
+	        this.totalQuestions = source["totalQuestions"];
+	        this.totalCorrect = source["totalCorrect"];
+	        this.accuracy = source["accuracy"];
+	        this.averageResponseTimeMs = source["averageResponseTimeMs"];
+	        this.nBackLevelStats = this.convertValues(source["nBackLevelStats"], NBackLevelStat);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class NBackSessionStats {
+	    sessionId: number;
+	    totalQuestions: number;
+	    totalCorrect: number;
+	    overallAccuracy: number;
+	    averageResponseTimeMs: number;
+	    roundStats: NBackRoundStats[];
+	
+	    static createFrom(source: any = {}) {
+	        return new NBackSessionStats(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.sessionId = source["sessionId"];
+	        this.totalQuestions = source["totalQuestions"];
+	        this.totalCorrect = source["totalCorrect"];
+	        this.overallAccuracy = source["overallAccuracy"];
+	        this.averageResponseTimeMs = source["averageResponseTimeMs"];
+	        this.roundStats = this.convertValues(source["roundStats"], NBackRoundStats);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	export class CustomTime {
 	
@@ -234,6 +334,26 @@ export namespace types {
 	        this.nBackLevel = source["nBackLevel"];
 	        this.shapeGroup = source["shapeGroup"];
 	        this.isRealMode = source["isRealMode"];
+	    }
+	}
+	export class NumberPressingConditionStat {
+	    conditionType: string;
+	    totalQuestions: number;
+	    totalCorrect: number;
+	    accuracy: number;
+	    averageTimeTakenSec: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new NumberPressingConditionStat(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.conditionType = source["conditionType"];
+	        this.totalQuestions = source["totalQuestions"];
+	        this.totalCorrect = source["totalCorrect"];
+	        this.accuracy = source["accuracy"];
+	        this.averageTimeTakenSec = source["averageTimeTakenSec"];
 	    }
 	}
 	export class NumberPressingProblemR2 {
@@ -412,6 +532,86 @@ export namespace types {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.resultsR1 = this.convertValues(source["resultsR1"], NumberPressingResultR1);
 	        this.resultsR2 = this.convertValues(source["resultsR2"], NumberPressingResultR2);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class NumberPressingRoundStats {
+	    round: number;
+	    totalQuestions: number;
+	    totalCorrect: number;
+	    accuracy: number;
+	    averageTimeTakenSec: number;
+	    conditionStats?: NumberPressingConditionStat[];
+	
+	    static createFrom(source: any = {}) {
+	        return new NumberPressingRoundStats(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.round = source["round"];
+	        this.totalQuestions = source["totalQuestions"];
+	        this.totalCorrect = source["totalCorrect"];
+	        this.accuracy = source["accuracy"];
+	        this.averageTimeTakenSec = source["averageTimeTakenSec"];
+	        this.conditionStats = this.convertValues(source["conditionStats"], NumberPressingConditionStat);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class NumberPressingSessionStats {
+	    sessionId: number;
+	    totalQuestions: number;
+	    totalCorrect: number;
+	    overallAccuracy: number;
+	    averageTimeTakenSec: number;
+	    roundStats: NumberPressingRoundStats[];
+	
+	    static createFrom(source: any = {}) {
+	        return new NumberPressingSessionStats(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.sessionId = source["sessionId"];
+	        this.totalQuestions = source["totalQuestions"];
+	        this.totalCorrect = source["totalCorrect"];
+	        this.overallAccuracy = source["overallAccuracy"];
+	        this.averageTimeTakenSec = source["averageTimeTakenSec"];
+	        this.roundStats = this.convertValues(source["roundStats"], NumberPressingRoundStats);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -732,7 +932,107 @@ export namespace types {
 		    return a;
 		}
 	}
+	export class RpsProblemCardHolderStat {
+	    problemCardHolder: string;
+	    totalQuestions: number;
+	    totalCorrect: number;
+	    accuracy: number;
+	    averageResponseTimeMs: number;
 	
+	    static createFrom(source: any = {}) {
+	        return new RpsProblemCardHolderStat(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.problemCardHolder = source["problemCardHolder"];
+	        this.totalQuestions = source["totalQuestions"];
+	        this.totalCorrect = source["totalCorrect"];
+	        this.accuracy = source["accuracy"];
+	        this.averageResponseTimeMs = source["averageResponseTimeMs"];
+	    }
+	}
+	
+	export class RpsRoundStats {
+	    round: number;
+	    totalQuestions: number;
+	    totalCorrect: number;
+	    accuracy: number;
+	    averageResponseTimeMs: number;
+	    problemCardHolderStats: RpsProblemCardHolderStat[];
+	
+	    static createFrom(source: any = {}) {
+	        return new RpsRoundStats(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.round = source["round"];
+	        this.totalQuestions = source["totalQuestions"];
+	        this.totalCorrect = source["totalCorrect"];
+	        this.accuracy = source["accuracy"];
+	        this.averageResponseTimeMs = source["averageResponseTimeMs"];
+	        this.problemCardHolderStats = this.convertValues(source["problemCardHolderStats"], RpsProblemCardHolderStat);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class RpsSessionStats {
+	    sessionId: number;
+	    totalQuestions: number;
+	    totalCorrect: number;
+	    overallAccuracy: number;
+	    averageResponseTimeMs: number;
+	    roundStats: RpsRoundStats[];
+	
+	    static createFrom(source: any = {}) {
+	        return new RpsSessionStats(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.sessionId = source["sessionId"];
+	        this.totalQuestions = source["totalQuestions"];
+	        this.totalCorrect = source["totalCorrect"];
+	        this.overallAccuracy = source["overallAccuracy"];
+	        this.averageResponseTimeMs = source["averageResponseTimeMs"];
+	        this.roundStats = this.convertValues(source["roundStats"], RpsRoundStats);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	
 	export class RpsSettings {
 	    rounds: number[];
@@ -753,6 +1053,70 @@ export namespace types {
 	    }
 	}
 	
+	export class ShapeRotationRoundStats {
+	    round: number;
+	    totalQuestions: number;
+	    totalCorrect: number;
+	    accuracy: number;
+	    averageSolveTimeMs: number;
+	    averageClickCount: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new ShapeRotationRoundStats(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.round = source["round"];
+	        this.totalQuestions = source["totalQuestions"];
+	        this.totalCorrect = source["totalCorrect"];
+	        this.accuracy = source["accuracy"];
+	        this.averageSolveTimeMs = source["averageSolveTimeMs"];
+	        this.averageClickCount = source["averageClickCount"];
+	    }
+	}
+	export class ShapeRotationSessionStats {
+	    sessionId: number;
+	    totalQuestions: number;
+	    totalCorrect: number;
+	    overallAccuracy: number;
+	    averageSolveTimeMs: number;
+	    averageClickCount: number;
+	    roundStats: ShapeRotationRoundStats[];
+	
+	    static createFrom(source: any = {}) {
+	        return new ShapeRotationSessionStats(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.sessionId = source["sessionId"];
+	        this.totalQuestions = source["totalQuestions"];
+	        this.totalCorrect = source["totalCorrect"];
+	        this.overallAccuracy = source["overallAccuracy"];
+	        this.averageSolveTimeMs = source["averageSolveTimeMs"];
+	        this.averageClickCount = source["averageClickCount"];
+	        this.roundStats = this.convertValues(source["roundStats"], ShapeRotationRoundStats);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	
 	export class ShapeRotationSettings {
 	    numProblems: number;

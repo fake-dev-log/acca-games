@@ -17,7 +17,7 @@ func setupTestDB(t *testing.T) *sql.DB {
 		t.Fatalf("Failed to open in-memory database: %v", err)
 	}
 
-	schemaPath := filepath.Join("/Users/anjhn/personal/acca-games", "database", "schema.sql")
+	schemaPath := filepath.Join("..", "..", "database", "schema.sql")
 	schema, err := ioutil.ReadFile(schemaPath)
 	if err != nil {
 		t.Fatalf("Failed to read schema.sql: %v", err)

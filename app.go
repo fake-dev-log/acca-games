@@ -13,8 +13,44 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"os"
+	"path/filepath"
+	"runtime"
 	"time"
 )
+
+// getApplicationSupportDirectory returns the appropriate application support/data directory
+// for the current operating system.
+func getApplicationSupportDirectory(appName string) (string, error) {
+	var dir string
+	var err error
+
+	switch runtime.GOOS {
+	case "windows":
+		dir, err = os.UserConfigDir()
+		if err != nil {
+			return "", fmt.Errorf("failed to get user config directory: %w", err)
+		}
+		dir = filepath.Join(dir, appName)
+	case "darwin": // macOS
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			return "", fmt.Errorf("failed to get user home directory: %w", err)
+		}
+		dir = filepath.Join(homeDir, "Library", "Application Support", appName)
+	case "linux":
+		dir, err = os.UserCacheDir()
+		if err != nil {
+			return "", fmt.Errorf("failed to get user cache directory: %w", err)
+		}
+		dir = filepath.Join(dir, appName)
+	default:
+		return "", fmt.Errorf("unsupported operating system: %s", runtime.GOOS)
+	}
+
+	return dir, nil
+}
+
 
 // GetSessionResults fetches results for a given session and game, returning them as a JSON string.
 func (a *App) GetSessionResults(gameCode string, sessionID int64) (string, error) {
@@ -69,10 +105,27 @@ func NewApp() *App {
 func (a *App) startup(ctx context.Context) {
 	rand.Seed(time.Now().UnixNano())
 	a.ctx = ctx
-	db, err := database.InitializeDatabase()
+
+	// --- Database Initialization ---
+	supportDir, err := getApplicationSupportDirectory("acca-games")
+	if err != nil {
+		log.Fatalf("failed to get application support directory: %v", err)
+	}
+
+	dbPath := filepath.Join(supportDir, "acca_games.db")
+	log.Printf("Database path: %s", dbPath)
+
+	// Ensure the directory exists
+	if err := os.MkdirAll(filepath.Dir(dbPath), 0755); err != nil {
+		log.Fatalf("failed to create database directory: %v", err)
+	}
+
+	db, err := database.NewDatabase(dbPath)
 	if err != nil {
 		log.Fatalf("failed to initialize database: %v", err)
 	}
+	// --- End Database Initialization ---
+
 	a.db = db
 	a.nbackService = nback.NewService(a.db)
 	a.rpsService = rps.NewService(a.db)

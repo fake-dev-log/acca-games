@@ -27,11 +27,6 @@ func NewDatabase(path string) (*sql.DB, error) {
 	return db, nil
 }
 
-// InitializeDatabase creates and initializes the production database.
-func InitializeDatabase() (*sql.DB, error) {
-	return NewDatabase("./acca_games.db")
-}
-
 // CreateGameSession creates a new game session and returns the session ID.
 func CreateGameSession(db *sql.DB, gameCode string, settings interface{}) (int64, error) {
 	settingsJSON, err := json.Marshal(settings)

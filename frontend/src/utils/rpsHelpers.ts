@@ -1,21 +1,13 @@
 import { types } from '@wails/go/models';
+import { createSettingsParser } from './settingsHelper';
 
-export function parseSettings(settingsJson: string): types.RpsSettings | null {
-  try {
-    return new types.RpsSettings(JSON.parse(settingsJson));
-  } catch (e) {
-    console.error('Failed to parse RPS settings:', e);
-    return null;
-  }
-}
+export const parseSettings = createSettingsParser(types.RpsSettings, 'RPS');
 
 export function formatSettings(settings: types.RpsSettings): string[] {
-    const rounds = settings.rounds.join(', ');
-    const mode = settings.isRealMode ? '실전' : '연습';
     return [
-        `문제: ${settings.questionsPerRound}개/라운드`,
-        `시간: ${settings.timeLimitMs / 1000}초`,
-        `라운드: ${rounds}`,
-        `모드: ${mode}`
+        `실전 모드: ${settings.isRealMode ? 'ON' : 'OFF'}`,
+        `라운드: ${settings.rounds.join(', ')}`,
+        `문제 수: ${settings.questionsPerRound}개/라운드`,
+        `시간 제한: ${settings.timeLimitMs / 1000}초`
     ];
 }

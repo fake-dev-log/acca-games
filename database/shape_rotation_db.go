@@ -110,12 +110,7 @@ func GetPaginatedShapeRotationSessionsWithResults(db *sql.DB, page int, limit in
 		); err != nil {
 			return nil, fmt.Errorf("failed to scan shape rotation session/result: %w", err)
 		}
-		// Double marshal settingsJSON to ensure it's treated as a string by Wails
-		doubleMarshaledSettings, err := json.Marshal(settingsJSON)
-		if err != nil {
-			return nil, fmt.Errorf("failed to double marshal settings: %w", err)
-		}
-		s.Settings = string(doubleMarshaledSettings)
+		s.Settings = settingsJSON
 		json.Unmarshal([]byte(solutionJSON), &r.UserSolution)
 
 		if _, ok := sessionMap[s.ID]; !ok {
@@ -154,15 +149,10 @@ func GetShapeRotationSessionStats(db *sql.DB, sessionID int64) (*types.ShapeRota
 	if err != nil {
 		return nil, fmt.Errorf("failed to get game session %d: %w", sessionID, err)
 	}
-	// Double marshal settingsJSON to ensure it's treated as a string by Wails
-	doubleMarshaledSettings, err := json.Marshal(settingsJSON)
-	if err != nil {
-		return nil, fmt.Errorf("failed to double marshal settings: %w", err)
-	}
-	gameSession.Settings = string(doubleMarshaledSettings)
+	gameSession.Settings = settingsJSON
 
 	var srSettings types.ShapeRotationSettings
-	if err := json.Unmarshal([]byte(gameSession.Settings), &srSettings); err != nil {
+	if err := json.Unmarshal([]byte(settingsJSON), &srSettings); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal shape rotation settings for session %d: %w", sessionID, err)
 	}
 

@@ -4,7 +4,6 @@ import (
 	"acca-games/types"
 	"database/sql"
 	"fmt"
-	"encoding/json"
 )
 
 // SaveRpsResult saves a single result from a Rock-Paper-Scissors game trial.
@@ -114,12 +113,7 @@ func GetPaginatedRpsSessionsWithResults(db *sql.DB, page int, limit int) (*types
 		); err != nil {
 			return nil, fmt.Errorf("failed to scan rps session/result: %w", err)
 		}
-		// Double marshal settingsJSON to ensure it's treated as a string by Wails
-		doubleMarshaledSettings, err := json.Marshal(settingsJSON)
-		if err != nil {
-			return nil, fmt.Errorf("failed to double marshal settings: %w", err)
-		}
-		s.Settings = string(doubleMarshaledSettings)
+		s.Settings = settingsJSON
 
 		if _, ok := sessionMap[s.ID]; !ok {
 			sessionMap[s.ID] = &types.RpsSessionWithResults{

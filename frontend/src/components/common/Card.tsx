@@ -1,4 +1,5 @@
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
+import { useThemeStore } from '@stores/themeStore';
 
 interface CardProps {
   children: ReactNode;
@@ -10,8 +11,22 @@ interface CardProps {
 }
 
 export const Card = ({ children, title, className = '', bordered = false, isAnimated = false, onAnimationEnd }: CardProps) => {
+  const { theme } = useThemeStore();
+  const [effectiveTheme, setEffectiveTheme] = useState(theme);
+
+  useEffect(() => {
+    if (theme === 'system') {
+      const systemIsDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setEffectiveTheme(systemIsDark ? 'dark' : 'light');
+    } else {
+      setEffectiveTheme(theme);
+    }
+  }, [theme]);
+
   const borderClass = bordered ? 'border-2 border-border-light dark:border-border-dark' : '';
-  const animationClass = isAnimated ? 'card-border-highlight-dark dark:card-border-highlight-light' : '';
+  const animationClass = isAnimated 
+    ? (effectiveTheme === 'dark' ? 'card-border-highlight-dark' : 'card-border-highlight-light') 
+    : '';
 
   return (
     <div 

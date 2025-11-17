@@ -16,7 +16,7 @@ interface NumberButtonProps {
 
 const NumberButton: FC<NumberButtonProps> = ({ number, onClick, disabled, isTarget }) => {
   const baseClasses = "w-24 h-24 text-3xl font-bold rounded-lg flex items-center justify-center border-4";
-  const activeClasses = "bg-surface-light dark:bg-surface-dark text-text-light dark:text-text-dark border-transparent hover:bg-primary-light/20 dark:hover:bg-primary-dark/20 cursor-pointer";
+  const activeClasses = "bg-surface-light dark:bg-surface-dark text-text-light dark:text-text-dark border-[var(--color-surface-light)] dark:border-[var(--color-surface-dark)] hover:bg-primary-light/20 dark:hover:bg-primary-dark/20 cursor-pointer";
   const disabledClasses = "bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-500 border-transparent cursor-not-allowed";
   const targetClasses = "border-primary-light dark:border-primary-dark shadow-lg";
 

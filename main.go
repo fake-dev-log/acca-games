@@ -1,6 +1,7 @@
 package main
 
 import (
+    _ "time/tzdata"
 	"embed"
 
 	"github.com/wailsapp/wails/v2"

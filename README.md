@@ -2,8 +2,8 @@
 
 ## ⬇️ 다운로드
 
-*   **macOS**: [acca-games-macos-universal.zip](https://drive.google.com/file/d/1NYNRKoUo7PMHXLgq7vOtkHKCh_eL6f7Q/view?usp=drive_link)
-*   **Windows**: [acca-games-windows-amd64.zip](https://drive.google.com/file/d/1KQ-nS6LQm8nb1H8Iq1WpcBQeQDtzcUki/view?usp=drive_link)
+*   **macOS**: [acca-games-macos-universal.zip](https://docs.google.com/uc?export=download&id=1NYNRKoUo7PMHXLgq7vOtkHKCh_eL6f7Q)
+*   **Windows**: [acca-games-windows-amd64.zip](https://docs.google.com/uc?export=download&id=1KQ-nS6LQm8nb1H8Iq1WpcBQeQDtzcUki)
 
 AI 역량검사에 나오는 전략게임을 연습하고 결과를 분석할 수 있는 데스크톱 애플리케이션입니다.
 

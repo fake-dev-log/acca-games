@@ -62,7 +62,7 @@ export function SessionList({ sessions, loading, error, onSessionClick, activeSe
     } catch (e) {
       console.error('Error rendering settings for session:', session, e);
       // In case settings are a string
-      const settingsString = typeof session.settings === 'string' ? session.settings : JSON.stringify(session.settings);
+      const settingsString = session.settings;
       return <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{settingsString}</p>;
     }
   };

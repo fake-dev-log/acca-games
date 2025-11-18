@@ -30,7 +30,6 @@
       "@features/*": ["./src/features/*"],
       "@utils/*": ["./src/utils/*"],
       "@api/*": ["./src/api/*"],
-      "@hooks/*": ["./src/hooks/*"],
       "@stores/*": ["./src/stores/*"],
       "@type/*": ["./src/type/*"],
       "@wails/*": ["./wailsjs/*"]

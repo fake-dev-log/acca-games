@@ -1,3 +1,4 @@
+import { ReactElement } from "react";
 import { render, screen, fireEvent } from '@testing-library/react';
 import { vi } from 'vitest';
 import { MemoryRouter, useNavigate } from 'react-router-dom';
@@ -28,7 +29,7 @@ describe('MainPage component', () => {
     (useNavigate as jest.Mock).mockReturnValue(mockNavigate);
   });
 
-  const renderWithRouter = (ui: React.ReactElement) => {
+  const renderWithRouter = (ui: ReactElement) => {
     return render(<MemoryRouter>{ui}</MemoryRouter>);
   };
 
@@ -36,7 +37,7 @@ describe('MainPage component', () => {
     renderWithRouter(<MainPage />);
     expect(screen.getByRole('button', { name: /게임/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /기록/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /설정/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /테마/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /종료/i })).toBeInTheDocument();
   });
 
@@ -56,11 +57,5 @@ describe('MainPage component', () => {
     renderWithRouter(<MainPage />);
     fireEvent.click(screen.getByRole('button', { name: /종료/i }));
     expect(Quit).toHaveBeenCalledTimes(1);
-  });
-
-  it('has a disabled "설정" button', () => {
-    renderWithRouter(<MainPage />);
-    const settingsButton = screen.getByRole('button', { name: /설정/i }) as HTMLButtonElement;
-    expect(settingsButton.disabled).toBe(true);
   });
 });

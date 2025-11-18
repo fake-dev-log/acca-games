@@ -9,13 +9,10 @@ export function safeParse(data: string | object): object | null {
   if (typeof data === 'object' && data !== null) {
     return data;
   }
-  if (typeof data === 'string') {
-    try {
-      return JSON.parse(data);
-    } catch (e) {
-      console.error('Failed to parse JSON string:', e);
-      return null;
-    }
+  try {
+    return JSON.parse(data);
+  } catch (e) {
+    console.error('Failed to parse JSON string:', e);
+    return null;
   }
-  return null;
 }

@@ -1,4 +1,5 @@
-import { render, screen, act, waitFor } from '@testing-library/react';
+import { ReactElement } from "react";
+import { render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
 import { MemoryRouter, useNavigate } from 'react-router-dom';
 import { RpsGame } from './RpsGame';
@@ -35,7 +36,7 @@ describe('RpsGame component', () => {
     vi.useRealTimers();
   });
 
-  const renderWithRouter = (ui: React.ReactElement) => {
+  const renderWithRouter = (ui: ReactElement) => {
     return render(<MemoryRouter>{ui}</MemoryRouter>);
   };
 

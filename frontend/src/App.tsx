@@ -1,6 +1,6 @@
 import './App.css';
 import RoutesProvider from "@routes/RoutesProvider";
-import { useThemeStore } from './stores/themeStore';
+import { useThemeStore } from '@stores/themeStore';
 import { useEffect } from 'react';
 
 function App() {

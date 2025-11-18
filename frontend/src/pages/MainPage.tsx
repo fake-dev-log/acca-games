@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Quit } from "@wails/runtime";
 import { Button } from '@components/common/Button';
-import { ThemeToggleButton } from '../components/common/ThemeToggleButton';
+import { ThemeToggleButton } from '@components/common/ThemeToggleButton';
 
 export default function MainPage() {
     const navigate = useNavigate();

@@ -22,15 +22,6 @@ export function NumberPressingGameSetup() {
     resetGame();
   }, [resetGame]);
 
-  const handleRoundToggle = (round: number) => {
-    setSettings(prev => {
-      const newRounds = prev.rounds.includes(round)
-        ? prev.rounds.filter(r => r !== round)
-        : [...prev.rounds, round].sort((a, b) => a - b);
-      return { ...prev, rounds: newRounds };
-    });
-  };
-
   const handleStartGame = async (e: FormEvent) => {
     e.preventDefault();
     await startGame(settings);

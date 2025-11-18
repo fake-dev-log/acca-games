@@ -1,10 +1,9 @@
+import { ReactElement } from "react";
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 import { MemoryRouter, useNavigate } from 'react-router-dom';
 import { RpsGameSetup } from './RpsGameSetup';
 import { useRpsStore } from '@features/rps/stores/rpsStore';
-import { GameCodeSlugs, GameCodes } from '@constants/gameCodes';
-import { rps } from '@wails/go/models';
 
 // Mock dependencies
 vi.mock('react-router-dom', async () => {
@@ -30,7 +29,7 @@ describe('RpsGameSetup component', () => {
     });
   });
 
-  const renderWithRouter = (ui: React.ReactElement) => {
+  const renderWithRouter = (ui: ReactElement) => {
     return render(<MemoryRouter>{ui}</MemoryRouter>);
   };
 

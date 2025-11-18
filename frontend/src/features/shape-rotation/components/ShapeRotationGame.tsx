@@ -1,14 +1,14 @@
-import { useEffect, useRef, useCallback, useState, FC } from 'react';
-import { useNavigate } from 'react-router-dom';
+import {FC, useCallback, useEffect, useRef, useState} from 'react';
+import {useNavigate} from 'react-router-dom';
 import useShapeRotationStore from '../stores/shapeRotationStore';
-import { SubmitShapeRotationAnswerAsync } from '@wails/go/main/App';
-import { GameLayout } from '@components/layout/GameLayout';
+import {SubmitShapeRotationAnswerAsync} from '@wails/go/main/App';
+import {GameLayout} from '@components/layout/GameLayout';
 import ShapeDisplay from '@components/shapes/shape_rotation/ShapeDisplay';
-import { Button } from '@components/common/Button';
-import { ProgressBar } from '@components/common/ProgressBar';
-import { SolutionTray } from '@components/game_setup/SolutionTray';
-import { FaArrowRotateLeft, FaArrowRotateRight } from "react-icons/fa6";
-import { RiFlipHorizontalFill, RiFlipVerticalFill } from "react-icons/ri";
+import {Button} from '@components/common/Button';
+import {ProgressBar} from '@components/common/ProgressBar';
+import {SolutionTray} from '@components/game_setup/SolutionTray';
+import {FaArrowRotateLeft, FaArrowRotateRight} from "react-icons/fa6";
+import {RiFlipHorizontalFill, RiFlipVerticalFill} from "react-icons/ri";
 
 const ShapeRotationGame: FC = () => {
   const navigate = useNavigate();
@@ -54,8 +54,7 @@ const ShapeRotationGame: FC = () => {
     answeredRef.current = true;
     stopTimer();
 
-    const solveTime = elapsedTime;
-    SubmitShapeRotationAnswerAsync(sessionId, currentProblem, userSolution, solveTime, clickCount);
+    SubmitShapeRotationAnswerAsync(sessionId, currentProblem, userSolution, elapsedTime, clickCount);
 
     if (currentProblemIndex < problems.length - 1) {
       nextProblem();

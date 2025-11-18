@@ -1,4 +1,5 @@
-import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
+import { ReactElement } from "react";
+import { render, screen, fireEvent, act, } from '@testing-library/react';
 import { vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import { NBackGame } from './NBackGame';
@@ -58,7 +59,7 @@ describe('NBackGame component', () => {
     vi.useRealTimers();
   });
 
-  const renderWithRouter = (ui: React.ReactElement) => {
+  const renderWithRouter = (ui: ReactElement) => {
     return render(<MemoryRouter>{ui}</MemoryRouter>);
   };
 

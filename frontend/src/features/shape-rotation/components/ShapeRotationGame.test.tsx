@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
@@ -12,7 +13,7 @@ vi.mock('@wails/go/main/App', () => ({
   SubmitShapeRotationAnswerAsync: vi.fn(),
 }));
 vi.mock('@components/layout/GameLayout', () => ({ 
-  GameLayout: ({ children, onExit }: { children: React.ReactNode, onExit: () => void }) => (
+  GameLayout: ({ children, onExit }: { children: ReactNode, onExit: () => void }) => (
     <div>
       <button onClick={onExit}>나가기</button>
       {children}

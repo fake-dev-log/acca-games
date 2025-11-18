@@ -1,11 +1,10 @@
+import { ReactElement } from "react";
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 import { MemoryRouter, useNavigate } from 'react-router-dom';
 import { NBackGameSetup } from './NBackGameSetup';
 import { useNBackStore } from '@features/n-back/stores/nbackStore';
 import { getShapeGroups } from '@api/nback';
-import { GameCodeSlugs, GameCodes } from '@constants/gameCodes';
-import { nback } from '@wails/go/models';
 
 // Mock dependencies
 vi.mock('react-router-dom', async () => {
@@ -36,7 +35,7 @@ describe('NBackGameSetup component', () => {
     });
   });
 
-  const renderWithRouter = (ui: React.ReactElement) => {
+  const renderWithRouter = (ui: ReactElement) => {
     return render(<MemoryRouter>{ui}</MemoryRouter>);
   };
   it('renders form elements with default values', async () => {

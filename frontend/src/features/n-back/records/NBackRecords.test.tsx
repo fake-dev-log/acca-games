@@ -1,3 +1,4 @@
+import { ReactElement } from "react";
 import { render, screen, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
@@ -20,7 +21,7 @@ describe('NBackRecords component', () => {
     });
   });
 
-  const renderWithRouter = (ui: React.ReactElement) => {
+  const renderWithRouter = (ui: ReactElement) => {
     return render(<MemoryRouter>{ui}</MemoryRouter>);
   };
 

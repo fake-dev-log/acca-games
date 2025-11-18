@@ -21,7 +21,6 @@ export default defineConfig({
       '@features': path.resolve(__dirname, './src/features'),
       '@utils': path.resolve(__dirname, './src/utils'),
       '@api': path.resolve(__dirname, './src/api'),
-      '@hooks': path.resolve(__dirname, './src/hooks'),
       '@stores': path.resolve(__dirname, './src/stores'),
       '@type': path.resolve(__dirname, "./src/type"),
       '@wails': path.resolve(__dirname, './wailsjs'),

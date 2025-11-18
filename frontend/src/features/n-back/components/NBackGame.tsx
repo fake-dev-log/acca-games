@@ -43,7 +43,6 @@ export function NBackGame() {
 
     const [currentTrial, setCurrentTrial] = useState(0);
     const [isInputAllowed, setIsInputAllowed] = useState(false);
-    const [results, setResults] = useState<types.NBackResult[]>([]);
     const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null);
     const [showStart, setShowStart] = useState(false);
     const [animateCard, setAnimateCard] = useState(false);
@@ -80,7 +79,6 @@ export function NBackGame() {
       try {
         const result = await submitAnswer(choice, responseTime, trial);
         if (result) {
-          setResults(prev => [...prev, result]);
           if (!gameState?.settings.isRealMode) {
             setFeedback(result.isCorrect ? 'correct' : 'incorrect');
             feedbackClearTimerRef.current = setTimeout(() => {

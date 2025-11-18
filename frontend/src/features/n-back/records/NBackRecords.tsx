@@ -2,15 +2,11 @@ import { useNBackStore } from '../stores/nbackStore';
 import { GameCodeSlugs } from '@constants/gameCodes';
 import { GameRecordsDashboard } from '@components/records/GameRecordsDashboard';
 import { types } from '@wails/go/models';
+import { calculateCommonMetrics } from '@utils/metrics';
 
 export function NBackRecords() {
   const calculateSessionMetrics = (session: types.NBackSessionWithResults) => {
-    const totalResults = session.results.length;
-    const correctCount = session.results.filter(r => r.isCorrect).length;
-    const totalResponseTime = session.results.reduce((sum, r) => sum + r.responseTimeMs, 0);
-
-    const overallAccuracy = totalResults > 0 ? (correctCount / totalResults) * 100 : 0;
-    const averageResponseTimeMs = totalResults > 0 ? totalResponseTime / totalResults : 0;
+    const commonMetrics = calculateCommonMetrics(session.results);
 
     const round1Results = session.results.filter(r => r.round === 1);
     const round1Correct = round1Results.filter(r => r.isCorrect).length;
@@ -25,8 +21,7 @@ export function NBackRecords() {
     const round2AverageResponseTimeMs = round2Results.length > 0 ? round2TotalResponseTime / round2Results.length : 0;
 
     return {
-      overallAccuracy: overallAccuracy,
-      averageResponseTimeMs: averageResponseTimeMs,
+      ...commonMetrics,
       round1Accuracy: round1Accuracy,
       round1AverageResponseTimeMs: round1AverageResponseTimeMs,
       round2Accuracy: round2Accuracy,

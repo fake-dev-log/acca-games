@@ -2,20 +2,11 @@ import { useRpsStore } from '../stores/rpsStore';
 import { GameCodeSlugs } from '@constants/gameCodes';
 import { GameRecordsDashboard } from '@components/records/GameRecordsDashboard';
 import { types } from '@wails/go/models';
+import { calculateCommonMetrics } from '@utils/metrics';
 
 export function RpsRecords() {
   const calculateSessionMetrics = (session: types.RpsSessionWithResults) => {
-    const totalResults = session.results.length;
-    const correctCount = session.results.filter(r => r.isCorrect).length;
-    const totalResponseTime = session.results.reduce((sum, r) => sum + r.responseTimeMs, 0);
-
-    const overallAccuracy = totalResults > 0 ? (correctCount / totalResults) * 100 : 0;
-    const averageResponseTimeMs = totalResults > 0 ? totalResponseTime / totalResults : 0;
-
-    return {
-      overallAccuracy: overallAccuracy,
-      averageResponseTimeMs: averageResponseTimeMs,
-    };
+    return calculateCommonMetrics(session.results);
   };
 
   const metricOptions = [

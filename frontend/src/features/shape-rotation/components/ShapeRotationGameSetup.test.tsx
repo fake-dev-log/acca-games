@@ -69,7 +69,7 @@ describe('ShapeRotationGameSetup component', () => {
     renderComponent();
 
     // Submit form
-    await fireEvent.submit(screen.getByRole('button', { name: '게임 시작' }));
+    fireEvent.submit(screen.getByRole('button', { name: '게임 시작' }));
 
     // Check that loading mode is set
     expect(mockSetGameMode).toHaveBeenCalledWith('loading');
@@ -89,7 +89,7 @@ describe('ShapeRotationGameSetup component', () => {
     (App.SaveShapeRotationSession as vi.Mock).mockRejectedValue(new Error('Failed to save'));
     renderComponent();
 
-    await fireEvent.submit(screen.getByRole('button', { name: '게임 시작' }));
+    fireEvent.submit(screen.getByRole('button', { name: '게임 시작' }));
 
     expect(mockSetGameMode).toHaveBeenCalledWith('loading');
     await screen.findByText('게임 시작'); // Wait for async operations to complete

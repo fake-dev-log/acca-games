@@ -14,7 +14,6 @@ export function RpsGame() {
   } = useRpsStore();
 
   const [currentTrial, setCurrentTrial] = useState(0);
-  const [results, setResults] = useState<types.RpsResult[]>([]);
   const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null);
   const [animateCards, setAnimateCards] = useState(false);
   const [progress, setProgress] = useState(100);
@@ -45,7 +44,6 @@ export function RpsGame() {
     try {
       const result = await submitAnswerToAction(choice, responseTime, currentTrial + 1);
       if (result) {
-        setResults(prev => [...prev, result]);
         if (!gameState?.settings.isRealMode) {
           setFeedback(result.isCorrect ? 'correct' : 'incorrect');
         }

@@ -4,7 +4,6 @@ import { MemoryRouter } from 'react-router-dom';
 import { NumberPressingGame } from './NumberPressingGame';
 import { useNumberPressingStore } from '@features/number-pressing/stores/numberPressingStore';
 import { types } from '@wails/go/models';
-import * as App from '@wails/go/main/App';
 
 // Mock dependencies
 vi.mock('@features/number-pressing/stores/numberPressingStore');

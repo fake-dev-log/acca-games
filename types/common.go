@@ -4,6 +4,6 @@ package types
 type GameSession struct {
 	ID           int64      `json:"id"`
 	GameCode     string     `json:"gameCode"`
-	PlayDatetime CustomTime `json:"playDatetime"`
+	PlayDatetime CustomTime `json:"playDatetime" ts_type:"string"`
 	Settings     string     `json:"settings"` // Reverted to string
 }

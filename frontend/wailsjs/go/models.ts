@@ -361,23 +361,10 @@ export namespace types {
 		    return a;
 		}
 	}
-	export class CustomTime {
-	
-	
-	    static createFrom(source: any = {}) {
-	        return new CustomTime(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	
-	    }
-	}
 	export class CountComparisonSessionWithResults {
 	    id: number;
 	    gameCode: string;
-	    // Go type: CustomTime
-	    playDatetime: any;
+	    playDatetime: string;
 	    settings: string;
 	    results: CountComparisonResult[];
 	
@@ -389,7 +376,7 @@ export namespace types {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
 	        this.gameCode = source["gameCode"];
-	        this.playDatetime = this.convertValues(source["playDatetime"], null);
+	        this.playDatetime = source["playDatetime"];
 	        this.settings = source["settings"];
 	        this.results = this.convertValues(source["results"], CountComparisonResult);
 	    }
@@ -577,8 +564,7 @@ export namespace types {
 	export class NBackSessionWithResults {
 	    id: number;
 	    gameCode: string;
-	    // Go type: CustomTime
-	    playDatetime: any;
+	    playDatetime: string;
 	    settings: string;
 	    results: NBackResult[];
 	
@@ -590,7 +576,7 @@ export namespace types {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
 	        this.gameCode = source["gameCode"];
-	        this.playDatetime = this.convertValues(source["playDatetime"], null);
+	        this.playDatetime = source["playDatetime"];
 	        this.settings = source["settings"];
 	        this.results = this.convertValues(source["results"], NBackResult);
 	    }
@@ -932,8 +918,7 @@ export namespace types {
 	export class NumberPressingSessionWithResults {
 	    id: number;
 	    gameCode: string;
-	    // Go type: CustomTime
-	    playDatetime: any;
+	    playDatetime: string;
 	    settings: string;
 	    results: NumberPressingResultsBundle;
 	
@@ -945,7 +930,7 @@ export namespace types {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
 	        this.gameCode = source["gameCode"];
-	        this.playDatetime = this.convertValues(source["playDatetime"], null);
+	        this.playDatetime = source["playDatetime"];
 	        this.settings = source["settings"];
 	        this.results = this.convertValues(source["results"], NumberPressingResultsBundle);
 	    }
@@ -1098,8 +1083,7 @@ export namespace types {
 	export class RpsSessionWithResults {
 	    id: number;
 	    gameCode: string;
-	    // Go type: CustomTime
-	    playDatetime: any;
+	    playDatetime: string;
 	    settings: string;
 	    results: RpsResult[];
 	
@@ -1111,7 +1095,7 @@ export namespace types {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
 	        this.gameCode = source["gameCode"];
-	        this.playDatetime = this.convertValues(source["playDatetime"], null);
+	        this.playDatetime = source["playDatetime"];
 	        this.settings = source["settings"];
 	        this.results = this.convertValues(source["results"], RpsResult);
 	    }
@@ -1193,8 +1177,7 @@ export namespace types {
 	export class ShapeRotationSessionWithResults {
 	    id: number;
 	    gameCode: string;
-	    // Go type: CustomTime
-	    playDatetime: any;
+	    playDatetime: string;
 	    settings: string;
 	    results: ShapeRotationResult[];
 	
@@ -1206,7 +1189,7 @@ export namespace types {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
 	        this.gameCode = source["gameCode"];
-	        this.playDatetime = this.convertValues(source["playDatetime"], null);
+	        this.playDatetime = source["playDatetime"];
 	        this.settings = source["settings"];
 	        this.results = this.convertValues(source["results"], ShapeRotationResult);
 	    }

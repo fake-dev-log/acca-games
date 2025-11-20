@@ -9,6 +9,7 @@ import {ProgressBar} from '@components/common/ProgressBar';
 import {SolutionTray} from '@components/game_setup/SolutionTray';
 import {FaArrowRotateLeft, FaArrowRotateRight} from "react-icons/fa6";
 import {RiFlipHorizontalFill, RiFlipVerticalFill} from "react-icons/ri";
+import {useGameLifecycle} from "@hooks/useGameLifecycle";
 
 const ShapeRotationGame: FC = () => {
   const navigate = useNavigate();
@@ -27,33 +28,21 @@ const ShapeRotationGame: FC = () => {
     resetGame,
   } = useShapeRotationStore();
 
-  const [progress, setProgress] = useState(100);
-  const [elapsedTime, setElapsedTime] = useState(0);
   const [isNewProblem, setIsNewProblem] = useState(true);
-  const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(0);
-
-  const currentProblem = problems[currentProblemIndex];
   const answeredRef = useRef(false);
 
-  const stopTimer = useCallback(() => {
-    if (timerIntervalRef.current) {
-      clearInterval(timerIntervalRef.current);
-      timerIntervalRef.current = null;
-    }
-  }, []);
-
-  const handleExit = useCallback(() => {
-    stopTimer();
-    resetGame();
-    navigate('/games');
-  }, [stopTimer, resetGame, navigate]);
+  const currentProblem = problems[currentProblemIndex];
 
   const handleSubmit = useCallback(async () => {
     if (answeredRef.current || !sessionId) return;
     answeredRef.current = true;
-    stopTimer();
-
+    
+    // Stop the timer from the hook
+    // The elapsed time will be the time limit since this is called onTimeUp
+    // Or if called manually, it would be Date.now() - startTimeRef.current
+    const elapsedTime = Date.now() - startTimeRef.current;
+    
     SubmitShapeRotationAnswerAsync(sessionId, currentProblem, userSolution, elapsedTime, clickCount);
 
     if (currentProblemIndex < problems.length - 1) {
@@ -61,19 +50,18 @@ const ShapeRotationGame: FC = () => {
     } else {
       setGameMode('result');
     }
-  }, [sessionId, currentProblem, userSolution, clickCount, elapsedTime, currentProblemIndex, problems.length, nextProblem, setGameMode, stopTimer]);
+  }, [sessionId, currentProblem, userSolution, clickCount, currentProblemIndex, problems.length, nextProblem, setGameMode]);
 
-  const startTimer = useCallback(() => {
-    startTimeRef.current = Date.now();
-    timerIntervalRef.current = setInterval(() => {
-      setElapsedTime(Date.now() - startTimeRef.current);
-    }, 100);
-  }, []);
-  
-  const resetTimer = useCallback(() => {
-    stopTimer();
-    setElapsedTime(0);
-  }, [stopTimer]);
+  const { remainingTime, progress, start, stop } = useGameLifecycle({
+    onTimeUp: handleSubmit,
+    timeLimit: settings.timeLimit * 1000,
+  });
+
+  const handleExit = useCallback(() => {
+    stop();
+    resetGame();
+    navigate('/games');
+  }, [stop, resetGame, navigate]);
 
   useEffect(() => {
     if (!currentProblem) {
@@ -81,33 +69,25 @@ const ShapeRotationGame: FC = () => {
       return;
     }
     answeredRef.current = false;
-    resetTimer();
-    startTimer();
+    startTimeRef.current = Date.now();
+    start();
     
     setIsNewProblem(true);
     const flashTimer = setTimeout(() => setIsNewProblem(false), 1000);
 
     return () => {
-      stopTimer();
       clearTimeout(flashTimer);
     }
-  }, [currentProblem, startTimer, stopTimer, resetTimer, handleExit]);
-
-  useEffect(() => {
-    const timeLimitMs = settings.timeLimit * 1000;
-    if (elapsedTime >= timeLimitMs && timeLimitMs > 0) {
-      handleSubmit();
-    }
-    const newProgress = 100 - (elapsedTime / timeLimitMs) * 100;
-    setProgress(Math.max(0, newProgress));
-  }, [elapsedTime, settings.timeLimit, handleSubmit]);
+  }, [currentProblem, start, handleExit]);
+  
+  const handleManualSubmit = () => {
+    stop();
+    handleSubmit();
+  }
 
   if (!currentProblem) {
     return <GameLayout onExit={handleExit}><div>문제를 불러오는 중...</div></GameLayout>;
   }
-
-  const timeLimitMs = settings.timeLimit * 1000;
-  const remainingTime = Math.max(0, timeLimitMs - elapsedTime);
 
   const animationClass = isNewProblem ? 'div-border-flash-light dark:div-border-flash-dark' : 'border-transparent';
 
@@ -183,7 +163,7 @@ const ShapeRotationGame: FC = () => {
               </div>
             </div>
 
-            <Button onClick={handleSubmit} className="w-full mt-4">답안 제출</Button>
+            <Button onClick={handleManualSubmit} className="w-full mt-4">답안 제출</Button>
           </div>
         </div>
       </div>

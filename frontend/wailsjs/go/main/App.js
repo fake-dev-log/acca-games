@@ -6,12 +6,24 @@ export function CalculateCorrectClicksR2(arg1) {
   return window['go']['main']['App']['CalculateCorrectClicksR2'](arg1);
 }
 
+export function GetCountComparisonSessionStats(arg1) {
+  return window['go']['main']['App']['GetCountComparisonSessionStats'](arg1);
+}
+
 export function GetNBackSessionStats(arg1) {
   return window['go']['main']['App']['GetNBackSessionStats'](arg1);
 }
 
+export function GetNextCountComparisonProblem() {
+  return window['go']['main']['App']['GetNextCountComparisonProblem']();
+}
+
 export function GetNumberPressingSessionStats(arg1) {
   return window['go']['main']['App']['GetNumberPressingSessionStats'](arg1);
+}
+
+export function GetPaginatedCountComparisonSessionsWithResults(arg1, arg2) {
+  return window['go']['main']['App']['GetPaginatedCountComparisonSessionsWithResults'](arg1, arg2);
 }
 
 export function GetPaginatedNBackSessionsWithResults(arg1, arg2) {
@@ -54,6 +66,10 @@ export function SaveShapeRotationSession(arg1) {
   return window['go']['main']['App']['SaveShapeRotationSession'](arg1);
 }
 
+export function StartCountComparisonGame(arg1) {
+  return window['go']['main']['App']['StartCountComparisonGame'](arg1);
+}
+
 export function StartNBackGame(arg1) {
   return window['go']['main']['App']['StartNBackGame'](arg1);
 }
@@ -64,6 +80,10 @@ export function StartNumberPressingGame(arg1) {
 
 export function StartRpsGame(arg1) {
   return window['go']['main']['App']['StartRpsGame'](arg1);
+}
+
+export function SubmitCountComparisonAnswer(arg1) {
+  return window['go']['main']['App']['SubmitCountComparisonAnswer'](arg1);
 }
 
 export function SubmitNBackAnswer(arg1, arg2, arg3) {

@@ -2,8 +2,10 @@ import { formatSettings as formatNbackSettings, parseSettings as parseNbackSetti
 import { formatSettings as formatNumberPressingSettings, parseSettings as parseNumberPressingSettings } from '@utils/numberPressingHelpers';
 import { formatSettings as formatRpsSettings, parseSettings as parseRpsSettings } from '@utils/rpsHelpers';
 import { formatSettings as formatShapeRotationSettings, parseSettings as parseShapeRotationSettings } from '@utils/shapeRotationHelpers';
+import { formatSettings as formatCountComparisonSettings, parseSettings as parseCountComparisonSettings } from '@utils/countComparisonHelpers'; // Import CountComparisonSettings formatter
 import { GameCodes } from "@constants/gameCodes";
 import { BaseGameSessionInfo } from '@type/common'; // Import the new base interface
+
 
 interface SessionListProps {
   sessions: BaseGameSessionInfo[];
@@ -37,7 +39,12 @@ export function SessionList({ sessions, loading, error, onSessionClick, activeSe
           parsedSettings = parseShapeRotationSettings(session.settings);
           if (parsedSettings) settingsArray = formatShapeRotationSettings(parsedSettings);
           break;
+        case GameCodes.COUNT_COMPARISON: // Handle CountComparison explicitly
+          parsedSettings = parseCountComparisonSettings(session.settings);
+          if (parsedSettings) settingsArray = formatCountComparisonSettings(parsedSettings);
+          break;
         default:
+          // If gameCode is unknown or settings couldn't be formatted, display raw JSON
           return <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{session.settings}</p>;
       }
 
@@ -48,7 +55,7 @@ export function SessionList({ sessions, loading, error, onSessionClick, activeSe
       if (isExpanded) {
         return (
           <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-            {settingsArray.map((line, index) => <p key={index}>{line}</p>)}
+            {settingsArray.map((line, index) => <p key={`${session.id}-${index}`}>{line}</p>)}
           </div>
         );
       } else {
@@ -61,9 +68,8 @@ export function SessionList({ sessions, loading, error, onSessionClick, activeSe
 
     } catch (e) {
       console.error('Error rendering settings for session:', session, e);
-      // In case settings are a string
-      const settingsString = session.settings;
-      return <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{settingsString}</p>;
+      // If error occurs, try to stringify the settings to display something
+      return <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{session.settings}</p>;
     }
   };
 

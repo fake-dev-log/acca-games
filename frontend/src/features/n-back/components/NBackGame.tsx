@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useRef, ComponentType } from 'react';
 import { useNBackStore } from '../stores/nbackStore';
-import { types } from '@wails/go/models';
 import { Circle } from '@components/shapes/nback/Circle';
 import { Square } from '@components/shapes/nback/Square';
 import { Triangle } from '@components/shapes/nback/Triangle';

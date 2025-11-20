@@ -2,6 +2,7 @@ package main
 
 import (
 	"acca-games/database"
+	"acca-games/games/count_comparison"
 	"acca-games/games/nback"
 	"acca-games/games/number_pressing"
 	"acca-games/games/rps"
@@ -51,7 +52,6 @@ func getApplicationSupportDirectory(appName string) (string, error) {
 	return dir, nil
 }
 
-
 // GetSessionResults fetches results for a given session and game, returning them as a JSON string.
 func (a *App) GetSessionResults(gameCode string, sessionID int64) (string, error) {
 	var data interface{}
@@ -66,6 +66,8 @@ func (a *App) GetSessionResults(gameCode string, sessionID int64) (string, error
 		data, err = database.GetNBackResultsForSession(a.db, sessionID)
 	case types.GameCodeNumberPressing:
 		data, err = database.GetNumberPressingResultsForSession(a.db, sessionID)
+	case types.GameCodeCountComparison:
+		data, err = database.GetCountComparisonResultsForSession(a.db, sessionID)
 	default:
 		return "", fmt.Errorf("unknown game code: %s", gameCode)
 	}
@@ -84,11 +86,12 @@ func (a *App) GetSessionResults(gameCode string, sessionID int64) (string, error
 
 // App struct
 type App struct {
-	ctx                   context.Context
-	db                    *sql.DB
-	nbackService          *nback.Service
-	rpsService            *rps.Service
-	numberPressingService *number_pressing.Service
+	ctx                      context.Context
+	db                       *sql.DB
+	nbackService             *nback.Service
+	rpsService               *rps.Service
+	numberPressingService    *number_pressing.Service
+	countComparisonService *count_comparison.Service
 }
 
 func init() {
@@ -130,6 +133,7 @@ func (a *App) startup(ctx context.Context) {
 	a.nbackService = nback.NewService(a.db)
 	a.rpsService = rps.NewService(a.db)
 	a.numberPressingService = number_pressing.NewService(a.db)
+	a.countComparisonService = count_comparison.NewService(a.db)
 }
 
 func (a *App) shutdown(ctx context.Context) {
@@ -163,11 +167,26 @@ func (a *App) SubmitRpsAnswer(playerChoice string, responseTimeMs int, questionN
 	return a.rpsService.SubmitAnswer(playerChoice, responseTimeMs, questionNum)
 }
 
+// StartCountComparisonGame starts a new Count Comparison game.
+func (a *App) StartCountComparisonGame(settings types.CountComparisonSettings) (int64, error) {
+	return a.countComparisonService.StartGame(settings)
+}
+
+// GetNextCountComparisonProblem returns the next problem for the current game.
+func (a *App) GetNextCountComparisonProblem() *types.CountComparisonProblem {
+	return a.countComparisonService.NextProblem()
+}
+
+// SubmitCountComparisonAnswer handles the player's submission and saves the result.
+func (a *App) SubmitCountComparisonAnswer(submission types.CountComparisonSubmission) error {
+	return a.countComparisonService.SubmitAnswer(submission)
+}
 var validGameCodes = map[string]bool{
-	types.GameCodeShapeRotation:  true,
-	types.GameCodeRPS:            true,
-	types.GameCodeNBack:          true,
-	types.GameCodeNumberPressing: true,
+	types.GameCodeShapeRotation:     true,
+	types.GameCodeRPS:               true,
+	types.GameCodeNBack:             true,
+	types.GameCodeNumberPressing:    true,
+	types.GameCodeCountComparison: true,
 }
 
 // GetPaginatedNBackSessionsWithResults fetches paginated N-Back sessions with their results.
@@ -260,4 +279,14 @@ func (a *App) GetPaginatedShapeRotationSessionsWithResults(page int, limit int) 
 // GetShapeRotationSessionStats fetches aggregated statistics for a given Shape Rotation session ID.
 func (a *App) GetShapeRotationSessionStats(sessionID int64) (*types.ShapeRotationSessionStats, error) {
 	return database.GetShapeRotationSessionStats(a.db, sessionID)
+}
+
+// GetPaginatedCountComparisonSessionsWithResults fetches paginated Count Comparison sessions with their results.
+func (a *App) GetPaginatedCountComparisonSessionsWithResults(page int, limit int) (*types.PaginatedCountComparisonSessions, error) {
+	return database.GetPaginatedCountComparisonSessionsWithResults(a.db, page, limit)
+}
+
+// GetCountComparisonSessionStats fetches aggregated statistics for a given Count Comparison session ID.
+func (a *App) GetCountComparisonSessionStats(sessionID int64) (*types.CountComparisonSessionStats, error) {
+	return database.GetCountComparisonSessionStats(a.db, sessionID)
 }

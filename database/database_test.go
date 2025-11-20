@@ -37,6 +37,7 @@ func TestDatabaseInitialization(t *testing.T) {
 	}
 
 	expectedTables := []string{
+		"count_comparison_results",
 		"game_sessions",
 		"nback_results",
 		"number_pressing_results_r1",

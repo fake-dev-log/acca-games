@@ -3,6 +3,7 @@ export const GameCodes = {
   RPS: 'RPS',
   N_BACK: 'N_BACK',
   NUMBER_PRESSING: 'NUMBER_PRESSING',
+  COUNT_COMPARISON: 'COUNT_COMPARISON',
 } as const;
 
 export const GameCodeSlugs = {
@@ -10,6 +11,7 @@ export const GameCodeSlugs = {
   [GameCodes.RPS]: 'rps',
   [GameCodes.N_BACK]: 'n-back',
   [GameCodes.NUMBER_PRESSING]: 'number-pressing',
+  [GameCodes.COUNT_COMPARISON]: 'count-comparison',
 } as const;
 
 export const GameCodeNames = {
@@ -17,6 +19,7 @@ export const GameCodeNames = {
   [GameCodes.RPS]: 'Rock-Paper-Scissors',
   [GameCodes.N_BACK]: 'N-Back',
   [GameCodes.NUMBER_PRESSING]: 'Number Pressing',
+  [GameCodes.COUNT_COMPARISON]: 'Count Comparison',
 } as const;
 
 export type GameCode = (typeof GameCodes)[keyof typeof GameCodes];
@@ -34,5 +37,6 @@ export const SlugToGameCode: { [key in GameCodeSlug]: GameCode } = {
   'n-back': GameCodes.N_BACK,
 
   'number-pressing': GameCodes.NUMBER_PRESSING,
+  'count-comparison': GameCodes.COUNT_COMPARISON,
 
 };

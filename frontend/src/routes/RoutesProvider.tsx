@@ -12,6 +12,8 @@ import { NumberPressingRecords } from "@features/number-pressing/records/NumberP
 import { NumberPressingSessionDetail } from "@features/number-pressing/records/NumberPressingSessionDetail";
 import { ShapeRotationRecords } from "@features/shape-rotation/records/ShapeRotationRecords";
 import { ShapeRotationSessionDetail } from "@features/shape-rotation/records/ShapeRotationSessionDetail";
+import { CountComparisonRecords } from "@features/count-comparison/records/CountComparisonRecords"; // New
+import { CountComparisonSessionDetail } from "@features/count-comparison/records/CountComparisonSessionDetail"; // New
 
 
 
@@ -20,6 +22,7 @@ import RpsPage from '@pages/games/RpsPage';
 import NumberPressingPage from '@pages/games/NumberPressingPage';
 
 import ShapeRotationPage from "@pages/games/ShapeRotationPage";
+import CountComparisonPage from "@pages/games/CountComparisonPage";
 import { GameCodeSlugs } from "@constants/gameCodes";
 
 export default function RoutesProvider() {
@@ -67,6 +70,14 @@ export default function RoutesProvider() {
                     path={`/records/${GameCodeSlugs.SHAPE_ROTATION}/:sessionId`}
                     element={<ShapeRotationSessionDetail />}
                 />
+                <Route
+                    path={`/records/${GameCodeSlugs.COUNT_COMPARISON}`}
+                    element={<CountComparisonRecords />}
+                />
+                <Route
+                    path={`/records/${GameCodeSlugs.COUNT_COMPARISON}/:sessionId`}
+                    element={<CountComparisonSessionDetail />}
+                />
                 <Route path={"/games"}>
                     <Route
                         path={""}
@@ -79,6 +90,7 @@ export default function RoutesProvider() {
                         path={GameCodeSlugs.SHAPE_ROTATION}
                         element={<ShapeRotationPage />}
                     />
+          <Route path={GameCodeSlugs.COUNT_COMPARISON} element={<CountComparisonPage />} />
                 </Route>
             </Routes>
         </HashRouter>

@@ -86,3 +86,24 @@ CREATE TABLE IF NOT EXISTS `nback_results` (
   `correct_choice` TEXT NOT NULL, -- 'LEFT', 'RIGHT', 'SPACE'
   FOREIGN KEY (`session_id`) REFERENCES `game_sessions` (`id`) ON DELETE CASCADE
 );
+
+-- -----------------------------------------------------
+-- Table `count_comparison_results` (Count Comparison)
+-- Stores results for each question in the Count Comparison game.
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `count_comparison_results` (
+  `id` INTEGER PRIMARY KEY AUTOINCREMENT,
+  `session_id` INTEGER NOT NULL,
+  `problem_number` INTEGER NOT NULL,
+  `is_correct` BOOLEAN NOT NULL,
+  `response_time_ms` INTEGER NOT NULL,
+  `player_choice` TEXT,
+  `correct_choice` TEXT NOT NULL,
+  `left_word` TEXT NOT NULL,
+  `right_word` TEXT NOT NULL,
+  `left_word_count` INTEGER NOT NULL,
+  `right_word_count` INTEGER NOT NULL,
+  `applied_traps` TEXT, -- JSON string of []types.AppliedTrap
+  FOREIGN KEY (`session_id`) REFERENCES `game_sessions` (`id`) ON DELETE CASCADE
+);
+

@@ -10,6 +10,7 @@ export function RecordsIndex() {
         <GridItemButton to={`/records/${GameCodeSlugs.RPS}`} title="가위바위보" description={GameCodeNames.RPS} />
         <GridItemButton to={`/records/${GameCodeSlugs.NUMBER_PRESSING}`} title="숫자 누르기" description={GameCodeNames.NUMBER_PRESSING} />
         <GridItemButton to={`/records/${GameCodeSlugs.SHAPE_ROTATION}`} title="도형 회전하기" description={GameCodeNames.SHAPE_ROTATION} />
+        <GridItemButton to={`/records/${GameCodeSlugs.COUNT_COMPARISON}`} title="개수 비교하기" description={GameCodeNames.COUNT_COMPARISON} />
       </div>
     </PageLayout>
   );

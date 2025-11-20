@@ -7,9 +7,15 @@ import {rps} from '../models';
 
 export function CalculateCorrectClicksR2(arg1:types.NumberPressingProblemR2):Promise<Array<number>>;
 
+export function GetCountComparisonSessionStats(arg1:number):Promise<types.CountComparisonSessionStats>;
+
 export function GetNBackSessionStats(arg1:number):Promise<types.NBackSessionStats>;
 
+export function GetNextCountComparisonProblem():Promise<types.CountComparisonProblem>;
+
 export function GetNumberPressingSessionStats(arg1:number):Promise<types.NumberPressingSessionStats>;
+
+export function GetPaginatedCountComparisonSessionsWithResults(arg1:number,arg2:number):Promise<types.PaginatedCountComparisonSessions>;
 
 export function GetPaginatedNBackSessionsWithResults(arg1:number,arg2:number):Promise<types.PaginatedNBackSessions>;
 
@@ -31,11 +37,15 @@ export function GetShapeRotationSessionStats(arg1:number):Promise<types.ShapeRot
 
 export function SaveShapeRotationSession(arg1:types.ShapeRotationSettings):Promise<number>;
 
+export function StartCountComparisonGame(arg1:types.CountComparisonSettings):Promise<number>;
+
 export function StartNBackGame(arg1:types.NBackSettings):Promise<nback.NBackGameState>;
 
 export function StartNumberPressingGame(arg1:types.NumberPressingSetup):Promise<types.NumberPressingGameState>;
 
 export function StartRpsGame(arg1:types.RpsSettings):Promise<rps.GameState>;
+
+export function SubmitCountComparisonAnswer(arg1:types.CountComparisonSubmission):Promise<void>;
 
 export function SubmitNBackAnswer(arg1:string,arg2:number,arg3:number):Promise<types.NBackResult>;
 

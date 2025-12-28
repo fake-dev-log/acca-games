@@ -1,47 +1,43 @@
 import {create} from 'zustand';
-import {rps, types} from '@wails/go/models';
-import {
-  getPaginatedRpsSessionsWithResults,
-  startRpsGame,
-  submitRpsAnswer,
-} from '@api/rps';
 import { GameMode } from "@constants/gameModes";
+import { rpsEngine } from '../logic/RPSEngine';
+import { RpsSettings, GameState, RpsResult } from '../logic/types';
 
 interface RpsState {
-  gameState: rps.GameState | null;
+  gameState: GameState | null;
+  results: RpsResult[];
   gameMode: GameMode;
   sessionId: number | null;
   loading: boolean;
   error: string | null;
-  paginatedSessions: {
-    sessions: types.RpsSessionWithResults[];
-    totalCount: number;
-  };
-
-  setGameState: (gameState: rps.GameState) => void;
+  // Pagination removed for standalone version
+  
+  setGameState: (gameState: GameState) => void;
   setSessionId: (id: number) => void;
   setGameMode: (mode: GameMode) => void;
-  startGame: (settings: types.RpsSettings) => Promise<void>;
-  submitAnswer: (choice: string, responseTime: number, trial: number) => Promise<types.RpsResult | null>;
+  startGame: (settings: RpsSettings) => Promise<void>;
+  submitAnswer: (choice: string, responseTime: number, trial: number) => Promise<RpsResult | null>;
   resetGame: () => void;
-  fetchPaginatedSessions: (page: number, limit: number) => Promise<void>;
+  // fetchPaginatedSessions removed for standalone version
 }
 
 export const useRpsStore = create<RpsState>((set) => ({
   gameState: null,
+  results: [],
   gameMode: 'setup',
   sessionId: null,
   loading: false,
   error: null,
-  paginatedSessions: { sessions: [], totalCount: 0 },
+  
   setGameState: (gameState) => set({ gameState }),
   setSessionId: (id) => set({ sessionId: id }),
   setGameMode: (mode) => set({ gameMode: mode }),
 
-  startGame: async (settings: types.RpsSettings) => {
-    set({ gameMode: 'loading', loading: true, error: null });
+  startGame: async (settings: RpsSettings) => {
+    set({ gameMode: 'loading', loading: true, error: null, results: [] });
     try {
-      const gameState = await startRpsGame(settings);
+      // Simulate async for consistency, though engine is sync
+      const gameState = rpsEngine.startGame(settings);
       set({ gameState, sessionId: gameState.id, gameMode: 'playing', loading: false });
     } catch (err: any) {
       set({ error: err.message || 'Unknown error', gameMode: 'setup', loading: false });
@@ -50,7 +46,10 @@ export const useRpsStore = create<RpsState>((set) => ({
 
   submitAnswer: async (playerChoice, responseTimeMs, questionNum) => {
     try {
-      return await submitRpsAnswer(playerChoice, responseTimeMs, questionNum);
+        // Synchronous call to engine
+      const result = rpsEngine.submitAnswer(playerChoice, responseTimeMs, questionNum);
+      set((state) => ({ results: [...state.results, result] }));
+      return result;
     } catch (err) {
       console.error("Failed to submit rps result", err);
       return null;
@@ -58,27 +57,6 @@ export const useRpsStore = create<RpsState>((set) => ({
   },
 
   resetGame: () => {
-    set({ gameState: null, gameMode: 'setup', sessionId: null, error: null, loading: false });
-  },
-
-  fetchPaginatedSessions: async (page: number, limit: number) => {
-    set({ loading: true, error: null });
-    try {
-      const paginatedResult = await getPaginatedRpsSessionsWithResults(page, limit);
-      const typedSessions = paginatedResult.sessions.map(s => types.RpsSessionWithResults.createFrom(s));
-      const parsedSessions = typedSessions.map(s => {
-        s.settings = JSON.parse(s.settings as unknown as string);
-        return s;
-      });
-      set({ 
-        paginatedSessions: {
-          sessions: parsedSessions,
-          totalCount: paginatedResult.totalCount,
-        }, 
-        loading: false 
-      });
-    } catch (err: any) {
-      set({ error: `Failed to fetch paginated sessions for rps: ${err.message || 'Unknown error'}`, loading: false });
-    }
+    set({ gameState: null, results: [], gameMode: 'setup', sessionId: null, error: null, loading: false });
   },
 }));

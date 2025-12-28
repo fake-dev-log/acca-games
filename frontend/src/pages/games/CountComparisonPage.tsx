@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useEffect } from 'react';
 import { GamePage } from '@components/layout/GamePage';
 import { useCountComparisonStore } from '@features/count-comparison/stores/countComparisonStore';
 import CountComparisonGameSetup from '@features/count-comparison/components/CountComparisonGameSetup';
@@ -7,6 +7,13 @@ import { GameEndPage } from '@features/common/components/GameEndPage';
 import { GameCodeSlugs } from '@constants/gameCodes';
 
 const CountComparisonPage: FC = () => {
+  const results = useCountComparisonStore(state => state.results);
+  const resetGame = useCountComparisonStore(state => state.resetGame);
+
+  useEffect(() => {
+    resetGame();
+  }, [resetGame]);
+
   return (
     <GamePage
       useGameStore={useCountComparisonStore}
@@ -17,6 +24,7 @@ const CountComparisonPage: FC = () => {
           gameCode={GameCodeSlugs.COUNT_COMPARISON}
           sessionId={sessionId}
           onExit={onExit}
+          results={results}
         />
       )}
     />

@@ -3,21 +3,9 @@ import MainPage from "@pages/MainPage";
 import { Select } from "@pages/games/Select";
 import NBackPage from '@pages/games/NBackPage';
 
-import { RecordsIndex } from "@pages/records/RecordsIndex";
-import { NBackRecords } from "@features/n-back/records/NBackRecords";
-import { NBackSessionDetail } from "@features/n-back/records/NBackSessionDetail";
-import { RpsRecords } from "@features/rps/records/RpsRecords";
-import { RpsSessionDetail } from "@features/rps/records/RpsSessionDetail";
-import { NumberPressingRecords } from "@features/number-pressing/records/NumberPressingRecords";
-import { NumberPressingSessionDetail } from "@features/number-pressing/records/NumberPressingSessionDetail";
-import { ShapeRotationRecords } from "@features/shape-rotation/records/ShapeRotationRecords";
-import { ShapeRotationSessionDetail } from "@features/shape-rotation/records/ShapeRotationSessionDetail";
-import { CountComparisonRecords } from "@features/count-comparison/records/CountComparisonRecords"; // New
-import { CountComparisonSessionDetail } from "@features/count-comparison/records/CountComparisonSessionDetail"; // New
-import { CatChaserRecords } from "@features/cat-chaser/records/CatChaserRecords";
-import { CatChaserSessionDetail } from "@features/cat-chaser/records/CatChaserSessionDetail";
-
-
+// Records imports removed for standalone version
+// import { RecordsIndex } from "@pages/records/RecordsIndex";
+// ... (other record imports)
 
 import RpsPage from '@pages/games/RpsPage';
 
@@ -38,58 +26,8 @@ export default function RoutesProvider() {
                     path={""}
                     element={<MainPage />}
                 />
-                <Route
-                    path={"/records"}
-                    element={<RecordsIndex />}
-                />
-                <Route
-                    path={`/records/${GameCodeSlugs.N_BACK}`}
-                    element={<NBackRecords />}
-                />
-                <Route
-                    path={`/records/${GameCodeSlugs.N_BACK}/:sessionId`} // New route for session detail
-                    element={<NBackSessionDetail />}
-                />
-                <Route
-                    path={`/records/${GameCodeSlugs.RPS}`}
-                    element={<RpsRecords />}
-                />
-                <Route
-                    path={`/records/${GameCodeSlugs.RPS}/:sessionId`}
-                    element={<RpsSessionDetail />}
-                />
-                <Route
-                    path={`/records/${GameCodeSlugs.NUMBER_PRESSING}`}
-                    element={<NumberPressingRecords />}
-                />
-                <Route
-                    path={`/records/${GameCodeSlugs.NUMBER_PRESSING}/:sessionId`}
-                    element={<NumberPressingSessionDetail />}
-                />
-                <Route
-                    path={`/records/${GameCodeSlugs.SHAPE_ROTATION}`}
-                    element={<ShapeRotationRecords />}
-                />
-                <Route
-                    path={`/records/${GameCodeSlugs.SHAPE_ROTATION}/:sessionId`}
-                    element={<ShapeRotationSessionDetail />}
-                />
-                <Route
-                    path={`/records/${GameCodeSlugs.COUNT_COMPARISON}`}
-                    element={<CountComparisonRecords />}
-                />
-                <Route
-                    path={`/records/${GameCodeSlugs.COUNT_COMPARISON}/:sessionId`}
-                    element={<CountComparisonSessionDetail />}
-                />
-                <Route
-                    path={`/records/${GameCodeSlugs.CAT_CHASER}`}
-                    element={<CatChaserRecords />}
-                />
-                <Route
-                    path={`/records/${GameCodeSlugs.CAT_CHASER}/:sessionId`}
-                    element={<CatChaserSessionDetail />}
-                />
+                {/* Records routes removed for standalone version */}
+                
                 <Route path={"/games"}>
                     <Route
                         path={""}

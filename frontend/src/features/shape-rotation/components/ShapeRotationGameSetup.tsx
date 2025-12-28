@@ -1,6 +1,5 @@
 import { FC, FormEvent } from "react";
 import useShapeRotationStore from '../stores/shapeRotationStore';
-import { GetShapeRotationProblems, SaveShapeRotationSession } from '@wails/go/main/App';
 import { PageLayout } from '@components/layout/PageLayout';
 import { RoundButton } from '@components/game_setup/RoundButton';
 import { NumberInput } from '@components/common/NumberInput';
@@ -11,24 +10,12 @@ const ShapeRotationGameSetup: FC = () => {
   const {
     settings,
     setSettings,
-    setProblems,
-    setGameMode,
-    setSessionId,
+    startGame,
   } = useShapeRotationStore();
 
-  const handleStartGame = async (e: FormEvent) => {
+  const handleStartGame = (e: FormEvent) => {
     e.preventDefault();
-    setGameMode('loading');
-    try {
-      const sessionId = await SaveShapeRotationSession(settings);
-      setSessionId(sessionId);
-      const problems = await GetShapeRotationProblems(settings.round, settings.numProblems);
-      setProblems(problems);
-      setGameMode('playing');
-    } catch (error) {
-      console.error("Failed to start game:", error);
-      setGameMode('setup'); // Go back to setup on error
-    }
+    startGame();
   };
 
   return (

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCountComparisonStore } from '../stores/countComparisonStore';
-import { types } from '@wails/go/models';
+import { CountComparisonSubmission } from '../logic/types';
 import { useGameLifecycle } from '@hooks/useGameLifecycle';
 import WordCloudDisplay from './WordCloudDisplay';
 import { Button } from '@components/common/Button';
@@ -26,7 +26,7 @@ const CountComparisonGame: React.FC = () => {
     if (!currentProblem) return;
 
     const responseTimeMs = Math.floor(Date.now() - inputStartTimeRef.current);
-    const submission: types.CountComparisonSubmission = {
+    const submission: CountComparisonSubmission = {
       problemNumber: currentProblem.problemNumber,
       playerChoice: playerChoice,
       responseTimeMs: responseTimeMs,

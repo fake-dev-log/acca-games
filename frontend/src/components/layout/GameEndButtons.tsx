@@ -10,21 +10,23 @@ interface GameEndButtonsProps {
 
 export const GameEndButtons: FC<GameEndButtonsProps> = ({ gameCode, sessionId }) => {
   const navigate = useNavigate();
-  const handleViewRecords = () => {
-    navigate(`/records/${gameCode}/${sessionId}`);
-  };
 
   const handleRetry = () => {
-    navigate(`/games/${gameCode}/setup`);
+    // Navigate back to the game select or setup
+    navigate(`/games/${gameCode}`);
+  };
+
+  const handleGoMain = () => {
+    navigate('/');
   };
 
   return (
     <div className="mt-6 flex flex-col items-center space-y-2">
-      <Button onClick={handleViewRecords} className="w-48">
-        기록 보기
-      </Button>
       <Button onClick={handleRetry} className="w-48">
         다시하기
+      </Button>
+      <Button onClick={handleGoMain} variant="secondary" className="w-48">
+        메인으로
       </Button>
     </div>
   );

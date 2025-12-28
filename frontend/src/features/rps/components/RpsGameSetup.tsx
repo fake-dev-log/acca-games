@@ -1,6 +1,6 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { useRpsStore } from '../stores/rpsStore';
-import { types } from '@wails/go/models';
+import { RpsSettings } from '../logic/types';
 import { PageLayout } from '@components/layout/PageLayout';
 import { Button } from '@components/common/Button';
 import { RealModeToggle } from '@components/common/RealModeToggle';
@@ -10,7 +10,7 @@ import { RoundButton } from '@components/game_setup/RoundButton';
 export function RpsGameSetup() {
   const { loading, error, startGame, resetGame } = useRpsStore();
 
-  const [settings, setSettings] = useState<types.RpsSettings>({
+  const [settings, setSettings] = useState<RpsSettings>({
     rounds: [1, 2, 3],
     questionsPerRound: 10,
     timeLimitMs: 3000,

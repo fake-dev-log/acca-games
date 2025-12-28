@@ -1,30 +1,22 @@
-import {create} from 'zustand';
-import {nback, types} from '@wails/go/models';
-import {
-  getPaginatedNBackSessionsWithResults,
-  startNBackGame,
-  submitNBackAnswer,
-} from '@api/nback';
+import { create } from 'zustand';
 import { GameMode } from "@constants/gameModes";
+import { nBackEngine } from '../logic/NBackEngine';
+import { NBackSettings, NBackGameState, NBackResult } from '../logic/types';
 
 interface NBackState {
-  gameState: nback.NBackGameState | null;
+  gameState: NBackGameState | null;
   gameMode: GameMode;
   sessionId: number | null;
   loading: boolean;
   error: string | null;
-  paginatedSessions: {
-    sessions: types.NBackSessionWithResults[];
-    totalCount: number;
-  };
+  results: NBackResult[];
 
-  setGameState: (gameState: nback.NBackGameState) => void;
+  setGameState: (gameState: NBackGameState) => void;
   setSessionId: (id: number) => void;
   setGameMode: (mode: GameMode) => void;
-  startGame: (settings: types.NBackSettings) => Promise<void>;
-  submitAnswer: (choice: string, responseTime: number, trial: number) => Promise<types.NBackResult | null>;
+  startGame: (settings: NBackSettings) => Promise<void>;
+  submitAnswer: (choice: string, responseTime: number, trial: number) => Promise<NBackResult | null>;
   resetGame: () => void;
-  fetchPaginatedSessions: (page: number, limit: number) => Promise<void>;
 }
 
 export const useNBackStore = create<NBackState>((set) => ({
@@ -33,16 +25,16 @@ export const useNBackStore = create<NBackState>((set) => ({
   sessionId: null,
   loading: false,
   error: null,
-  paginatedSessions: { sessions: [], totalCount: 0 },
+  results: [],
 
   setGameState: (gameState) => set({ gameState }),
   setSessionId: (id) => set({ sessionId: id }),
   setGameMode: (mode) => set({ gameMode: mode }),
 
-  startGame: async (settings: types.NBackSettings) => {
-    set({ gameMode: 'loading', loading: true, error: null });
+  startGame: async (settings: NBackSettings) => {
+    set({ gameMode: 'loading', loading: true, error: null, results: [] });
     try {
-      const gameState = await startNBackGame(settings);
+      const gameState = nBackEngine.startGame(settings);
       set({ gameState, sessionId: gameState.id, gameMode: 'playing', loading: false });
     } catch (err: any) {
       set({ error: err.message || 'Unknown error', gameMode: 'setup', loading: false });
@@ -51,7 +43,9 @@ export const useNBackStore = create<NBackState>((set) => ({
 
   submitAnswer: async (choice, responseTime, trial) => {
     try {
-      return await submitNBackAnswer(choice, responseTime, trial);
+      const result = nBackEngine.submitAnswer(choice, responseTime, trial);
+      set((state) => ({ results: [...state.results, result] }));
+      return result;
     } catch (err) {
       console.error("Failed to submit N-Back answer:", err);
       return null;
@@ -59,27 +53,6 @@ export const useNBackStore = create<NBackState>((set) => ({
   },
 
   resetGame: () => {
-    set({ gameState: null, gameMode: 'setup', sessionId: null, error: null, loading: false });
-  },
-
-  fetchPaginatedSessions: async (page: number, limit: number) => {
-    set({ loading: true, error: null });
-    try {
-      const paginatedResult = await getPaginatedNBackSessionsWithResults(page, limit);
-      const typedSessions = paginatedResult.sessions.map(s => types.NBackSessionWithResults.createFrom(s));
-      const parsedSessions = typedSessions.map(s => {
-        s.settings = JSON.parse(s.settings as unknown as string);
-        return s;
-      });
-      set({ 
-        paginatedSessions: {
-          sessions: parsedSessions,
-          totalCount: paginatedResult.totalCount,
-        }, 
-        loading: false 
-      });
-    } catch (err: any) {
-      set({ error: `Failed to fetch paginated sessions for n-back: ${err.message || 'Unknown error'}`, loading: false });
-    }
+    set({ gameState: null, gameMode: 'setup', sessionId: null, error: null, loading: false, results: [] });
   },
 }));

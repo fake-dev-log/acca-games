@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRpsStore } from '../stores/rpsStore';
-import { types } from '@wails/go/models';
 import { GameLayout } from '@components/layout/GameLayout';
 import { ProgressBar } from '@components/common/ProgressBar';
 import { Card } from '@components/common/Card';

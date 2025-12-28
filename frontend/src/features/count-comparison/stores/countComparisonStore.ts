@@ -1,31 +1,23 @@
 import { create } from 'zustand';
-import { types } from '@wails/go/models';
-import {
-  startCountComparisonGame,
-  getNextCountComparisonProblem,
-  submitCountComparisonAnswer,
-  getPaginatedCountComparisonSessionsWithResults,
-} from '@api/countComparison';
+import { GameMode } from "@constants/gameModes";
+import { countComparisonEngine } from '../logic/CountComparisonEngine';
+import { CountComparisonSettings, CountComparisonProblem, CountComparisonSubmission, CountComparisonResult } from '../logic/types';
 
 interface CountComparisonState {
-  settings: types.CountComparisonSettings | null;
-  currentProblem: types.CountComparisonProblem | null;
-  gameMode: 'setup' | 'playing' | 'results' | 'loading' | 'result';
+  settings: CountComparisonSettings;
+  currentProblem: CountComparisonProblem | null;
+  gameMode: GameMode;
   sessionId: number | null;
   loading: boolean;
   error: string | null;
-  paginatedSessions: {
-    sessions: types.CountComparisonSessionWithResults[]; // Use the new type
-    totalCount: number;
-  };
+  results: CountComparisonResult[];
 
-  setSettings: (settings: types.CountComparisonSettings) => void;
-  setGameMode: (mode: CountComparisonState['gameMode']) => void;
-  startGame: (settings: types.CountComparisonSettings) => Promise<number>; // Changed return type to Promise<number>
-  fetchNextProblem: () => Promise<void>;
-  submitAnswer: (submission: types.CountComparisonSubmission) => Promise<boolean>;
+  setSettings: (settings: CountComparisonSettings) => void;
+  setGameMode: (mode: GameMode) => void;
+  startGame: (settings: CountComparisonSettings) => void;
+  fetchNextProblem: () => void;
+  submitAnswer: (submission: CountComparisonSubmission) => boolean;
   resetGame: () => void;
-  fetchPaginatedSessions: (page: number, limit: number) => Promise<void>;
 }
 
 export const useCountComparisonStore = create<CountComparisonState>((set, get) => ({
@@ -40,53 +32,40 @@ export const useCountComparisonStore = create<CountComparisonState>((set, get) =
   sessionId: null,
   loading: false,
   error: null,
-  paginatedSessions: { sessions: [], totalCount: 0 },
+  results: [],
 
   setSettings: (settings) => set({ settings }),
   setGameMode: (mode) => set({ gameMode: mode }),
 
-  startGame: async (settings: types.CountComparisonSettings) => {
-    set({ gameMode: 'loading', loading: true, error: null, settings });
+  startGame: (settings: CountComparisonSettings) => {
+    set({ gameMode: 'loading', loading: true, error: null, settings, results: [] });
     try {
-      const newSessionId = await startCountComparisonGame(settings); // Capture sessionId
-      set({ sessionId: newSessionId }); // Set sessionId in the store
-      await get().fetchNextProblem(); // Fetch the first problem
+      const { sessionId } = countComparisonEngine.startGame(settings);
+      set({ sessionId });
+      get().fetchNextProblem();
       set({ gameMode: 'playing', loading: false });
-      return newSessionId; // Return sessionId
     } catch (err: any) {
-      set({ error: err.message || 'Unknown error', gameMode: 'setup', loading: false });
-      throw err; // Re-throw error for proper handling
+      set({ error: err.message, gameMode: 'setup', loading: false });
     }
   },
 
-  fetchNextProblem: async () => {
-    set({ loading: true, error: null });
-    try {
-      const problem = await getNextCountComparisonProblem();
-      if (problem) {
-        set({ currentProblem: problem, loading: false });
-      } else {
-        set({ currentProblem: null, gameMode: 'result', loading: false });
-      }
-    } catch (err: any) {
-      set({ error: err.message || 'Unknown error', loading: false });
+  fetchNextProblem: () => {
+    const problem = countComparisonEngine.getNextProblem();
+    if (problem) {
+      set({ currentProblem: problem });
+    } else {
+      set({ currentProblem: null, gameMode: 'result' });
     }
   },
 
-  submitAnswer: async (submission: types.CountComparisonSubmission): Promise<boolean> => {
-    set({ loading: true, error: null });
+  submitAnswer: (submission: CountComparisonSubmission): boolean => {
     try {
-      await submitCountComparisonAnswer(submission);
-      const problem = get().currentProblem;
-      if (!problem) {
-        throw new Error("No current problem to submit answer for.");
-      }
-      const isCorrect = submission.playerChoice === problem.correctSide;
-      set({ loading: false });
+      const isCorrect = countComparisonEngine.submitAnswer(submission.playerChoice, submission.responseTimeMs);
+      set((state) => ({ results: countComparisonEngine.getResults() }));
       return isCorrect;
     } catch (err: any) {
-      set({ error: err.message || 'Unknown error', loading: false });
-      return false; // Assume incorrect on error
+      console.error(err);
+      return false;
     }
   },
 
@@ -103,26 +82,7 @@ export const useCountComparisonStore = create<CountComparisonState>((set, get) =
       sessionId: null,
       loading: false,
       error: null,
+      results: [],
     });
-  },
-
-  fetchPaginatedSessions: async (page: number, limit: number) => {
-    set({ loading: true, error: null });
-    try {
-      const paginatedResult = await getPaginatedCountComparisonSessionsWithResults(page, limit);
-      const parsedSessions = paginatedResult.sessions.map((s: types.CountComparisonSessionWithResults) => {
-        return s;
-    });
-
-      set({
-        paginatedSessions: {
-          sessions: parsedSessions,
-          totalCount: paginatedResult.totalCount,
-        },
-        loading: false,
-      });
-    } catch (err: any) {
-      set({ error: `Failed to fetch paginated sessions: ${err.message || 'Unknown error'}`, loading: false });
-    }
   },
 }));

@@ -7,7 +7,7 @@ import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: '/acca-games/',
+  base: './',
   plugins: [react(), tsconfigPaths(), tailwindcss()],
   test: {
     globals: true,

@@ -28,7 +28,8 @@ jobs:
       - name: Build
         run: |
           cd frontend
-          npm run build
+          npm ci
+          npx vite build --base=/acca-games/
           touch dist/.nojekyll
 
       - name: Deploy to GitHub Pages

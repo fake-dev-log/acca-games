@@ -1,6 +1,6 @@
 import { FC, useEffect } from "react";
 import { GamePage } from '@components/layout/GamePage';
-import { useNBackStore } from '@features/n-back/stores/nBackStore';
+import { useNBackStore } from '@features/n-back/stores/nbackStore';
 import { NBackGameSetup } from '@features/n-back/components/NBackGameSetup';
 import { NBackGame } from '@features/n-back/components/NBackGame';
 import { GameEndPage } from '@features/common/components/GameEndPage';

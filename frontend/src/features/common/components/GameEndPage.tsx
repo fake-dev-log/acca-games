@@ -7,6 +7,7 @@ import { ShapeRotationResultDetail } from '@features/shape-rotation/components/S
 import { NBackResultDetail } from '@features/n-back/components/NBackResultDetail';
 import { NumberPressingResultDetail } from '@features/number-pressing/components/NumberPressingResultDetail';
 import { CountComparisonResultDetail } from '@features/count-comparison/components/CountComparisonResultDetail';
+import { CatChaserResultDetail } from '@features/cat-chaser/components/CatChaserResultDetail';
 import { Button } from '@components/common/Button';
 
 type GameEndPageProps = {
@@ -43,7 +44,7 @@ export const GameEndPage: FC<GameEndPageProps> = ({ gameCode, sessionId, onExit,
     }
     
     return (
-      <div className="flex flex-col items-center">
+      <div className="flex flex-col items-center w-full">
         <p className="text-xl mt-4 mb-6">정확도: {accuracy.toFixed(2)}%</p>
         
         {showDetail && gameCode === GameCodeSlugs.RPS && (
@@ -64,6 +65,10 @@ export const GameEndPage: FC<GameEndPageProps> = ({ gameCode, sessionId, onExit,
 
         {showDetail && gameCode === GameCodeSlugs.COUNT_COMPARISON && (
           <CountComparisonResultDetail results={results} />
+        )}
+
+        {showDetail && gameCode === GameCodeSlugs.CAT_CHASER && (
+          <CatChaserResultDetail results={results} />
         )}
 
         <div className="mt-6 flex flex-col items-center space-y-2">

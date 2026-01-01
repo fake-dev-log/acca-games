@@ -14,6 +14,8 @@ import { ShapeRotationRecords } from "@features/shape-rotation/records/ShapeRota
 import { ShapeRotationSessionDetail } from "@features/shape-rotation/records/ShapeRotationSessionDetail";
 import { CountComparisonRecords } from "@features/count-comparison/records/CountComparisonRecords"; // New
 import { CountComparisonSessionDetail } from "@features/count-comparison/records/CountComparisonSessionDetail"; // New
+import { CatChaserRecords } from "@features/cat-chaser/records/CatChaserRecords";
+import { CatChaserSessionDetail } from "@features/cat-chaser/records/CatChaserSessionDetail";
 
 
 
@@ -23,9 +25,11 @@ import NumberPressingPage from '@pages/games/NumberPressingPage';
 
 import ShapeRotationPage from "@pages/games/ShapeRotationPage";
 import CountComparisonPage from "@pages/games/CountComparisonPage";
+import CatChaserPage from "@pages/games/CatChaserPage";
 import { GameCodeSlugs } from "@constants/gameCodes";
 
 export default function RoutesProvider() {
+
 
     return (
         <HashRouter basename={"/"}>
@@ -78,6 +82,14 @@ export default function RoutesProvider() {
                     path={`/records/${GameCodeSlugs.COUNT_COMPARISON}/:sessionId`}
                     element={<CountComparisonSessionDetail />}
                 />
+                <Route
+                    path={`/records/${GameCodeSlugs.CAT_CHASER}`}
+                    element={<CatChaserRecords />}
+                />
+                <Route
+                    path={`/records/${GameCodeSlugs.CAT_CHASER}/:sessionId`}
+                    element={<CatChaserSessionDetail />}
+                />
                 <Route path={"/games"}>
                     <Route
                         path={""}
@@ -91,6 +103,7 @@ export default function RoutesProvider() {
                         element={<ShapeRotationPage />}
                     />
           <Route path={GameCodeSlugs.COUNT_COMPARISON} element={<CountComparisonPage />} />
+          <Route path={GameCodeSlugs.CAT_CHASER} element={<CatChaserPage />} />
                 </Route>
             </Routes>
         </HashRouter>

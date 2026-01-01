@@ -3,6 +3,7 @@ import { formatSettings as formatNumberPressingSettings, parseSettings as parseN
 import { formatSettings as formatRpsSettings, parseSettings as parseRpsSettings } from '@utils/rpsHelpers';
 import { formatSettings as formatShapeRotationSettings, parseSettings as parseShapeRotationSettings } from '@utils/shapeRotationHelpers';
 import { formatSettings as formatCountComparisonSettings, parseSettings as parseCountComparisonSettings } from '@utils/countComparisonHelpers'; // Import CountComparisonSettings formatter
+import { formatSettings as formatCatChaserSettings, parseSettings as parseCatChaserSettings } from '@utils/catChaserHelpers';
 import { GameCodes } from "@constants/gameCodes";
 import { BaseGameSessionInfo } from '@type/common'; // Import the new base interface
 
@@ -42,6 +43,10 @@ export function SessionList({ sessions, loading, error, onSessionClick, activeSe
         case GameCodes.COUNT_COMPARISON: // Handle CountComparison explicitly
           parsedSettings = parseCountComparisonSettings(session.settings);
           if (parsedSettings) settingsArray = formatCountComparisonSettings(parsedSettings);
+          break;
+        case GameCodes.CAT_CHASER:
+          parsedSettings = parseCatChaserSettings(session.settings);
+          if (parsedSettings) settingsArray = formatCatChaserSettings(parsedSettings);
           break;
         default:
           // If gameCode is unknown or settings couldn't be formatted, display raw JSON

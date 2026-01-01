@@ -6,6 +6,10 @@ export function CalculateCorrectClicksR2(arg1) {
   return window['go']['main']['App']['CalculateCorrectClicksR2'](arg1);
 }
 
+export function GetCatChaserSessionStats(arg1) {
+  return window['go']['main']['App']['GetCatChaserSessionStats'](arg1);
+}
+
 export function GetCountComparisonSessionStats(arg1) {
   return window['go']['main']['App']['GetCountComparisonSessionStats'](arg1);
 }
@@ -20,6 +24,10 @@ export function GetNextCountComparisonProblem() {
 
 export function GetNumberPressingSessionStats(arg1) {
   return window['go']['main']['App']['GetNumberPressingSessionStats'](arg1);
+}
+
+export function GetPaginatedCatChaserSessionsWithResults(arg1, arg2) {
+  return window['go']['main']['App']['GetPaginatedCatChaserSessionsWithResults'](arg1, arg2);
 }
 
 export function GetPaginatedCountComparisonSessionsWithResults(arg1, arg2) {
@@ -66,6 +74,10 @@ export function SaveShapeRotationSession(arg1) {
   return window['go']['main']['App']['SaveShapeRotationSession'](arg1);
 }
 
+export function StartCatChaserGame(arg1) {
+  return window['go']['main']['App']['StartCatChaserGame'](arg1);
+}
+
 export function StartCountComparisonGame(arg1) {
   return window['go']['main']['App']['StartCountComparisonGame'](arg1);
 }
@@ -80,6 +92,10 @@ export function StartNumberPressingGame(arg1) {
 
 export function StartRpsGame(arg1) {
   return window['go']['main']['App']['StartRpsGame'](arg1);
+}
+
+export function SubmitCatChaserAnswer(arg1, arg2, arg3, arg4, arg5) {
+  return window['go']['main']['App']['SubmitCatChaserAnswer'](arg1, arg2, arg3, arg4, arg5);
 }
 
 export function SubmitCountComparisonAnswer(arg1) {

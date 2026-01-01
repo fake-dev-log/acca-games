@@ -5,12 +5,13 @@ import { GameCodeSlug } from "@constants/gameCodes";
 
 interface GameEndButtonsProps {
   gameCode: GameCodeSlug;
+  sessionId: number;
 }
 
-export const GameEndButtons: FC<GameEndButtonsProps> = ({ gameCode }) => {
+export const GameEndButtons: FC<GameEndButtonsProps> = ({ gameCode, sessionId }) => {
   const navigate = useNavigate();
   const handleViewRecords = () => {
-    navigate(`/records/${gameCode}`);
+    navigate(`/records/${gameCode}/${sessionId}`);
   };
 
   const handleRetry = () => {

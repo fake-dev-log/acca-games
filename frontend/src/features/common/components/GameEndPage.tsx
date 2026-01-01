@@ -54,7 +54,7 @@ export const GameEndPage: FC<GameEndPageProps> = ({ gameCode, sessionId, onExit 
       <div className="flex flex-col m-auto text-center">
         <h1 className="text-2xl font-bold">게임 종료!</h1>
         {renderContent()}
-        <GameEndButtons gameCode={gameCode} />
+        <GameEndButtons gameCode={gameCode} sessionId={sessionId} />
       </div>
     </GameLayout>
   );

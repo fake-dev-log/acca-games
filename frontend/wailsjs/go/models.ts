@@ -1,3 +1,42 @@
+export namespace cat_chaser {
+	
+	export class CatChaserGameState {
+	    settings: types.CatChaserSettings;
+	    problems: types.CatChaserProblem[];
+	    id: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new CatChaserGameState(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.settings = this.convertValues(source["settings"], types.CatChaserSettings);
+	        this.problems = this.convertValues(source["problems"], types.CatChaserProblem);
+	        this.id = source["id"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+
+}
+
 export namespace nback {
 	
 	export class NBackGameState {
@@ -151,6 +190,176 @@ export namespace types {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.type = source["type"];
 	        this.appliedTo = source["appliedTo"];
+	    }
+	}
+	export class CatChaserProblem {
+	    round: number;
+	    micePositions: number[];
+	    catPositions: number[];
+	    redCatIndex: number;
+	    blueCatIndex: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new CatChaserProblem(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.round = source["round"];
+	        this.micePositions = source["micePositions"];
+	        this.catPositions = source["catPositions"];
+	        this.redCatIndex = source["redCatIndex"];
+	        this.blueCatIndex = source["blueCatIndex"];
+	    }
+	}
+	export class CatChaserResult {
+	    sessionId: number;
+	    round: number;
+	    targetColor: string;
+	    playerChoice: string;
+	    confidence: number;
+	    correctChoice: string;
+	    isCorrect: boolean;
+	    score: number;
+	    responseTimeMs: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new CatChaserResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.sessionId = source["sessionId"];
+	        this.round = source["round"];
+	        this.targetColor = source["targetColor"];
+	        this.playerChoice = source["playerChoice"];
+	        this.confidence = source["confidence"];
+	        this.correctChoice = source["correctChoice"];
+	        this.isCorrect = source["isCorrect"];
+	        this.score = source["score"];
+	        this.responseTimeMs = source["responseTimeMs"];
+	    }
+	}
+	export class CatChaserRoundStats {
+	    round: number;
+	    totalQuestions: number;
+	    totalCorrect: number;
+	    totalScore: number;
+	    accuracy: number;
+	    averageResponseTimeMs: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new CatChaserRoundStats(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.round = source["round"];
+	        this.totalQuestions = source["totalQuestions"];
+	        this.totalCorrect = source["totalCorrect"];
+	        this.totalScore = source["totalScore"];
+	        this.accuracy = source["accuracy"];
+	        this.averageResponseTimeMs = source["averageResponseTimeMs"];
+	    }
+	}
+	export class CatChaserSessionStats {
+	    sessionId: number;
+	    totalQuestions: number;
+	    totalCorrect: number;
+	    totalScore: number;
+	    overallAccuracy: number;
+	    averageResponseTimeMs: number;
+	    roundStats: CatChaserRoundStats[];
+	
+	    static createFrom(source: any = {}) {
+	        return new CatChaserSessionStats(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.sessionId = source["sessionId"];
+	        this.totalQuestions = source["totalQuestions"];
+	        this.totalCorrect = source["totalCorrect"];
+	        this.totalScore = source["totalScore"];
+	        this.overallAccuracy = source["overallAccuracy"];
+	        this.averageResponseTimeMs = source["averageResponseTimeMs"];
+	        this.roundStats = this.convertValues(source["roundStats"], CatChaserRoundStats);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class CatChaserSessionWithResults {
+	    id: number;
+	    gameCode: string;
+	    playDatetime: string;
+	    settings: string;
+	    results: CatChaserResult[];
+	
+	    static createFrom(source: any = {}) {
+	        return new CatChaserSessionWithResults(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.gameCode = source["gameCode"];
+	        this.playDatetime = source["playDatetime"];
+	        this.settings = source["settings"];
+	        this.results = this.convertValues(source["results"], CatChaserResult);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class CatChaserSettings {
+	    numTrials: number;
+	    difficulty: string;
+	    showTime: number;
+	    responseTimeLimit: number;
+	    isRealMode: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new CatChaserSettings(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.numTrials = source["numTrials"];
+	        this.difficulty = source["difficulty"];
+	        this.showTime = source["showTime"];
+	        this.responseTimeLimit = source["responseTimeLimit"];
+	        this.isRealMode = source["isRealMode"];
 	    }
 	}
 	export class DensityParams {
@@ -954,6 +1163,38 @@ export namespace types {
 		}
 	}
 	
+	export class PaginatedCatChaserSessions {
+	    sessions: CatChaserSessionWithResults[];
+	    totalCount: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new PaginatedCatChaserSessions(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.sessions = this.convertValues(source["sessions"], CatChaserSessionWithResults);
+	        this.totalCount = source["totalCount"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class PaginatedCountComparisonSessions {
 	    sessions: CountComparisonSessionWithResults[];
 	    totalCount: number;

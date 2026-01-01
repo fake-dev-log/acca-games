@@ -107,3 +107,20 @@ CREATE TABLE IF NOT EXISTS `count_comparison_results` (
   FOREIGN KEY (`session_id`) REFERENCES `game_sessions` (`id`) ON DELETE CASCADE
 );
 
+-- -----------------------------------------------------
+-- Table `cat_chaser_results`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `cat_chaser_results` (
+  `id` INTEGER PRIMARY KEY AUTOINCREMENT,
+  `session_id` INTEGER NOT NULL,
+  `round` INTEGER NOT NULL,
+  `target_color` TEXT NOT NULL, -- 'RED', 'BLUE'
+  `player_choice` TEXT, -- 'CAUGHT', 'MISSED'
+  `confidence` INTEGER NOT NULL, -- 1-4
+  `correct_choice` TEXT NOT NULL,
+  `is_correct` BOOLEAN NOT NULL,
+  `score` REAL NOT NULL,
+  `response_time_ms` INTEGER NOT NULL,
+  FOREIGN KEY (`session_id`) REFERENCES `game_sessions` (`id`) ON DELETE CASCADE
+);
+

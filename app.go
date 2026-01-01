@@ -2,6 +2,7 @@ package main
 
 import (
 	"acca-games/database"
+	"acca-games/games/cat_chaser"
 	"acca-games/games/count_comparison"
 	"acca-games/games/nback"
 	"acca-games/games/number_pressing"
@@ -68,6 +69,8 @@ func (a *App) GetSessionResults(gameCode string, sessionID int64) (string, error
 		data, err = database.GetNumberPressingResultsForSession(a.db, sessionID)
 	case types.GameCodeCountComparison:
 		data, err = database.GetCountComparisonResultsForSession(a.db, sessionID)
+	case types.GameCodeCatChaser:
+		data, err = database.GetCatChaserResultsBySessionID(a.db, sessionID)
 	default:
 		return "", fmt.Errorf("unknown game code: %s", gameCode)
 	}
@@ -92,6 +95,7 @@ type App struct {
 	rpsService               *rps.Service
 	numberPressingService    *number_pressing.Service
 	countComparisonService *count_comparison.Service
+	catChaserService       *cat_chaser.Service
 }
 
 func init() {
@@ -134,6 +138,7 @@ func (a *App) startup(ctx context.Context) {
 	a.rpsService = rps.NewService(a.db)
 	a.numberPressingService = number_pressing.NewService(a.db)
 	a.countComparisonService = count_comparison.NewService(a.db)
+	a.catChaserService = cat_chaser.NewService(a.db)
 }
 
 func (a *App) shutdown(ctx context.Context) {
@@ -187,6 +192,7 @@ var validGameCodes = map[string]bool{
 	types.GameCodeNBack:             true,
 	types.GameCodeNumberPressing:    true,
 	types.GameCodeCountComparison: true,
+	types.GameCodeCatChaser:       true,
 }
 
 // GetPaginatedNBackSessionsWithResults fetches paginated N-Back sessions with their results.
@@ -281,6 +287,16 @@ func (a *App) GetShapeRotationSessionStats(sessionID int64) (*types.ShapeRotatio
 	return database.GetShapeRotationSessionStats(a.db, sessionID)
 }
 
+// StartCatChaserGame starts a new Cat Chaser game.
+func (a *App) StartCatChaserGame(settings types.CatChaserSettings) (*cat_chaser.CatChaserGameState, error) {
+	return a.catChaserService.StartGame(settings)
+}
+
+// SubmitCatChaserAnswer submits an answer for the Cat Chaser game.
+func (a *App) SubmitCatChaserAnswer(round int, targetColor string, playerChoice string, confidence int, responseTimeMs int) (*types.CatChaserResult, error) {
+	return a.catChaserService.SubmitAnswer(round, targetColor, playerChoice, confidence, responseTimeMs)
+}
+
 // GetPaginatedCountComparisonSessionsWithResults fetches paginated Count Comparison sessions with their results.
 func (a *App) GetPaginatedCountComparisonSessionsWithResults(page int, limit int) (*types.PaginatedCountComparisonSessions, error) {
 	return database.GetPaginatedCountComparisonSessionsWithResults(a.db, page, limit)
@@ -289,4 +305,14 @@ func (a *App) GetPaginatedCountComparisonSessionsWithResults(page int, limit int
 // GetCountComparisonSessionStats fetches aggregated statistics for a given Count Comparison session ID.
 func (a *App) GetCountComparisonSessionStats(sessionID int64) (*types.CountComparisonSessionStats, error) {
 	return database.GetCountComparisonSessionStats(a.db, sessionID)
+}
+
+// GetPaginatedCatChaserSessionsWithResults fetches paginated Cat Chaser sessions with their results.
+func (a *App) GetPaginatedCatChaserSessionsWithResults(page int, limit int) (*types.PaginatedCatChaserSessions, error) {
+	return database.GetPaginatedCatChaserSessionsWithResults(a.db, page, limit)
+}
+
+// GetCatChaserSessionStats fetches aggregated statistics for a given Cat Chaser session ID.
+func (a *App) GetCatChaserSessionStats(sessionID int64) (*types.CatChaserSessionStats, error) {
+	return database.GetCatChaserSessionStats(a.db, sessionID)
 }

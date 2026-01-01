@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { cat_chaser, types } from '@wails/go/models';
+// import { cat_chaser, types } from '@wails/go/models'; // Removed Wails imports
+import { CatChaserGameState, CatChaserProblem, CatChaserResult, CatChaserSettings } from '@features/cat-chaser/logic/types';
 import { startCatChaserGame, submitCatChaserAnswer, getPaginatedCatChaserSessionsWithResults } from '@api/catChaser';
 import { GameMode } from '@constants/gameModes';
 
@@ -10,24 +11,24 @@ interface CatChaserStore {
   sessionId: number | null;
   resetGame: () => void;
 
-  gameState: cat_chaser.CatChaserGameState | null;
+  gameState: CatChaserGameState | null;
   currentRound: number;
   step: GameStep;
 
   // Current Problem Data
-  currentProblem: types.CatChaserProblem | null;
-  results: types.CatChaserResult[];
-  lastResult: types.CatChaserResult | null;
+  currentProblem: CatChaserProblem | null;
+  results: CatChaserResult[];
+  lastResult: CatChaserResult | null;
 
   // Records
   loading: boolean;
   error: string | null;
   paginatedSessions: {
-    sessions: types.CatChaserSessionWithResults[];
+    sessions: any[]; // Using any[] for now as session structure might differ in standalone
     totalCount: number;
   };
 
-  startGame: (settings: types.CatChaserSettings) => Promise<void>;
+  startGame: (settings: CatChaserSettings) => Promise<void>;
   startRound: (round: number) => void;
   setStep: (step: GameStep) => void;
   submitAnswer: (

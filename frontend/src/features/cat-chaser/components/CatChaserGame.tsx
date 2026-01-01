@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useCatChaserStore } from '../stores/useCatChaserStore';
-import { types } from '@wails/go/models';
+import { CatChaserProblem, CatChaserResult } from '@features/cat-chaser/logic/types';
 import { ProgressBar } from '@components/common/ProgressBar';
 import { Button } from '@components/common/Button';
 import { GameLayout } from '@components/layout/GameLayout';
@@ -119,7 +119,7 @@ export function CatChaserGame() {
 
 // --- Sub Components ---
 
-function FeedbackScreen({ result, onNext }: { result: types.CatChaserResult, onNext: () => void }) {
+function FeedbackScreen({ result, onNext }: { result: CatChaserResult, onNext: () => void }) {
     // result.isCorrect, result.correctChoice ("CAUGHT"/"MISSED")
     // targetColor is in result
     
@@ -180,7 +180,7 @@ function TimerProgressBar({ duration, isActive }: { duration: number, isActive: 
     return <ProgressBar progress={progress} />;
 }
 
-function ProblemScreen({ step, problem }: { step: string; problem: types.CatChaserProblem }) {
+function ProblemScreen({ step, problem }: { step: string; problem: CatChaserProblem }) {
     const gridSize = 6;
     const cells = Array.from({ length: gridSize * gridSize }, (_, i) => i);
 
@@ -234,9 +234,9 @@ function DecisionScreen({
     step: 'DECISION_RED' | 'DECISION_BLUE'; 
     limit: number; 
     onDecide: (c: 'CAUGHT' | 'MISSED', conf: number) => void;
-    currentProblem: types.CatChaserProblem;
+    currentProblem: CatChaserProblem;
     feedbackVisible: boolean;
-    lastResult: types.CatChaserResult | null;
+    lastResult: CatChaserResult | null;
 }) {
     const targetText = step === 'DECISION_RED' ? '빨간 고양이' : '파란 고양이';
     const borderColor = step === 'DECISION_RED' ? 'border-red-500' : 'border-blue-500';

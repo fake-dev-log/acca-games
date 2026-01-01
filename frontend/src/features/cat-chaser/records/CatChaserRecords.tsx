@@ -2,10 +2,10 @@ import { FC } from 'react';
 import { GameCodeSlugs, GameCodeNames } from '@constants/gameCodes';
 import { GameRecordsDashboard } from '@components/records/GameRecordsDashboard';
 import { useCatChaserStore } from '../stores/useCatChaserStore';
-import { types } from '@wails/go/models';
+import { CatChaserSessionWithResults } from '@features/cat-chaser/logic/types';
 
 export const CatChaserRecords: FC = () => {
-    const calculateSessionMetrics = (session: types.CatChaserSessionWithResults) => {
+    const calculateSessionMetrics = (session: CatChaserSessionWithResults) => {
         const totalAnswers = session.results.length;
         const correctAnswers = session.results.filter(r => r.isCorrect).length;
         const accuracy = totalAnswers > 0 ? (correctAnswers / totalAnswers) * 100 : 0;

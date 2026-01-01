@@ -1,35 +1,48 @@
-import {
-  StartCatChaserGame,
-  SubmitCatChaserAnswer,
-  GetPaginatedCatChaserSessionsWithResults,
-} from '@wails/go/main/App';
-import { cat_chaser, types } from '@wails/go/models';
+import { catChaserEngine } from '@features/cat-chaser/logic/CatChaserEngine';
+import { CatChaserSettings, CatChaserGameState, CatChaserResult } from '@features/cat-chaser/logic/types';
+
+// Mock types for pagination response since standalone doesn't support persistent records yet
+export interface PaginatedCatChaserSessions {
+  sessions: any[];
+  totalCount: number;
+}
 
 export const startCatChaserGame = (
-  settings: types.CatChaserSettings,
-): Promise<cat_chaser.CatChaserGameState> => {
-  return StartCatChaserGame(settings);
+  settings: CatChaserSettings,
+): Promise<CatChaserGameState> => {
+  return new Promise((resolve) => {
+    const gameState = catChaserEngine.startGame(settings);
+    resolve(gameState);
+  });
 };
 
 export const submitCatChaserAnswer = (
   round: number,
-  targetColor: string,
-  playerChoice: string,
+  targetColor: 'RED' | 'BLUE', // Adjusted type to match engine
+  playerChoice: 'CAUGHT' | 'MISSED' | 'TIMEOUT', // Adjusted type to match engine
   confidence: number,
   responseTimeMs: number,
-): Promise<types.CatChaserResult> => {
-  return SubmitCatChaserAnswer(
-    round,
-    targetColor,
-    playerChoice,
-    confidence,
-    responseTimeMs,
-  );
+): Promise<CatChaserResult> => {
+  return new Promise((resolve) => {
+    const result = catChaserEngine.submitAnswer(
+      round,
+      targetColor,
+      playerChoice,
+      confidence,
+      responseTimeMs
+    );
+    resolve(result);
+  });
 };
 
 export const getPaginatedCatChaserSessionsWithResults = (
   page: number,
   limit: number,
-): Promise<types.PaginatedCatChaserSessions> => {
-  return GetPaginatedCatChaserSessionsWithResults(page, limit);
+): Promise<PaginatedCatChaserSessions> => {
+    // In standalone mode, we don't persist sessions to a DB.
+    // Return empty result or implement local storage based persistence if needed.
+    return Promise.resolve({
+        sessions: [],
+        totalCount: 0
+    });
 };

@@ -1,10 +1,11 @@
 import { FC, useEffect, useState, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { GetSessionResults } from "@wails/go/main/App";
-import { types } from '@wails/go/models';
+// import { GetSessionResults } from "@wails/go/main/App"; // Removed
+// import { types } from '@wails/go/models'; // Removed
+import { CatChaserResult } from '@features/cat-chaser/logic/types';
 import { RecordPageLayout } from '@components/layout/RecordPageLayout';
 import { ResultsTable } from '@components/records/ResultsTable';
-import { GameCodes } from '@constants/gameCodes';
+// import { GameCodes } from '@constants/gameCodes';
 import { Doughnut, Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
 import { useCatChaserStore } from '../stores/useCatChaserStore';
@@ -16,7 +17,7 @@ ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarEle
 
 export const CatChaserSessionDetail: FC = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
-  const [results, setResults] = useState<types.CatChaserResult[]>([]);
+  const [results, setResults] = useState<CatChaserResult[]>([]);
   const [loading, setLoading] = useState(true);
   
   // For sidebar session list
@@ -26,20 +27,17 @@ export const CatChaserSessionDetail: FC = () => {
   useEffect(() => {
     if (paginatedSessions.sessions.length === 0) {
         setSessionListLoading(true);
-        fetchPaginatedSessions(1, 20).finally(() => setSessionListLoading(false));
+        // fetchPaginatedSessions(1, 20).finally(() => setSessionListLoading(false));
+        setSessionListLoading(false);
     }
   }, [fetchPaginatedSessions, paginatedSessions.sessions.length]);
 
   useEffect(() => {
     if (sessionId) {
       setLoading(true);
-      GetSessionResults(GameCodes.CAT_CHASER, Number(sessionId))
-        .then((dataStr) => {
-            const data = JSON.parse(dataStr);
-            setResults(data || []);
-        })
-        .catch(console.error)
-        .finally(() => setLoading(false));
+      // Mock data or empty
+      setResults([]);
+      setLoading(false);
     }
   }, [sessionId]);
   
@@ -82,17 +80,17 @@ export const CatChaserSessionDetail: FC = () => {
   }, [results]);
 
   const columns = [
-    { header: '라운드', accessor: (r: types.CatChaserResult) => r.round },
-    { header: '타겟', accessor: (r: types.CatChaserResult) => r.targetColor === 'RED' ? '빨강' : '파랑' },
-    { header: '선택', accessor: (r: types.CatChaserResult) => {
+    { header: '라운드', accessor: (r: CatChaserResult) => r.round },
+    { header: '타겟', accessor: (r: CatChaserResult) => r.targetColor === 'RED' ? '빨강' : '파랑' },
+    { header: '선택', accessor: (r: CatChaserResult) => {
         if (r.playerChoice === 'TIMEOUT') return '미제출';
         return r.playerChoice === 'CAUGHT' ? '잡았다' : '놓쳤다';
     } },
-    { header: '정답', accessor: (r: types.CatChaserResult) => r.correctChoice === 'CAUGHT' ? '잡았다' : '놓쳤다' },
-    { header: '확신도', accessor: (r: types.CatChaserResult) => r.confidence },
-    { header: '점수', accessor: (r: types.CatChaserResult) => r.score.toFixed(1) },
-    { header: '결과', accessor: (r: types.CatChaserResult) => r.isCorrect ? '정답' : '오답' },
-    { header: '소요시간(ms)', accessor: (r: types.CatChaserResult) => r.responseTimeMs },
+    { header: '정답', accessor: (r: CatChaserResult) => r.correctChoice === 'CAUGHT' ? '잡았다' : '놓쳤다' },
+    { header: '확신도', accessor: (r: CatChaserResult) => r.confidence },
+    { header: '점수', accessor: (r: CatChaserResult) => r.score.toFixed(1) },
+    { header: '결과', accessor: (r: CatChaserResult) => r.isCorrect ? '정답' : '오답' },
+    { header: '소요시간(ms)', accessor: (r: CatChaserResult) => r.responseTimeMs },
   ];
   
   // Charts Data

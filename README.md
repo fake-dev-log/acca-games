@@ -1,11 +1,12 @@
 # Acca Games - AI 역량검사 전략게임 연습
 
-## ⬇️ 다운로드
+## ⬇️ 다운로드 및 웹 버전
 
+*   **Web Version (바로 플레이)**: [https://fake-dev-log.github.io/acca-games/](https://fake-dev-log.github.io/acca-games/)
 *   **macOS**: [acca-games-macos-universal.zip](https://docs.google.com/uc?export=download&id=1NYNRKoUo7PMHXLgq7vOtkHKCh_eL6f7Q)
 *   **Windows**: [acca-games-windows-amd64.zip](https://docs.google.com/uc?export=download&id=1KQ-nS6LQm8nb1H8Iq1WpcBQeQDtzcUki)
 
-AI 역량검사에 나오는 전략게임을 연습하고 결과를 분석할 수 있는 데스크톱 애플리케이션입니다.
+AI 역량검사에 나오는 전략게임을 연습하고 결과를 분석할 수 있는 애플리케이션입니다.
 
 ## ✨ 개발 이유
 
@@ -18,6 +19,7 @@ AI 역량검사를 준비하면서, 특정 유형의 게임을 반복적으로 �
 - **숫자 누르기 (Number Pressing)**
 - **도형 순서 기억하기 (N-Back)**
 - **개수 비교하기 (Count Comparison)**
+- **고양이 술래잡기 (Cat Chaser)**
 
 각 게임의 상세한 기획 내용은 [GAME_PLAN.md](docs/GAME_PLAN.md) 및 [GAME_PLAN_2.md](docs/GAME_PLAN_2.md) 문서에서 확인하실 수 있습니다.
 
@@ -34,6 +36,7 @@ AI 역량검사를 준비하면서, 특정 유형의 게임을 반복적으로 �
 /
 ├── build/              # Wails 빌드 결과물 (실행 파일)
 ├── database/           # 데이터베이스 스키마 및 쿼리
+├── docs/               # 게임 기획 및 튜토리얼 문서
 ├── frontend/           # React 프론트엔드 소스 코드
 ├── games/              # 각 게임의 Go 로직
 ├── types/              # Go 와 프론트엔드에서 공유하는 타입 정의

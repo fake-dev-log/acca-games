@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { DAYS, MAP_CELLS } from '../logic/AppointmentEngine';
+import { MAP_CELLS } from '../logic/AppointmentEngine';
 
 const MENU_EMOJI: Record<string, string> = {
   김밥: '🍙', 라면: '🍜', 떡볶이: '🌶️', 돈가스: '🍖', 짜장면: '🥡', 초밥: '🍣', 피자: '🍕', 햄버거: '🍔',
@@ -19,12 +19,12 @@ const markClass = (mark: Mark) =>
 
 // 한 사람이 보여 주는 선호
 export const PersonItems: FC<{ round: number; items: string[] }> = ({ round, items }) => {
+  // 요일은 그 사람이 고른 카드만, 받은 순서 그대로 보여 준다(예: 일 · 금 · 목). 7장은 마지막 선택 화면에만 나온다.
   if (round === 1) {
     return (
-      <div className="grid grid-cols-7 gap-2">
-        {DAYS.map((day) => (
-          <div key={day} className={`w-14 h-14 rounded-lg flex items-center justify-center text-xl font-bold border-2 ${
-            items.includes(day) ? 'bg-primary text-white border-primary' : 'opacity-30 border-border-light dark:border-border-dark'}`}>
+      <div className="flex gap-3 justify-center">
+        {items.map((day) => (
+          <div key={day} className="w-20 h-24 rounded-lg flex items-center justify-center text-3xl font-bold border-2 bg-primary text-white border-primary">
             {day}
           </div>
         ))}

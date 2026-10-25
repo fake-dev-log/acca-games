@@ -1,15 +1,13 @@
 import { accuracyOf, averageOf } from '@games/stats';
 import { PathResult } from './types';
 
-export const isOptimal = (r: PathResult) => r.isCorrect && r.fencesUsed === r.puzzle.minFences;
-
 export function calculatePathStats(results: PathResult[]) {
   const solved = results.filter((r) => r.isCorrect);
   return {
     solvedCount: solved.length,
+    perfectCount: results.filter((r) => r.verdict === 'perfect').length,
     accuracy: accuracyOf(results), // 푼 문제 비율
-    optimalRate: solved.length ? (solved.filter(isOptimal).length / solved.length) * 100 : 0, // 푼 문제 중 최소 울타리
-    averageExtraClicks: averageOf(solved, (r) => r.clicks - r.puzzle.minClicks),
+    averageExcess: averageOf(solved, (r) => r.excessFences), // 해결한 문제의 평균 초과 설치
     averageSolveTimeMs: averageOf(solved, (r) => r.timeMs),
   };
 }

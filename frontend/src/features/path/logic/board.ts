@@ -28,25 +28,26 @@ export const exitPort = (r: number, c: number, size: number): Port | null => {
   return null;
 };
 
-export const samePort = (a: Port, b: Port) => a.side === b.side && a.index === b.index;
+export const samePort = (a: Port | null, b: Port) => !!a && a.side === b.side && a.index === b.index;
 export const portKey = (p: Port) => `${p.side}:${p.index}`;
 
 export const allPorts = (size: number): Port[] =>
   (['top', 'bottom', 'left', 'right'] as const).flatMap((side) => Array.from({ length: size }, (_, index) => ({ side, index })));
 
 export interface Trace {
-  cells: [number, number][]; // 지나간 칸(순서대로)
-  exit: Port;
+  cells: [number, number][]; // 지나간 칸(순서대로). 벽에 부딪혔으면 마지막이 그 벽 칸
+  exit: Port | null; // null = 벽에 부딪혀 멈춤
 }
 
-// 울타리 배치대로 한 대를 몰아 본다. 거울만 있는 판에서는 바깥에서 들어온 경로가 반드시 밖으로 나간다.
-export function trace(board: Cell[][], entry: Port): Trace {
+// 울타리 배치대로 한 대를 몰아 본다. 거울만 있는 판에서는 바깥에서 들어온 경로가 반드시 밖으로 나가거나 벽에서 멈춘다.
+export function trace(board: Cell[][], entry: Port, walls?: boolean[][]): Trace {
   const size = board.length;
   let [r, c] = entryCell(entry, size);
   let dir = entryDir(entry);
   const cells: [number, number][] = [];
   for (let step = 0; step <= 4 * size * size + 4; step++) {
     cells.push([r, c]);
+    if (walls?.[r][c]) return { cells, exit: null };
     dir = reflect(board[r][c], dir);
     r += dir[0];
     c += dir[1];
@@ -57,7 +58,9 @@ export function trace(board: Cell[][], entry: Port): Trace {
 }
 
 export const emptyBoard = (size: number): Cell[][] => Array.from({ length: size }, () => Array<Cell>(size).fill(null));
+export const noWalls = (size: number): boolean[][] => Array.from({ length: size }, () => Array<boolean>(size).fill(false));
 
 export const countFences = (board: Cell[][]) => board.flat().filter((cell) => cell !== null).length;
 
-export const clickCost = (cell: Cell) => (cell === '/' ? 1 : cell === '\\' ? 2 : 0);
+// 칸 안에서 누른 위치(0~1, 왼쪽 위 기준)에 더 가까운 대각선. 가운데는 '/'.
+export const fenceAt = (x: number, y: number): '/' | '\\' => (Math.abs(x - y) < Math.abs(x + y - 1) ? '\\' : '/');

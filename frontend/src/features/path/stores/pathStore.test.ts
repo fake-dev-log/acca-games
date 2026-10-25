@@ -1,96 +1,104 @@
 import { act } from '@testing-library/react';
 import { vi } from 'vitest';
 import { usePathStore } from './pathStore';
-import { ROUND_CONFIGS } from '../logic/generator';
+import { MAX_CLICKS, REAL_SETTINGS } from '../logic/PathEngine';
 import { PathSettings } from '../logic/types';
 
-const settings: PathSettings = { rounds: [1, 3], timeLimitSec: 180, isRealMode: false };
+const practice: PathSettings = { isRealMode: false, difficulty: 'normal', timeLimitSec: 300, problemCount: 3 };
 const store = () => usePathStore.getState();
 
-// 정답 배치를 클릭으로 놓는다('/' 한 번, '\' 두 번)
-const placeSolution = () => {
-  store().puzzle!.solution.forEach((row, r) => row.forEach((cell, c) => {
-    const times = cell === '/' ? 1 : cell === '\\' ? 2 : 0;
-    for (let i = 0; i < times; i++) act(() => store().clickCell(r, c));
-  }));
+const placeSolution = () => store().puzzle!.solution.forEach((row, r) => row.forEach((cell, c) => {
+  if (cell) act(() => store().toggleAt(r, c, cell));
+}));
+const openCell = (): [number, number] => {
+  const { walls, solution } = store().puzzle!;
+  for (let r = 0; r < walls.length; r++) for (let c = 0; c < walls.length; c++) if (!walls[r][c] && !solution[r][c]) return [r, c];
+  throw new Error('no open cell');
 };
 
 describe('usePathStore', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     act(() => store().resetGame());
-    act(() => store().startGame(settings));
+    act(() => store().startGame(practice));
   });
 
-  it('starts with an empty board of the first round size', () => {
-    expect(store().gameMode).toBe('playing');
-    expect(store().puzzle!.size).toBe(ROUND_CONFIGS[1].size);
-    expect(store().board.flat().every((c) => c === null)).toBe(true);
+  it('places a fence where pressed and removes it on the next press — one click each', () => {
+    const [r, c] = openCell();
+    act(() => store().toggleAt(r, c, '\\'));
+    expect(store().board[r][c]).toBe('\\');
+    act(() => store().toggleAt(r, c, '/'));
+    expect(store().board[r][c]).toBeNull();
+    expect(store().clicks).toBe(2);
   });
 
-  it('cycles a cell empty → / → \\ → empty and counts every click', () => {
-    act(() => store().clickCell(0, 0));
-    expect(store().board[0][0]).toBe('/');
-    act(() => store().clickCell(0, 0));
-    expect(store().board[0][0]).toBe('\\');
-    act(() => store().clickCell(0, 0));
-    expect(store().board[0][0]).toBeNull();
-    expect(store().clicks).toBe(3);
+  it('changes a chosen cell directly in choose mode and ignores no-op changes', () => {
+    const [r, c] = openCell();
+    act(() => store().setCell(r, c, '/'));
+    act(() => store().setCell(r, c, '\\'));
+    act(() => store().setCell(r, c, '\\')); // 같은 값이면 클릭을 쓰지 않는다
+    expect(store().board[r][c]).toBe('\\');
+    expect(store().clicks).toBe(2);
   });
 
-  it('records a solved puzzle with the minimum clicks and moves on after advance', () => {
-    const puzzle = store().puzzle!;
+  it('stops accepting clicks after 20', () => {
+    const [r, c] = openCell();
+    for (let i = 0; i < MAX_CLICKS + 5; i++) act(() => store().toggleAt(r, c, '/'));
+    expect(store().clicks).toBe(MAX_CLICKS);
+  });
+
+  it('records a perfect solve, an excess solve and a wrong answer', () => {
     placeSolution();
-    let ok = false;
-    act(() => { ok = store().launch(); });
-    expect(ok).toBe(true);
-    expect(store().solved).toBe(true);
-    expect(store().results[0]).toMatchObject({ isCorrect: true, fencesUsed: puzzle.minFences, clicks: puzzle.minClicks, attempts: 1, round: 1, revealed: false });
+    act(() => { store().submit(); });
+    expect(store().submitted!.verdict).toBe('perfect');
+    act(() => store().toggleAt(0, 0, '/')); // 제출 뒤 입력은 무시
+    act(() => store().next());
 
-    act(() => { store().launch(); store().clickCell(0, 0); }); // 성공 표시 중 입력은 무시
-    expect(store().results).toHaveLength(1);
-    act(() => store().advance());
-    expect(store().puzzle).not.toBe(puzzle);
-    expect(store().clicks).toBe(0);
-  });
+    placeSolution();
+    const [r, c] = openCell();
+    act(() => store().toggleAt(r, c, '/'));
+    act(() => { store().submit(); });
+    // 남는 울타리 하나가 경로를 바꿀 수도 있어서 초과 설치 또는 오답
+    expect(['excess', 'wrong']).toContain(store().submitted!.verdict);
+    act(() => store().next());
 
-  it('keeps a failed launch on the same puzzle and clears the paths on the next edit', () => {
-    let ok = true;
-    act(() => { ok = store().launch(); }); // 빈 판 — 생성기는 울타리 없이 풀리는 문제를 내지 않는다
-    expect(ok).toBe(false);
-    expect(store().lastCheck!.success).toBe(false);
-    expect(store().attempts).toBe(1);
-    expect(store().results).toHaveLength(0);
-    act(() => store().clickCell(1, 1));
-    expect(store().lastCheck).toBeNull();
-  });
+    act(() => { store().submit(); }); // 빈 판
+    expect(store().submitted!.verdict).toBe('wrong');
 
-  it('records skipped and revealed puzzles as unsolved', () => {
-    act(() => store().clickCell(0, 0));
-    act(() => store().skip());
-    act(() => store().reveal());
-    expect(store().board).toEqual(store().puzzle!.solution);
-    expect(store().lastCheck!.success).toBe(true);
-    act(() => store().skip());
-    expect(store().results.map((r) => [r.isCorrect, r.revealed])).toEqual([[false, false], [false, true]]);
-  });
+    const results = store().results;
+    expect(results.map((x) => x.problemNum)).toEqual([1, 2, 3]);
+    expect(results[0]).toMatchObject({ verdict: 'perfect', isCorrect: true, excessFences: 0 });
+    if (results[1].verdict === 'excess') expect(results[1].excessFences).toBe(1);
+    expect(results[2]).toMatchObject({ verdict: 'wrong', isCorrect: false });
 
-  it('ends a round on time-up, skipping an untouched puzzle, and finishes after the last round', () => {
-    act(() => store().endRound());
-    expect(store().results).toHaveLength(0);
-    expect(store().puzzle!.size).toBe(ROUND_CONFIGS[3].size);
-
-    act(() => store().clickCell(0, 0));
-    act(() => store().endRound());
-    expect(store().results).toHaveLength(1);
-    expect(store().results[0]).toMatchObject({ round: 3, isCorrect: false });
+    act(() => store().next());
     expect(store().gameMode).toBe('result');
   });
 
-  it('refuses to start without rounds', () => {
+  it('on finish, records a touched-but-unsubmitted puzzle as wrong even if the board is right', () => {
+    placeSolution();
+    act(() => store().finish());
+    expect(store().results).toHaveLength(1);
+    expect(store().results[0].verdict).toBe('wrong');
+    expect(store().gameMode).toBe('result');
+  });
+
+  it('does not record an untouched puzzle on finish', () => {
+    act(() => store().finish());
+    expect(store().results).toHaveLength(0);
+  });
+
+  it('refuses walls and refuses to start with zero problems', () => {
     act(() => store().resetGame());
-    act(() => store().startGame({ ...settings, rounds: [] }));
+    act(() => store().startGame({ ...practice, difficulty: 'hard' }));
+    const { walls } = store().puzzle!;
+    const wall = walls.flatMap((row, r) => row.map((w, c) => (w ? [r, c] : null))).find(Boolean)!;
+    act(() => store().toggleAt(wall[0], wall[1], '/'));
+    expect(store().clicks).toBe(0);
+
+    act(() => store().resetGame());
+    act(() => store().startGame({ ...REAL_SETTINGS, problemCount: 0 }));
     expect(store().gameMode).toBe('setup');
-    expect(store().error).toMatch('라운드');
+    expect(store().error).toMatch('문제 수');
   });
 });

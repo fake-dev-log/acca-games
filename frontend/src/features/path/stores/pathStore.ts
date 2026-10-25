@@ -1,10 +1,8 @@
 import { create } from 'zustand';
 import { GameMode } from '@constants/gameModes';
-import { CheckResult, PathGameState, pathEngine } from '../logic/PathEngine';
+import { CheckResult, MAX_CLICKS, PathGameState, pathEngine } from '../logic/PathEngine';
 import { emptyBoard } from '../logic/board';
-import { Cell, PathPuzzle, PathResult, PathSettings } from '../logic/types';
-
-const NEXT: Record<string, Cell> = { null: '/', '/': '\\', '\\': null };
+import { Cell, Fence, PathPuzzle, PathResult, PathSettings } from '../logic/types';
 
 interface PathState {
   gameState: PathGameState | null;
@@ -13,44 +11,41 @@ interface PathState {
   error: string | null;
   results: PathResult[];
 
-  roundIndex: number;
+  index: number; // 지금 문제(0부터)
   puzzle: PathPuzzle | null;
   board: Cell[][];
   clicks: number;
-  attempts: number;
   puzzleStartedAt: number;
-  lastCheck: CheckResult | null; // 마지막 '출발' 결과 — 울타리를 고치면 지운다
-  revealed: boolean;
-  solved: boolean; // 성공 직후 경로를 잠깐 보여 주는 중
+  submitted: CheckResult | null; // 제출 결과 — 다음 문제로 넘어갈 때까지 보여 준다
 
   setGameMode: (mode: GameMode) => void;
   startGame: (settings: PathSettings) => void;
-  clickCell: (r: number, c: number) => void;
-  launch: () => boolean; // 성공하면 기록하고 solved 로 둔다 — 화면이 잠깐 보여 준 뒤 advance
-  advance: () => void;
-  skip: () => void;
-  reveal: () => void;
-  endRound: () => void; // 라운드 시간이 끝났을 때
+  toggleAt: (r: number, c: number, fence: Fence) => void; // 빈칸이면 fence 를 놓고, 울타리가 있으면 치운다
+  setCell: (r: number, c: number, value: Cell) => void; // '칸 누르고 방향 고르기'
+  submit: () => CheckResult | null;
+  next: () => void;
+  finish: () => void; // 시간 종료 · '그만하고 결과 보기'
   resetGame: () => void;
 }
 
-const fresh = (puzzle: PathPuzzle) => ({
-  puzzle, board: emptyBoard(puzzle.size), clicks: 0, attempts: 0, puzzleStartedAt: Date.now(), lastCheck: null, revealed: false, solved: false,
-});
-
 export const usePathStore = create<PathState>((set, get) => {
-  const currentRound = () => {
-    const { gameState, roundIndex } = get();
-    return gameState!.settings.rounds[roundIndex];
+  const load = (index: number) => {
+    const puzzle = pathEngine.puzzleFor(index);
+    return { index, puzzle, board: emptyBoard(puzzle.size), clicks: 0, puzzleStartedAt: Date.now(), submitted: null };
   };
 
-  // 지금 문제를 기록한다(성공으로 이미 기록한 문제는 건너뛴다)
-  const recordCurrent = (isCorrect: boolean) => {
-    const { puzzle, board, clicks, attempts, puzzleStartedAt, revealed, solved } = get();
-    if (!puzzle || solved) return;
-    const result = pathEngine.record({
-      round: currentRound(), puzzle, board, isCorrect, clicks, attempts, timeMs: Date.now() - puzzleStartedAt, revealed,
-    });
+  // 클릭 한 번(최대 MAX_CLICKS)으로 칸을 바꾼다. 벽 · 제출 뒤 · 클릭 소진이면 무시.
+  const change = (r: number, c: number, value: Cell) => {
+    const { puzzle, board, clicks, submitted } = get();
+    if (!puzzle || submitted || clicks >= MAX_CLICKS || puzzle.walls[r][c] || board[r][c] === value) return;
+    const nextBoard = board.map((row) => [...row]);
+    nextBoard[r][c] = value;
+    set({ board: nextBoard, clicks: clicks + 1 });
+  };
+
+  const record = (submitted: boolean) => {
+    const { puzzle, board, clicks, puzzleStartedAt } = get();
+    const result = pathEngine.record(puzzle!, board, clicks, Date.now() - puzzleStartedAt, submitted);
     set((state) => ({ results: [...state.results, result] }));
   };
 
@@ -60,73 +55,53 @@ export const usePathStore = create<PathState>((set, get) => {
     sessionId: null,
     error: null,
     results: [],
-    roundIndex: 0,
+    index: 0,
     puzzle: null,
     board: [],
     clicks: 0,
-    attempts: 0,
     puzzleStartedAt: 0,
-    lastCheck: null,
-    revealed: false,
-    solved: false,
+    submitted: null,
 
     setGameMode: (mode) => set({ gameMode: mode }),
 
     startGame: (settings) => {
       try {
         const gameState = pathEngine.startGame(settings);
-        set({ gameState, sessionId: gameState.id, gameMode: 'playing', error: null, results: [], roundIndex: 0,
-          ...fresh(pathEngine.newPuzzle(settings.rounds[0])) });
+        set({ gameState, sessionId: gameState.id, gameMode: 'playing', error: null, results: [], ...load(0) });
       } catch (err: any) {
         set({ error: err.message || 'Unknown error', gameMode: 'setup' });
       }
     },
 
-    clickCell: (r, c) => {
-      const { board, revealed, solved } = get();
-      if (revealed || solved) return;
-      const next = board.map((row) => [...row]);
-      next[r][c] = NEXT[String(board[r][c])];
-      set((state) => ({ board: next, clicks: state.clicks + 1, lastCheck: null }));
-    },
+    toggleAt: (r, c, fence) => change(r, c, get().board[r]?.[c] ? null : fence),
 
-    launch: () => {
-      const { puzzle, board, revealed, solved } = get();
-      if (!puzzle || revealed || solved) return false;
+    setCell: (r, c, value) => change(r, c, value),
+
+    submit: () => {
+      const { puzzle, board, submitted } = get();
+      if (!puzzle || submitted) return null;
       const check = pathEngine.check(puzzle, board);
-      set((state) => ({ attempts: state.attempts + 1, lastCheck: check }));
-      if (check.success) {
-        recordCurrent(true);
-        set({ solved: true });
-      }
-      return check.success;
+      record(true);
+      set({ submitted: check });
+      return check;
     },
 
-    advance: () => set(fresh(pathEngine.newPuzzle(currentRound()))),
-
-    skip: () => {
-      recordCurrent(false);
-      set(fresh(pathEngine.newPuzzle(currentRound())));
-    },
-
-    reveal: () => {
-      const { puzzle } = get();
-      if (!puzzle) return;
-      set({ revealed: true, board: puzzle.solution.map((row) => [...row]), lastCheck: pathEngine.check(puzzle, puzzle.solution) });
-    },
-
-    endRound: () => {
-      // 시간이 끝났을 때 손도 안 댄 문제는 기록하지 않는다(풀 기회가 없었다)
-      if (get().clicks > 0) recordCurrent(false);
-      const { gameState, roundIndex } = get();
-      if (roundIndex + 1 >= gameState!.settings.rounds.length) {
+    next: () => {
+      const { index, gameState } = get();
+      if (index + 1 >= gameState!.settings.problemCount) {
         set({ puzzle: null, gameMode: 'result' });
         return;
       }
-      const nextRound = gameState!.settings.rounds[roundIndex + 1];
-      set({ roundIndex: roundIndex + 1, ...fresh(pathEngine.newPuzzle(nextRound)) });
+      set(load(index + 1));
     },
 
-    resetGame: () => set({ gameState: null, gameMode: 'setup', sessionId: null, error: null, results: [], puzzle: null, board: [], roundIndex: 0 }),
+    // 풀던 문제는 손을 댔을 때만 기록한다(제출 전에 끝났으면 못 푼 것으로)
+    finish: () => {
+      const { puzzle, submitted, clicks } = get();
+      if (puzzle && !submitted && clicks > 0) record(false);
+      set({ puzzle: null, gameMode: 'result' });
+    },
+
+    resetGame: () => set({ gameState: null, gameMode: 'setup', sessionId: null, error: null, results: [], puzzle: null, board: [], index: 0, submitted: null }),
   };
 });

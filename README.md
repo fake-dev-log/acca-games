@@ -16,8 +16,11 @@ AI 역량검사를 준비하면서, 특정 유형의 게임을 반복적으로 �
 - **도형 순서 기억하기 (N-Back)**
 - **개수 비교하기 (Count Comparison)**
 - **고양이 술래잡기 (Cat Chaser)**
+- **약속 정하기 (Appointment)**
+- **길 만들기 (Path)**
+- **마법약 만들기 (Potion)**
 
-각 게임의 상세한 기획 내용은 [GAME_PLAN.md](docs/GAME_PLAN.md) 및 [GAME_PLAN_2.md](docs/GAME_PLAN_2.md) 문서에서 확인하실 수 있습니다.
+잡다 AI 역량검사 전략게임 9종을 모두 담았습니다. 각 게임의 상세한 기획 내용은 [GAME_PLAN.md](docs/GAME_PLAN.md) · [GAME_PLAN_2.md](docs/GAME_PLAN_2.md) · [GAME_PLAN_3.md](docs/GAME_PLAN_3.md) 문서에서 확인하실 수 있습니다. 새 3종(약속 정하기·길 만들기·마법약 만들기)은 공개 자료(잡다 전략게임 안내·연습 사이트 공략)를 기준으로 만들었고, 자료에 없는 수치는 설정으로 바꿀 수 있게 열어 두었습니다.
 
 ## 📊 기록
 

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { cat_chaser, types } from '@wails/go/models';
-import { startCatChaserGame, submitCatChaserAnswer, getPaginatedCatChaserSessionsWithResults } from '@api/catChaser';
+import { CatChaserGameState, CatChaserProblem, CatChaserResult, CatChaserSettings } from '@features/cat-chaser/logic/types';
+import { catChaserEngine } from '@features/cat-chaser/logic/CatChaserEngine';
 import { GameMode } from '@constants/gameModes';
 
 type GameStep = 'MOUSE' | 'ISI' | 'CAT_NORMAL' | 'CAT_HIGHLIGHT' | 'DECISION_RED' | 'DECISION_BLUE' | 'FEEDBACK';
@@ -10,24 +10,16 @@ interface CatChaserStore {
   sessionId: number | null;
   resetGame: () => void;
 
-  gameState: cat_chaser.CatChaserGameState | null;
+  gameState: CatChaserGameState | null;
   currentRound: number;
   step: GameStep;
 
   // Current Problem Data
-  currentProblem: types.CatChaserProblem | null;
-  results: types.CatChaserResult[];
-  lastResult: types.CatChaserResult | null;
+  currentProblem: CatChaserProblem | null;
+  results: CatChaserResult[];
+  lastResult: CatChaserResult | null;
 
-  // Records
-  loading: boolean;
-  error: string | null;
-  paginatedSessions: {
-    sessions: types.CatChaserSessionWithResults[];
-    totalCount: number;
-  };
-
-  startGame: (settings: types.CatChaserSettings) => Promise<void>;
+  startGame: (settings: CatChaserSettings) => Promise<void>;
   startRound: (round: number) => void;
   setStep: (step: GameStep) => void;
   submitAnswer: (
@@ -36,7 +28,6 @@ interface CatChaserStore {
     confidence: number,
     timeMs: number
   ) => Promise<void>;
-  fetchPaginatedSessions: (page: number, limit: number) => Promise<void>;
 }
 
 export const useCatChaserStore = create<CatChaserStore>((set, get) => ({
@@ -48,15 +39,11 @@ export const useCatChaserStore = create<CatChaserStore>((set, get) => ({
   currentProblem: null,
   results: [],
   lastResult: null,
-  
-  loading: false,
-  error: null,
-  paginatedSessions: { sessions: [], totalCount: 0 },
 
   startGame: async (settings) => {
     set({ gameMode: 'loading' });
     try {
-      const gameState = await startCatChaserGame(settings);
+      const gameState = catChaserEngine.startGame(settings);
       set({
         gameState,
         sessionId: gameState.id,
@@ -90,13 +77,7 @@ export const useCatChaserStore = create<CatChaserStore>((set, get) => ({
   submitAnswer: async (targetColor, choice, confidence, timeMs) => {
     const { currentRound, results } = get();
     try {
-      const result = await submitCatChaserAnswer(
-        currentRound,
-        targetColor,
-        choice,
-        confidence,
-        timeMs
-      );
+      const result = catChaserEngine.submitAnswer(currentRound, targetColor, choice, confidence, timeMs);
       set({ results: [...results, result], lastResult: result });
     } catch (err) {
       console.error('Failed to submit answer:', err);
@@ -111,20 +92,6 @@ export const useCatChaserStore = create<CatChaserStore>((set, get) => ({
     step: 'MOUSE',
     currentProblem: null,
     results: [],
-    loading: false,
-    error: null,
+    lastResult: null,
   }),
-
-  fetchPaginatedSessions: async (page: number, limit: number) => {
-    set({ loading: true, error: null });
-    try {
-      const paginatedResult = await getPaginatedCatChaserSessionsWithResults(page, limit);
-      set({ 
-        paginatedSessions: paginatedResult, 
-        loading: false 
-      });
-    } catch (err: any) {
-      set({ error: `Failed to fetch paginated sessions: ${err.message || 'Unknown error'}`, loading: false });
-    }
-  },
 }));

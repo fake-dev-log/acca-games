@@ -3,13 +3,9 @@ import { vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import { NumberPressingGame } from './NumberPressingGame';
 import { useNumberPressingStore } from '@features/number-pressing/stores/numberPressingStore';
-import { types } from '@wails/go/models';
 
 // Mock dependencies
 vi.mock('@features/number-pressing/stores/numberPressingStore');
-vi.mock('@wails/go/main/App', () => ({
-  CalculateCorrectClicksR2: vi.fn(),
-}));
 
 describe('NumberPressingGame component', () => {
   const mockSetGameMode = vi.fn();
@@ -19,7 +15,7 @@ describe('NumberPressingGame component', () => {
 
   const mockGameState = {
     id: 1,
-    setup: types.NumberPressingSetup.createFrom({
+    setup: ({
       isRealMode: false,
       rounds: [1],
       problemsPerRound: 2,
@@ -27,8 +23,8 @@ describe('NumberPressingGame component', () => {
       timeLimitR2: 60,
     }),
     problemsR1: [
-      types.NumberPressingProblemR1.createFrom({ targetNumber: 5 }),
-      types.NumberPressingProblemR1.createFrom({ targetNumber: 8 }),
+      ({ targetNumber: 5 }),
+      ({ targetNumber: 8 }),
     ],
     problemsR2: [],
   };

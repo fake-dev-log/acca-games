@@ -1,7 +1,7 @@
 import {useState, useEffect, ChangeEvent, FormEvent} from 'react';
 import { useNavigate } from 'react-router-dom';
-import { types } from '@wails/go/models';
-import { getShapeGroups } from '@api/nback';
+import { NBackSettings } from '../logic/types';
+import { SHAPE_GROUPS } from '../logic/NBackEngine';
 import { useNBackStore } from '../stores/nbackStore';
 import { RoundButton } from '@components/game_setup/RoundButton';
 import { ShapeSetButton } from '@components/game_setup/ShapeSetButton';
@@ -21,7 +21,7 @@ export function NBackGameSetup() {
     resetGame,
   } = useNBackStore();
 
-  const [settings, setSettings] = useState<types.NBackSettings>({
+  const [settings, setSettings] = useState<NBackSettings>({
     numTrials: 25,
     presentationTime: 3000, // ms
     nBackLevel: 0,
@@ -33,7 +33,8 @@ export function NBackGameSetup() {
   useEffect(() => {
     // Reset previous game state when entering setup
     resetGame();
-    getShapeGroups().then(setAvailableGroups).catch(console.error);
+    // Simulate async fetch if needed, but here it is sync
+    setAvailableGroups(SHAPE_GROUPS);
   }, [resetGame]);
 
   useEffect(() => {
@@ -50,7 +51,7 @@ export function NBackGameSetup() {
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setSettings((prev: types.NBackSettings) => ({
+    setSettings((prev: NBackSettings) => ({
       ...prev,
       [name]: Number(value),
     }));
@@ -115,7 +116,7 @@ export function NBackGameSetup() {
             name="presentationTime"
             label="도형 제시 시간 (초, 1-10)"
             value={presentationTimeInSeconds}
-            onChange={(e) => setSettings((prev: types.NBackSettings) => ({...prev, presentationTime: Number(e.target.value) * 1000}))}
+            onChange={(e) => setSettings((prev: NBackSettings) => ({...prev, presentationTime: Number(e.target.value) * 1000}))}
             min={1}
             max={10}
             step={0.1}

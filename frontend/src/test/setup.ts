@@ -22,3 +22,5 @@ global.ResizeObserver = class ResizeObserver {
   unobserve = vi.fn();
   disconnect = vi.fn();
 };
+// IndexedDB — jsdom 에는 없다. 기록 저장소를 실제 API 로 돌린다.
+import 'fake-indexeddb/auto';

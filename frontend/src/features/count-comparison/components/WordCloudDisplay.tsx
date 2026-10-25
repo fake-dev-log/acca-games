@@ -1,10 +1,10 @@
 import React from 'react';
-import { types } from '@wails/go/models';
+import { WordDetail, DensityParams } from '../logic/types';
 
 interface WordCloudDisplayProps {
-  words: types.WordDetail[];
+  words: WordDetail[];
   wordText: string; // The actual word (e.g., "강아지")
-  densityParams: types.DensityParams; // Density parameters for the word cloud
+  densityParams: DensityParams; // Density parameters for the word cloud
 }
 
 const WordCloudDisplay: React.FC<WordCloudDisplayProps> = ({ words, wordText, densityParams }) => {

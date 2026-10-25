@@ -4,7 +4,6 @@ import { vi } from 'vitest';
 import { MemoryRouter, useNavigate } from 'react-router-dom';
 import { NBackGameSetup } from './NBackGameSetup';
 import { useNBackStore } from '@features/n-back/stores/nbackStore';
-import { getShapeGroups } from '@api/nback';
 
 // Mock dependencies
 vi.mock('react-router-dom', async () => {
@@ -12,7 +11,6 @@ vi.mock('react-router-dom', async () => {
   return { ...actual as any, useNavigate: vi.fn() };
 });
 vi.mock('@features/n-back/stores/nbackStore');
-vi.mock('@api/nback');
 
 describe('NBackGameSetup component', () => {
   const mockNavigate = vi.fn();
@@ -28,10 +26,6 @@ describe('NBackGameSetup component', () => {
       error: null,
       startGame: mockStartGame,
       resetGame: mockResetGame,
-    });
-    (getShapeGroups as jest.Mock).mockResolvedValue({
-      group1: ['circle', 'square', 'triangle'],
-      group2: ['trapezoid', 'hourglass', 'diamond'],
     });
   });
 

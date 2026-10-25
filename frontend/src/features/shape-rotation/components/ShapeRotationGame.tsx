@@ -1,7 +1,6 @@
 import {FC, useCallback, useEffect, useRef, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import useShapeRotationStore from '../stores/shapeRotationStore';
-import {SubmitShapeRotationAnswerAsync} from '@wails/go/main/App';
 import {GameLayout} from '@components/layout/GameLayout';
 import ShapeDisplay from '@components/shapes/shape_rotation/ShapeDisplay';
 import {Button} from '@components/common/Button';
@@ -24,6 +23,7 @@ const ShapeRotationGame: FC = () => {
     undoTransform,
     clearTransforms,
     nextProblem,
+    submitAnswer,
     setGameMode,
     resetGame,
   } = useShapeRotationStore();
@@ -34,23 +34,20 @@ const ShapeRotationGame: FC = () => {
 
   const currentProblem = problems[currentProblemIndex];
 
-  const handleSubmit = useCallback(async () => {
+  const handleSubmit = useCallback(() => {
     if (answeredRef.current || !sessionId) return;
     answeredRef.current = true;
     
-    // Stop the timer from the hook
-    // The elapsed time will be the time limit since this is called onTimeUp
-    // Or if called manually, it would be Date.now() - startTimeRef.current
     const elapsedTime = Date.now() - startTimeRef.current;
     
-    SubmitShapeRotationAnswerAsync(sessionId, currentProblem, userSolution, elapsedTime, clickCount);
+    submitAnswer(elapsedTime);
 
     if (currentProblemIndex < problems.length - 1) {
       nextProblem();
     } else {
       setGameMode('result');
     }
-  }, [sessionId, currentProblem, userSolution, clickCount, currentProblemIndex, problems.length, nextProblem, setGameMode]);
+  }, [sessionId, currentProblemIndex, problems.length, nextProblem, setGameMode, submitAnswer]);
 
   const { remainingTime, progress, start, stop } = useGameLifecycle({
     onTimeUp: handleSubmit,

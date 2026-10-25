@@ -1,47 +1,27 @@
-import { ComponentType, FC, useEffect } from 'react';
-import { StoreApi, UseBoundStore } from 'zustand';
-import { GameMode } from "@constants/gameModes";
+import { FC, useEffect } from 'react';
+import { GameDefinition } from '@games/types';
+import { GameEndPage } from '@features/common/components/GameEndPage';
 
-interface GameStoreState {
-  gameMode: GameMode;
-  sessionId: number | null;
-  resetGame: () => void;
-}
+export const GamePage: FC<{ game: GameDefinition }> = ({ game }) => {
+  const gameMode = game.useStore((state) => state.gameMode);
+  const resetGame = game.useStore((state) => state.resetGame);
 
-interface GamePageProps {
-  useGameStore: UseBoundStore<StoreApi<GameStoreState>>;
-  SetupComponent: ComponentType;
-  GameComponent: ComponentType;
-  GameEndComponent: ComponentType<{ sessionId: number, onExit: () => void }>;
-}
-
-export const GamePage: FC<GamePageProps> = ({
-  useGameStore, 
-  SetupComponent, 
-  GameComponent, 
-  GameEndComponent 
-}) => {
-  const gameMode = useGameStore((state) => state.gameMode);
-  const sessionId = useGameStore((state) => state.sessionId);
-  const resetGame = useGameStore((state) => state.resetGame);
-
+  // 들어올 때와 나갈 때 모두 초기화 — 이전 판의 결과 화면이 남지 않게
   useEffect(() => {
-    // Reset the game state when the user navigates away from the page.
-    return () => {
-      resetGame();
-    };
+    resetGame();
+    return () => resetGame();
   }, [resetGame]);
 
+  const { Setup, Game } = game;
   switch (gameMode) {
     case 'loading':
       return <div className="flex items-center justify-center h-screen">문제 생성 중...</div>;
     case 'playing':
-      return <GameComponent />;
+      return <Game />;
     case 'result':
-      if (!sessionId) return <div>오류: 세션 ID를 찾을 수 없습니다.</div>;
-      return <GameEndComponent sessionId={sessionId} onExit={resetGame} />;
+      return <GameEndPage game={game} />;
     case 'setup':
     default:
-      return <SetupComponent />;
+      return <Setup />;
   }
 };

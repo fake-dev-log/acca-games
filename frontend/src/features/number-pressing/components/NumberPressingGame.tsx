@@ -1,10 +1,9 @@
 import { useState, useEffect, useCallback, useRef, useMemo, FC } from 'react';
 import { useNumberPressingStore } from '../stores/numberPressingStore';
-import { types } from '@wails/go/models';
+import { numberPressingEngine } from '../logic/NumberPressingEngine';
 import { GameLayout } from '@components/layout/GameLayout';
 import { ProgressBar } from '@components/common/ProgressBar';
 import { Card } from '@components/common/Card';
-import { CalculateCorrectClicksR2 } from '@wails/go/main/App';
 
 // --- Helper Components ---
 interface NumberButtonProps {
@@ -144,12 +143,12 @@ export function NumberPressingGame() {
 
     const timeTaken = (Date.now() - problemStartTimeRef.current) / 1000; // problemStartTimeRef still tracks problem start
     const isCorrect = clickedNumber === currentProblemR1.targetNumber;
-    const result = new types.NumberPressingResultR1({
-      sessionID: gameState!.id,
+    const result = {
+      sessionId: gameState!.id,
       problem: currentProblemR1,
       timeTaken,
       isCorrect,
-    });
+    };
     await submitAnswerR1(result);
     showFeedback(isCorrect);
   }, [status, currentProblemR1, gameState, showFeedback, currentRound, submitAnswerR1, problemStartTimeRef]);
@@ -164,14 +163,14 @@ export function NumberPressingGame() {
 
     if (!isPartialCorrect) {
       const timeTaken = (Date.now() - problemStartTimeRef.current) / 1000;
-      const result = new types.NumberPressingResultR2({
-        sessionID: gameState!.id,
+      const result = {
+        sessionId: gameState!.id,
         problem: currentProblemR2,
         playerClicks: newSequence,
         correctClicks: correctSequence,
         timeTaken,
         isCorrect: false,
-      });
+      };
       await submitAnswerR2(result);
       showFeedback(false);
       return;
@@ -179,14 +178,14 @@ export function NumberPressingGame() {
 
     if (newSequence.length === correctSequence.length) {
       const timeTaken = (Date.now() - problemStartTimeRef.current) / 1000;
-      const result = new types.NumberPressingResultR2({
-        sessionID: gameState!.id,
+      const result = {
+        sessionId: gameState!.id,
         problem: currentProblemR2,
         playerClicks: newSequence,
         correctClicks: correctSequence,
         timeTaken,
         isCorrect: true,
-      });
+      };
       await submitAnswerR2(result);
       showFeedback(true);
     }
@@ -219,7 +218,8 @@ export function NumberPressingGame() {
       if (currentRound === 2 && currentProblemR2) {
         const numbers = Array.from({ length: 9 }, (_, i) => i + 1);
         setShuffledNumbers(numbers.sort(() => Math.random() - 0.5));
-        CalculateCorrectClicksR2(currentProblemR2).then(setCorrectSequence);
+        const correctClicks = numberPressingEngine.calculateCorrectClicksR2(currentProblemR2);
+        setCorrectSequence(correctClicks);
         setPlayerSequence([]);
       }
     } else if (status === 'round-end') {

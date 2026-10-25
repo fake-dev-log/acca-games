@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { Transform } from '@features/shape-rotation/stores/shapeRotationStore';
+import { Transform } from '@features/shape-rotation/logic/types';
 import { FaArrowRotateLeft, FaArrowRotateRight } from "react-icons/fa6";
 import { RiFlipHorizontalFill, RiFlipVerticalFill } from "react-icons/ri";
 

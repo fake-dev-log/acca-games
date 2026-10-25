@@ -3,20 +3,12 @@ import { vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import ShapeRotationGameSetup from './ShapeRotationGameSetup';
 import useShapeRotationStore from '@features/shape-rotation/stores/shapeRotationStore';
-import * as App from '@wails/go/main/App';
 
-// Mock dependencies
 vi.mock('@features/shape-rotation/stores/shapeRotationStore');
-vi.mock('@wails/go/main/App', () => ({
-  SaveShapeRotationSession: vi.fn(),
-  GetShapeRotationProblems: vi.fn(),
-}));
 
 describe('ShapeRotationGameSetup component', () => {
   const mockSetSettings = vi.fn();
-  const mockSetProblems = vi.fn();
-  const mockSetGameMode = vi.fn();
-  const mockSetSessionId = vi.fn();
+  const mockStartGame = vi.fn();
 
   const defaultSettings = {
     round: 1,
@@ -30,12 +22,8 @@ describe('ShapeRotationGameSetup component', () => {
     (useShapeRotationStore as any).mockReturnValue({
       settings: defaultSettings,
       setSettings: mockSetSettings,
-      setProblems: mockSetProblems,
-      setGameMode: mockSetGameMode,
-      setSessionId: mockSetSessionId,
+      startGame: mockStartGame,
     });
-    (App.SaveShapeRotationSession as vi.Mock).mockResolvedValue(123);
-    (App.GetShapeRotationProblems as vi.Mock).mockResolvedValue([]);
   });
 
   const renderComponent = () => {
@@ -56,43 +44,19 @@ describe('ShapeRotationGameSetup component', () => {
   it('calls setSettings when user changes an input', () => {
     renderComponent();
 
-    // Change round
     fireEvent.click(screen.getByRole('button', { name: /4x4 그리드 도형 회전 및 반전/i }));
     expect(mockSetSettings).toHaveBeenCalledWith({ ...defaultSettings, round: 2 });
 
-    // Change number of problems
+    fireEvent.click(screen.getByRole('button', { name: /모든 라운드/i }));
+    expect(mockSetSettings).toHaveBeenCalledWith({ ...defaultSettings, round: 0 });
+
     fireEvent.change(screen.getByLabelText(/문제 수/i), { target: { value: '5' } });
     expect(mockSetSettings).toHaveBeenCalledWith({ ...defaultSettings, numProblems: 5 });
   });
 
-  it('calls functions to start the game on form submission', async () => {
+  it('starts the game on form submission', () => {
     renderComponent();
-
-    // Submit form
     fireEvent.submit(screen.getByRole('button', { name: '게임 시작' }));
-
-    // Check that loading mode is set
-    expect(mockSetGameMode).toHaveBeenCalledWith('loading');
-
-    // Check that session is saved and problems are fetched
-    expect(App.SaveShapeRotationSession).toHaveBeenCalledWith(defaultSettings);
-    await screen.findByText('게임 시작'); // Wait for async operations to complete
-    expect(mockSetSessionId).toHaveBeenCalledWith(123);
-    expect(App.GetShapeRotationProblems).toHaveBeenCalledWith(defaultSettings.round, defaultSettings.numProblems);
-    expect(mockSetProblems).toHaveBeenCalledWith([]);
-
-    // Check that game mode is set to playing
-    expect(mockSetGameMode).toHaveBeenCalledWith('playing');
-  });
-
-  it('reverts to setup mode if starting the game fails', async () => {
-    (App.SaveShapeRotationSession as vi.Mock).mockRejectedValue(new Error('Failed to save'));
-    renderComponent();
-
-    fireEvent.submit(screen.getByRole('button', { name: '게임 시작' }));
-
-    expect(mockSetGameMode).toHaveBeenCalledWith('loading');
-    await screen.findByText('게임 시작'); // Wait for async operations to complete
-    expect(mockSetGameMode).toHaveBeenCalledWith('setup');
+    expect(mockStartGame).toHaveBeenCalledTimes(1);
   });
 });

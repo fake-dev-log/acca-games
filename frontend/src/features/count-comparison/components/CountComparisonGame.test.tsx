@@ -3,7 +3,7 @@ import { vi } from 'vitest';
 import { create, useStore } from 'zustand';
 import { MemoryRouter } from 'react-router-dom';
 import CountComparisonGame from './CountComparisonGame';
-import { types } from '@wails/go/models';
+import { CountComparisonProblem } from '../logic/types';
 
 const mockStore = create<any>((set) => ({
   settings: {
@@ -51,17 +51,17 @@ vi.mock('./WordCloudDisplay', () => ({
 }));
 
 describe('CountComparisonGame component', () => {
-  const mockProblem: types.CountComparisonProblem = types.CountComparisonProblem.createFrom({
+  const mockProblem: CountComparisonProblem = ({
     problemNumber: 1,
     leftWords: [
-      types.WordDetail.createFrom({ text: 'wordA', size: 1.0, weight: 400, isGap: false }),
+      ({ text: 'wordA', size: 1.0, weight: 400, isGap: false }),
     ],
     rightWords: [
-      types.WordDetail.createFrom({ text: 'wordB', size: 1.0, weight: 400, isGap: false }),
+      ({ text: 'wordB', size: 1.0, weight: 400, isGap: false }),
     ],
     leftWordText: 'wordA',
     rightWordText: 'wordB',
-    density: types.DensityInfo.createFrom({ left: {}, right: {} }),
+    density: ({ left: {}, right: {} }),
     presentationTime: 1000,
     inputTime: 3000,
     correctSide: 'right',

@@ -1,15 +1,15 @@
 import { render, screen } from '@testing-library/react';
 import WordCloudDisplay from './WordCloudDisplay';
-import { types } from '@wails/go/models';
+import { DensityParams, WordDetail } from '../logic/types';
 
 describe('WordCloudDisplay', () => {
-  const mockWords: types.WordDetail[] = [
-    types.WordDetail.createFrom({ text: 'test1', size: 1, weight: 400, isGap: false }),
-    types.WordDetail.createFrom({ isGap: true, gapWidth: 2 }),
-    types.WordDetail.createFrom({ text: 'test2', size: 2, weight: 700, isGap: false }),
+  const mockWords: WordDetail[] = [
+    ({ text: 'test1', size: 1, weight: 400, isGap: false }),
+    ({ isGap: true, gapWidth: 2 }),
+    ({ text: 'test2', size: 2, weight: 700, isGap: false }),
   ];
 
-  const mockDensityParams: types.DensityParams = types.DensityParams.createFrom({
+  const mockDensityParams: DensityParams = ({
     areaMultiplier: 1,
   });
 
@@ -41,7 +41,7 @@ describe('WordCloudDisplay', () => {
   });
 
   it('applies container styles based on density', () => {
-    const densityParams: types.DensityParams = types.DensityParams.createFrom({
+    const densityParams: DensityParams = ({
         areaMultiplier: 1.5,
     });
     const { container } = render(<WordCloudDisplay words={mockWords} wordText="test" densityParams={densityParams} />);

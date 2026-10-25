@@ -1,5 +1,5 @@
 import { useState, useEffect, FormEvent } from 'react';
-import { types } from '@wails/go/models';
+import { CatChaserSettings } from '@features/cat-chaser/logic/types';
 import { useCatChaserStore } from '../stores/useCatChaserStore';
 import { PageLayout } from '@components/layout/PageLayout';
 import { Button } from '@components/common/Button';
@@ -13,13 +13,13 @@ export function CatChaserGameSetup() {
     resetGame,
   } = useCatChaserStore();
 
-  const [settings, setSettings] = useState<types.CatChaserSettings>(new types.CatChaserSettings({
+  const [settings, setSettings] = useState<CatChaserSettings>({
     numTrials: 6,
     difficulty: 'auto',
     showTime: 1.0,
     responseTimeLimit: 3.0,
     isRealMode: false,
-  }));
+  });
 
   useEffect(() => {
     resetGame();

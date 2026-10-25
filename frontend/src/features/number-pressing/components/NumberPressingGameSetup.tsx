@@ -1,6 +1,6 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { useNumberPressingStore } from '../stores/numberPressingStore';
-import { types } from '@wails/go/models';
+import { NumberPressingSetup } from '../logic/types';
 import { PageLayout } from '@components/layout/PageLayout';
 import { Button } from '@components/common/Button';
 import { NumberInput } from '@components/common/NumberInput';
@@ -10,7 +10,7 @@ import { RoundButton } from '@components/game_setup/RoundButton';
 export function NumberPressingGameSetup() {
   const { loading, error, startGame, resetGame } = useNumberPressingStore();
 
-  const [settings, setSettings] = useState<types.NumberPressingSetup>({
+  const [settings, setSettings] = useState<NumberPressingSetup>({
     isRealMode: false,
     rounds: [1, 2],
     problemsPerRound: 10,

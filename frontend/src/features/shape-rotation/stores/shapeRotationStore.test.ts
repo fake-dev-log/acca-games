@@ -1,6 +1,7 @@
 import { act } from '@testing-library/react';
 import { vi } from 'vitest';
-import useShapeRotationStore, { ShapeRotationProblem, Transform } from './shapeRotationStore';
+import useShapeRotationStore from './shapeRotationStore';
+import { Transform } from '../logic/types';
 
 const initialState = useShapeRotationStore.getState();
 
@@ -25,38 +26,36 @@ describe('useShapeRotationStore', () => {
       });
       expect(useShapeRotationStore.getState().settings).toEqual(newSettings);
     });
-
-    it('should set problems', () => {
-      const mockProblems: ShapeRotationProblem[] = [
-        { ID: 1, Round: 1, InitialShape: 'path1', FinalShape: 'path2', MinMoves: 1, Solution: ['flip_horizontal'], InitialShapeCenterX: 0, InitialShapeCenterY: 0, FinalShapeCenterX: 0, FinalShapeCenterY: 0 },
-      ];
-      act(() => {
-        useShapeRotationStore.getState().setProblems(mockProblems);
-      });
-      expect(useShapeRotationStore.getState().problems).toEqual(mockProblems);
-    });
   });
 
   describe('game flow', () => {
-    it('should start a round', () => {
+    it('starts both rounds when round 0 is selected', () => {
       act(() => {
-        useShapeRotationStore.setState({
-          gameMode: 'setup',
-          currentProblemIndex: 5,
-          userSolution: ['flip_vertical'],
-        });
+        useShapeRotationStore.getState().setSettings({ round: 0, numProblems: 2, timeLimit: 60, isRealMode: false });
+        useShapeRotationStore.getState().startGame();
       });
-
-      act(() => {
-        useShapeRotationStore.getState().startRound();
-      });
-
       const state = useShapeRotationStore.getState();
       expect(state.gameMode).toBe('playing');
+      expect(state.problems.map((p) => p.Round)).toEqual([1, 1, 2, 2]);
+      expect(state.sessionId).not.toBeNull();
       expect(state.currentProblemIndex).toBe(0);
-      expect(state.userSolution).toEqual([]);
-      expect(state.clickCount).toBe(0);
-      expect(state.isCorrect).toBeNull();
+    });
+
+    it('stores a snapshot of the problem with each answer', () => {
+      act(() => {
+        useShapeRotationStore.getState().setSettings({ round: 1, numProblems: 2, timeLimit: 60, isRealMode: false });
+        useShapeRotationStore.getState().startGame();
+      });
+      const problem = useShapeRotationStore.getState().problems[0];
+      act(() => {
+        problem.Solution.forEach((t) => useShapeRotationStore.getState().addTransform(t));
+        useShapeRotationStore.getState().submitAnswer(1234);
+      });
+      const [result] = useShapeRotationStore.getState().results;
+      expect(result.isCorrect).toBe(true);
+      expect(result.problem).toEqual(problem);
+      expect(result.solveTime).toBe(1234);
+      expect(result.clickCount).toBe(problem.Solution.length);
     });
 
     it('should proceed to the next problem', () => {

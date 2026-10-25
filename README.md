@@ -1,16 +1,12 @@
 # Acca Games - AI 역량검사 전략게임 연습
 
-## ⬇️ 다운로드 및 웹 버전
+**바로 플레이**: [https://fake-dev-log.github.io/acca-games/](https://fake-dev-log.github.io/acca-games/)
 
-*   **Web Version (바로 플레이)**: [https://fake-dev-log.github.io/acca-games/](https://fake-dev-log.github.io/acca-games/)
-*   **macOS**: [acca-games-macos-universal.zip](https://docs.google.com/uc?export=download&id=1NYNRKoUo7PMHXLgq7vOtkHKCh_eL6f7Q)
-*   **Windows**: [acca-games-windows-amd64.zip](https://docs.google.com/uc?export=download&id=1KQ-nS6LQm8nb1H8Iq1WpcBQeQDtzcUki)
-
-AI 역량검사에 나오는 전략게임을 연습하고 결과를 분석할 수 있는 애플리케이션입니다.
+AI 역량검사에 나오는 전략게임을 연습하고 결과를 분석할 수 있는 웹 앱입니다. 설치 없이 브라우저에서 돌아가고, 플레이 기록은 그 브라우저에 저장됩니다.
 
 ## ✨ 개발 이유
 
-AI 역량검사를 준비하면서, 특정 유형의 게임을 반복적으로 연습하고 약점을 파악할 수 있는 도구가 필요했습니다. 이 프로젝트는 사용자가 자신의 컴퓨터에서 편하게 연습하고, 플레이 기록을 로컬에 저장하여 스스로의 성과를 추적하고 분석할 수 있도록 돕기 위해 시작되었습니다.
+AI 역량검사를 준비하면서, 특정 유형의 게임을 반복적으로 연습하고 약점을 파악할 수 있는 도구가 필요했습니다. 이 프로젝트는 사용자가 편하게 연습하고, 플레이 기록을 로컬에 저장하여 스스로의 성과를 추적하고 분석할 수 있도록 돕기 위해 시작되었습니다.
 
 ## 🎮 포함된 게임
 
@@ -23,91 +19,47 @@ AI 역량검사를 준비하면서, 특정 유형의 게임을 반복적으로 �
 
 각 게임의 상세한 기획 내용은 [GAME_PLAN.md](docs/GAME_PLAN.md) 및 [GAME_PLAN_2.md](docs/GAME_PLAN_2.md) 문서에서 확인하실 수 있습니다.
 
+## 📊 기록
+
+- 게임을 끝까지 마치면 세션 하나가 브라우저 IndexedDB 에 저장됩니다. 중간에 나간 판은 저장하지 않습니다.
+- **기록** 화면에서 게임별 추이(정답률·반응 시간 등)와 세션별 상세(라운드·유형별 정답률, 문제별 결과)를 볼 수 있습니다.
+- 기록은 그 브라우저에만 있습니다. 브라우저의 사이트 데이터를 지우거나 다른 기기·브라우저에서 열면 보이지 않습니다.
+
 ## 🛠️ 기술 스택
 
-- **Application Framework**: [Wails](https://wails.io/) (Go + Web Technologies)
-- **Backend**: Go
-- **Frontend**: React, TypeScript, Vite, Tailwind CSS
-- **Database**: SQLite
+- **Frontend**: React, TypeScript, Vite, Tailwind CSS, Zustand
+- **저장소**: 브라우저 IndexedDB
+- **배포**: GitHub Pages (`main` push 시 GitHub Actions 가 테스트·빌드 후 `gh-pages` 브랜치로 배포)
 
 ## 📂 프로젝트 구조
 
 ```
-/
-├── build/              # Wails 빌드 결과물 (실행 파일)
-├── database/           # 데이터베이스 스키마 및 쿼리
-├── docs/               # 게임 기획 및 튜토리얼 문서
-├── frontend/           # React 프론트엔드 소스 코드
-├── games/              # 각 게임의 Go 로직
-├── types/              # Go 와 프론트엔드에서 공유하는 타입 정의
-├── app.go              # Wails 애플리케이션 기본 로직
-├── main.go             # 애플리케이션 진입점
-└── wails.json          # Wails 프로젝트 설정
+frontend/src/
+├── games/        # 게임 레지스트리(registry.ts)와 공용 타입·집계 헬퍼
+├── features/     # 게임별 폴더: logic/(엔진·타입) · stores/ · components/ · definition.ts
+├── records/      # IndexedDB 기록 저장소
+├── pages/        # 메인·게임 선택·기록 화면
+└── components/   # 공용 UI·레이아웃
 ```
 
-## 🚀 시작하기
+새 게임은 `features/<게임>/definition.ts` 에 정의를 만들고 `games/registry.ts` 에 한 줄 추가하면 라우트·게임 선택·결과·기록 화면에 모두 붙습니다.
 
-### 사전 요구사항
+## 🚀 개발
 
-- [Go](https://golang.org/doc/install) (v1.18 이상)
-- [Node.js](https://nodejs.org/en/download/) (v16 이상)
-- [Wails CLI](https://wails.io/docs/gettingstarted/installation)
-
-### 개발 모드 실행
-
-1.  **의존성 설치**
-    ```bash
-    # frontend/ 디렉토리에서 npm 패키지 설치
-    cd frontend
-    npm install
-    cd ..
-    ```
-
-2.  **개발 서버 실행**
-    ```bash
-    wails dev
-    ```
-    애플리케이션이 개발 모드로 실행되며, 코드 변경 시 자동으로 리로드됩니다.
-
-## 📦 빌드하기
-
-Wails는 크로스 컴파일을 지원하지만, 호스트 OS와 타겟 OS에 따라 추가 설정이 필요할 수 있습니다.
-
-### ✅ macOS에서 빌드
-
-#### 네이티브 macOS 앱 빌드
 ```bash
-wails build
+cd frontend
+npm install
+npm run dev     # 개발 서버
+npm test        # 테스트 (vitest)
+npm run build   # 타입 검사 + 프로덕션 빌드
 ```
 
-#### Windows용 앱 크로스 컴파일 (Apple Silicon Mac 기준)
-Apple Silicon (arm64) Mac에서 Windows (amd64)용으로 빌드할 때는 몇 가지 추가 단계가 필요합니다.
+## 🖥️ 데스크톱 버전 (구버전)
 
-1.  **MinGW-w64 설치**: Windows용 C 크로스 컴파일러를 설치합니다.
-    ```bash
-    brew install mingw-w64
-    ```
+예전에는 Wails(Go + SQLite) 데스크톱 앱으로 배포했습니다. 지금은 웹 버전만 관리하고, 데스크톱 코드는 `desktop-v1` 태그에 남겨 두었습니다. 아래 파일은 게임 6종이 들어 있는 마지막 데스크톱 빌드입니다.
 
-2.  **빌드 명령어 실행**: `CGO_ENABLED=1`과 `CC` 환경 변수를 설정하여 CGO를 활성화하고, Windows용 C 컴파일러를 지정해줘야 합니다. 또한, 이 프로젝트는 `time.LoadLocation`을 사용하므로 `main.go`에 `import _ "time/tzdata"`가 포함되어 있어야 합니다.
-
-    ```bash
-    CC=/opt/homebrew/bin/x86_64-w64-mingw32-gcc CGO_ENABLED=1 \
-    wails build -platform windows/amd64
-    ```
-    *참고: Homebrew 설치 경로가 다른 경우 `CC` 변수의 경로를 실제 `x86_64-w64-mingw32-gcc` 위치에 맞게 수정해야 합니다.*
-
-### ✅ Windows에서 빌드
-
-#### 네이티브 Windows 앱 빌드
-```bash
-wails build
-```
-
-#### macOS용 앱 크로스 컴파일
-Windows에서 macOS용으로 크로스 컴파일하는 것은 매우 복잡하며, 일반적으로 권장되지 않습니다. Apple의 라이선스 및 기술적 제약으로 인해 macOS 가상 머신 또는 실제 Mac 장비에서 빌드하는 것이 가장 안정적인 방법입니다.
-
----
-빌드가 완료되면 `build/bin` 디렉토리에서 실행 파일을 찾을 수 있습니다.
+*   **macOS**: [acca-games-macos-universal.zip](https://docs.google.com/uc?export=download&id=1NYNRKoUo7PMHXLgq7vOtkHKCh_eL6f7Q)
+*   **Windows**: [acca-games-windows-amd64.zip](https://docs.google.com/uc?export=download&id=1KQ-nS6LQm8nb1H8Iq1WpcBQeQDtzcUki)
 
 ## 📄 라이선스
 

@@ -4,7 +4,7 @@ import { vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import { NBackGame } from './NBackGame';
 import { useNBackStore } from '@features/n-back/stores/nbackStore';
-import { nback } from '@wails/go/models';
+import { NBackGameState } from '../logic/types';
 
 // Mock the store
 vi.mock('@features/n-back/stores/nbackStore');
@@ -32,7 +32,7 @@ describe('NBackGame component', () => {
   const mockResetGame = vi.fn();
   const mockSetGameMode = vi.fn();
 
-  const mockGameState: nback.NBackGameState = nback.NBackGameState.createFrom({
+  const mockGameState: NBackGameState = ({
     settings: {
       numTrials: 3,
       presentationTime: 1000,

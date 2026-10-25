@@ -4,14 +4,10 @@ import { vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import ShapeRotationGame from './ShapeRotationGame';
 import useShapeRotationStore from '@features/shape-rotation/stores/shapeRotationStore';
-import * as App from '@wails/go/main/App';
-import { shape_rotation } from '@wails/go/models';
+import { ShapeRotationProblem } from '../logic/types';
 
 // Mock dependencies
 vi.mock('@features/shape-rotation/stores/shapeRotationStore');
-vi.mock('@wails/go/main/App', () => ({
-  SubmitShapeRotationAnswerAsync: vi.fn(),
-}));
 vi.mock('@components/layout/GameLayout', () => ({ 
   GameLayout: ({ children, onExit }: { children: ReactNode, onExit: () => void }) => (
     <div>
@@ -28,8 +24,12 @@ describe('ShapeRotationGame component', () => {
   const mockNextProblem = vi.fn();
   const mockSetGameMode = vi.fn();
   const mockResetGame = vi.fn();
+  const mockSubmitAnswer = vi.fn();
 
-  const mockProblem: shape_rotation.Problem = {
+  const mockProblem: ShapeRotationProblem = {
+    ID: 1,
+    Round: 1,
+    Solution: ['flip_horizontal'],
     InitialShape: 'F',
     FinalShape: 'G',
     MinMoves: 1,
@@ -53,6 +53,7 @@ describe('ShapeRotationGame component', () => {
     clearTransforms: mockClearTransforms,
     nextProblem: mockNextProblem,
     setGameMode: mockSetGameMode,
+    submitAnswer: mockSubmitAnswer,
     resetGame: mockResetGame,
   };
 
@@ -60,7 +61,6 @@ describe('ShapeRotationGame component', () => {
     vi.clearAllMocks();
     vi.useFakeTimers();
     (useShapeRotationStore as any).mockReturnValue(defaultStoreState);
-    (App.SubmitShapeRotationAnswerAsync as vi.Mock).mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -116,7 +116,7 @@ describe('ShapeRotationGame component', () => {
       fireEvent.click(screen.getByRole('button', { name: '답안 제출' }));
     });
 
-    expect(App.SubmitShapeRotationAnswerAsync).toHaveBeenCalled();
+    expect(mockSubmitAnswer).toHaveBeenCalledWith(expect.any(Number));
     expect(mockNextProblem).toHaveBeenCalledTimes(1);
   });
 
@@ -127,7 +127,7 @@ describe('ShapeRotationGame component', () => {
       fireEvent.click(screen.getByRole('button', { name: '답안 제출' }));
     });
 
-    expect(App.SubmitShapeRotationAnswerAsync).toHaveBeenCalled();
+    expect(mockSubmitAnswer).toHaveBeenCalledWith(expect.any(Number));
     expect(mockSetGameMode).toHaveBeenCalledWith('result');
   });
 

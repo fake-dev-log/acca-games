@@ -56,14 +56,15 @@ export const PotionResultDetail: FC<{ results: PotionResult[] }> = ({ results })
   const stats = calculatePotionStats(results);
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6 mt-8 text-left">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard label="정답률 (채점 문제)" value={`${stats.accuracy.toFixed(1)}%`} note={`채점 ${stats.scoredCount} / 전체 ${results.length}`} />
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <StatCard label="최적 선택률" value={`${stats.accuracy.toFixed(1)}%`} note={`확률 높은 쪽 · 채점 ${stats.scoredCount}/${results.length}`} />
+        <StatCard label="예측 적중률" value={`${stats.predictionHitRate.toFixed(1)}%`} note="실제 결과와 같게 고름" />
         <StatCard label="레시피 변경 전" value={`${stats.beforeAccuracy.toFixed(1)}%`} />
         <StatCard label="변경 후 · 바뀐 조합" value={stats.hasChange ? `${stats.afterChangedAccuracy.toFixed(1)}%` : '-'} note="새 레시피에 적응" />
         <StatCard label="변경 후 · 안 바뀐 조합" value={stats.hasChange ? `${stats.afterUnchangedAccuracy.toFixed(1)}%` : '-'} note="괜히 바꿔 답하지 않기" />
       </div>
       <p className="text-sm opacity-70">
-        정답은 실제로 나온 약이 아니라 그 시점 레시피에서 나올 가능성이 높은 약입니다. 처음 본 조합과 레시피가 바뀐 뒤 처음 본 조합은 채점하지 않습니다.
+        정답(최적 선택)은 실제로 나온 약이 아니라 그 시점 레시피에서 나올 가능성이 높은 약입니다. 예측 적중률은 확률 때문에 최적 선택률보다 낮게 나오는 게 정상입니다. 처음 본 조합과 레시피가 바뀐 뒤 처음 본 조합은 채점하지 않습니다.
       </p>
 
       <Card title="레시피 (노란 줄 = 중간에 바뀐 조합)" bordered><RecipeTable results={results} /></Card>

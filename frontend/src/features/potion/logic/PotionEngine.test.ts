@@ -4,7 +4,7 @@ import { calculatePotionStats } from './stats';
 import { PotionSettings } from './types';
 
 const settings = (overrides: Partial<PotionSettings> = {}): PotionSettings => ({
-  numTrials: 60, responseTimeLimitMs: 3000, dominantProbability: 0.8, recipeChange: true, ...overrides,
+  numTrials: 60, responseTimeLimitMs: 3000, dominantProbability: 0.8, recipeChange: true, isRealMode: false, ...overrides,
 });
 
 describe('COMBOS', () => {
@@ -67,6 +67,20 @@ describe('PotionEngine', () => {
     expect(hits / total).toBeLessThan(0.85);
   });
 
+  it('spaces repeats of the same combo at least 3 trials apart and keeps counts balanced', () => {
+    const engine = new PotionEngine();
+    for (let k = 0; k < 30; k++) {
+      const { trials } = engine.startGame(settings({ numTrials: 100 }));
+      const keys = trials.map((t) => comboKey(t.combo));
+      for (let i = 2; i < keys.length; i++) {
+        expect(keys[i]).not.toBe(keys[i - 1]);
+        expect(keys[i]).not.toBe(keys[i - 2]);
+      }
+      const counts = COMBOS.map((c) => keys.filter((key) => key === comboKey(c)).length);
+      expect(Math.max(...counts) - Math.min(...counts)).toBeLessThanOrEqual(1);
+    }
+  });
+
   it('never changes the recipe when recipeChange is off', () => {
     const { trials, changeAt } = new PotionEngine().startGame(settings({ recipeChange: false }));
     expect(changeAt).toBeNull();
@@ -94,7 +108,8 @@ describe('calculatePotionStats', () => {
       { ...base, trialNum: 4, phase: 'after' as const, changedCombo: false, scored: true, isCorrect: true },
     ];
     expect(calculatePotionStats(results)).toEqual({
-      scoredCount: 3, accuracy: (2 / 3) * 100, beforeAccuracy: 100, afterChangedAccuracy: 0, afterUnchangedAccuracy: 100, hasChange: true,
+      scoredCount: 3, accuracy: (2 / 3) * 100, predictionHitRate: 100,
+      beforeAccuracy: 100, afterChangedAccuracy: 0, afterUnchangedAccuracy: 100, hasChange: true,
     });
     expect(calculatePotionStats([])).toMatchObject({ scoredCount: 0, accuracy: 0, hasChange: false });
   });

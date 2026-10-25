@@ -1,5 +1,6 @@
 import { PotionColor, PotionGameState, PotionResult, PotionSettings, PotionTrial } from './types';
 
+
 export const INGREDIENTS = [
   { emoji: '🍄', name: '버섯' },
   { emoji: '🌿', name: '약초' },
@@ -14,6 +15,28 @@ export const COMBOS: number[][] = Array.from({ length: 15 }, (_, mask) => mask +
   .sort((a, b) => a.length - b.length || a.join().localeCompare(b.join()));
 
 export const CHANGED_COMBO_COUNT = 4;
+const MIN_REPEAT_GAP = 3; // 같은 조합은 최소 3문제 간격을 두고 다시 나온다
+
+// 실전: 100문항 · 3초 · 우세 색 80% · 레시피 변경 있음
+export const REAL_SETTINGS: PotionSettings = {
+  numTrials: 100, responseTimeLimitMs: 3000, dominantProbability: 0.8, recipeChange: true, isRealMode: true,
+};
+
+// 조합 순서: 지금까지 덜 나온 조합을 우선하되, 바로 앞 몇 문제에 나온 조합은 피한다
+function comboSequence(n: number): number[][] {
+  const counts = new Map(COMBOS.map((c) => [comboKey(c), 0]));
+  const sequence: number[][] = [];
+  for (let i = 0; i < n; i++) {
+    const recent = new Set(sequence.slice(-(MIN_REPEAT_GAP - 1)).map(comboKey));
+    const allowed = COMBOS.filter((c) => !recent.has(comboKey(c)));
+    const least = Math.min(...allowed.map((c) => counts.get(comboKey(c))!));
+    const candidates = allowed.filter((c) => counts.get(comboKey(c)) === least);
+    const combo = candidates[Math.floor(Math.random() * candidates.length)];
+    counts.set(comboKey(combo), least + 1);
+    sequence.push(combo);
+  }
+  return sequence;
+}
 
 export const comboKey = (combo: number[]) => combo.join(',');
 export const flip = (color: PotionColor): PotionColor => (color === 'RED' ? 'BLUE' : 'RED');
@@ -40,13 +63,10 @@ export class PotionEngine {
     const changeAt = settings.recipeChange ? Math.floor(n * (0.4 + Math.random() * 0.2)) + 1 : null;
     const changed = new Set(shuffle(COMBOS).slice(0, CHANGED_COMBO_COUNT).map(comboKey));
 
-    // 14개씩 묶어 섞어서 조합이 고르게 나오게 한다
-    const sequence: number[][] = [];
-    while (sequence.length < n) sequence.push(...shuffle(COMBOS));
-
+    const sequence = comboSequence(n);
     const seen = new Set<string>();
     const seenAfterChange = new Set<string>();
-    const trials: PotionTrial[] = sequence.slice(0, n).map((combo, i) => {
+    const trials: PotionTrial[] = sequence.map((combo, i) => {
       const trialNum = i + 1;
       const key = comboKey(combo);
       const phase = changeAt !== null && trialNum >= changeAt ? 'after' : 'before';

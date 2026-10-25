@@ -4,6 +4,7 @@ import { PotionColor, PotionResult } from '../logic/types';
 import { GameLayout } from '@components/layout/GameLayout';
 import { ProgressBar } from '@components/common/ProgressBar';
 import { useGameLifecycle } from '@hooks/useGameLifecycle';
+import { comboKey } from '../logic/PotionEngine';
 import { IngredientCards, PotionBadge } from './PotionParts';
 
 const OUTCOME_MS = 1000;
@@ -66,6 +67,10 @@ export function PotionGame() {
 
   if (!trial || !settings) return null;
 
+  // 연습 모드 표시: 같은 조합이 지난번에 다른 약을 냈는지(플레이어가 직접 본 결과만으로 판단한다)
+  const lastTime = [...trials.slice(0, index)].reverse().find((t) => comboKey(t.combo) === comboKey(trial.combo));
+  const differsFromLastTime = !!(shown && lastTime && lastTime.outcome !== trial.outcome);
+
   return (
     <GameLayout onExit={resetGame}>
       <div className="absolute top-4 left-4 font-mono text-lg">{index + 1} / {trials.length}</div>
@@ -79,6 +84,7 @@ export function PotionGame() {
             <>
               <p className="text-2xl">만들어진 약: <PotionBadge color={shown.outcome} /></p>
               {shown.playerChoice === null && <p className="text-sm text-danger">시간 초과</p>}
+              {!settings.isRealMode && differsFromLastTime && <p className="text-sm font-bold text-warning">같은 조합인데 지난번과 다른 약이 나왔어요</p>}
             </>
           )}
         </div>

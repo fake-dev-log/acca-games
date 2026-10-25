@@ -22,6 +22,7 @@ export const potionGame: GameDefinition<PotionSettings, PotionResult> = {
   ResultDetail: PotionResultDetail,
   selectRecord: (state) => ({ settings: state.gameState!.settings, results: state.results }),
   formatSettings: (s) => [
+    `실전 모드: ${s.isRealMode ? 'ON' : 'OFF'}`,
     `문제 수: ${s.numTrials}개`,
     `응답 제한 시간: ${s.responseTimeLimitMs / 1000}초`,
     `우세 색 확률: ${Math.round(s.dominantProbability * 100)}%`,
@@ -32,6 +33,7 @@ export const potionGame: GameDefinition<PotionSettings, PotionResult> = {
     const stats = calculatePotionStats(results);
     return {
       accuracy: stats.accuracy,
+      predictionHitRate: stats.predictionHitRate,
       averageTimeMs: averageOf(results, (r) => r.responseTimeMs),
       beforeAccuracy: stats.beforeAccuracy,
       afterChangedAccuracy: stats.afterChangedAccuracy,
@@ -39,7 +41,8 @@ export const potionGame: GameDefinition<PotionSettings, PotionResult> = {
     };
   },
   metricOptions: [
-    { value: 'accuracy', label: '정답률 (%, 채점 문제)' },
+    { value: 'accuracy', label: '최적 선택률 (%, 채점 문제)' },
+    { value: 'predictionHitRate', label: '예측 적중률 (%)' },
     { value: 'beforeAccuracy', label: '레시피 변경 전 정답률 (%)' },
     { value: 'afterChangedAccuracy', label: '변경 후 바뀐 조합 정답률 (%)' },
     { value: 'afterUnchangedAccuracy', label: '변경 후 안 바뀐 조합 정답률 (%)' },

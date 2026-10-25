@@ -6,6 +6,7 @@ export interface PotionSettings {
   responseTimeLimitMs: number;
   dominantProbability: number; // 0.6 ~ 0.95 — 조합의 우세 색이 실제로 나올 확률
   recipeChange: boolean; // 중간에 레시피 일부를 뒤집을지
+  isRealMode: boolean; // 실전: 100문항 고정 · 연습 전용 표시 없음
 }
 
 export interface PotionTrial {

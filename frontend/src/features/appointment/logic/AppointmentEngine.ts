@@ -1,17 +1,23 @@
 import { AppointmentGameState, AppointmentProblem, AppointmentResult, AppointmentSettings } from './types';
 
 export const DAYS = ['월', '화', '수', '목', '금', '토', '일'];
-export const MAP_CELLS = Array.from({ length: 16 }, (_, i) => String(i)); // 4×4, 왼쪽 위부터 행 순서
+export const PLACES = Array.from({ length: 16 }, (_, i) => String(i)); // 마을 지도의 건물 16채, 왼쪽 위부터 행 순서
 export const MENUS = ['김밥', '라면', '떡볶이', '돈가스', '짜장면', '초밥', '피자', '햄버거'];
 
-export const ROUND_INFO: Record<number, { name: string; question: string; baseItems: number }> = {
-  1: { name: '요일', question: '세 사람 모두 가능한 요일은?', baseItems: 3 },
-  2: { name: '위치', question: '세 사람 모두 표시한 위치는?', baseItems: 4 },
-  3: { name: '메뉴', question: '세 사람 모두 고른 메뉴는?', baseItems: 3 },
-  4: { name: '버스', question: '아무도 타지 않은 버스는?', baseItems: 2 },
+export const ROUND_INFO: Record<number, { name: string; question: string }> = {
+  1: { name: '요일', question: '어떤 요일에 만나면 좋을까요?' },
+  2: { name: '장소', question: '어떤 장소에서 만나면 좋을까요?' },
+  3: { name: '메뉴', question: '어떤 메뉴를 먹으면 좋을까요?' },
+  4: { name: '버스', question: '아무도 타지 않은 버스는?' },
+};
+
+// 실전: 4라운드 × 10문항, 한 사람 1초, 응답 3초
+export const REAL_SETTINGS: AppointmentSettings = {
+  rounds: [1, 2, 3, 4], problemsPerRound: 10, presentationTimeMs: 1000, responseTimeLimitMs: 3000, isRealMode: true,
 };
 
 const PEOPLE = 3;
+const BASE_ITEMS = 3; // 라운드 후반(6번째 문항부터)은 4개
 
 const shuffle = <T>(items: T[]): T[] => {
   const a = [...items];
@@ -29,8 +35,7 @@ function commonOnly(universe: string[], answer: string, perPerson: number): stri
   const others = universe.filter((u) => u !== answer);
   while (true) {
     const people = Array.from({ length: PEOPLE }, () => shuffle([answer, ...pick(others, perPerson - 1)]));
-    const sharedByAll = others.filter((o) => people.every((p) => p.includes(o)));
-    if (sharedByAll.length === 0) return people;
+    if (others.every((o) => !people.every((p) => p.includes(o)))) return people;
   }
 }
 
@@ -45,6 +50,9 @@ function busNumbers(count: number): string[] {
   return [...set];
 }
 
+export const itemsPerPersonAt = (index: number, problemsPerRound: number) =>
+  BASE_ITEMS + (index >= Math.ceil(problemsPerRound / 2) ? 1 : 0);
+
 export class AppointmentEngine {
   private state: AppointmentGameState | null = null;
   private results: AppointmentResult[] = [];
@@ -52,10 +60,17 @@ export class AppointmentEngine {
   public startGame(settings: AppointmentSettings): AppointmentGameState {
     const problems: AppointmentProblem[] = [];
     for (const round of settings.rounds) {
+      let previous: Omit<AppointmentProblem, 'questionNum'> | null = null;
       for (let i = 0; i < settings.problemsPerRound; i++) {
-        // 라운드 후반 문제는 한 사람이 보여 주는 항목이 하나 늘어난다
-        const itemsPerPerson = ROUND_INFO[round].baseItems + (i >= Math.ceil(settings.problemsPerRound / 2) ? 1 : 0);
-        problems.push({ ...this.generateProblem(round, itemsPerPerson), questionNum: problems.length + 1 });
+        const itemsPerPerson = itemsPerPersonAt(i, settings.problemsPerRound);
+        // 정답이 바로 앞 문항과 같거나 같은 자리에 오지 않게 한다(자리로 외우는 걸 막는다)
+        let problem: Omit<AppointmentProblem, 'questionNum'>;
+        do {
+          problem = this.generateProblem(round, itemsPerPerson);
+        } while (previous && (problem.answer === previous.answer
+          || problem.options.indexOf(problem.answer) === previous.options.indexOf(previous.answer)));
+        previous = problem;
+        problems.push({ ...problem, questionNum: problems.length + 1 });
       }
     }
     this.state = { settings, problems, id: Date.now() };
@@ -89,7 +104,7 @@ export class AppointmentEngine {
 
   private generateProblem(round: number, itemsPerPerson: number): Omit<AppointmentProblem, 'questionNum'> {
     if (round === 4) {
-      // 세 사람이 탄 번호를 합치면 itemsPerPerson × 2 개. 아무도 안 탄 번호 하나를 더해 선택지를 만든다.
+      // 세 사람이 탄 번호를 합치면 itemsPerPerson × 2 개. 아무도 안 탄 번호 하나를 더해 보기를 만든다.
       const [answer, ...ridden] = busNumbers(itemsPerPerson * 2 + 1);
       let people: string[][];
       do {
@@ -98,11 +113,13 @@ export class AppointmentEngine {
       return { round, itemsPerPerson, people, options: shuffle([answer, ...ridden]), answer };
     }
 
-    const universe = round === 1 ? DAYS : round === 2 ? MAP_CELLS : MENUS;
+    const universe = round === 1 ? DAYS : round === 2 ? PLACES : MENUS;
     const answer = universe[Math.floor(Math.random() * universe.length)];
-    // 요일·지도는 원래 순서로 선택지를 보여 주고, 메뉴는 섞는다
-    const options = round === 3 ? shuffle(universe) : universe;
-    return { round, itemsPerPerson, people: commonOnly(universe, answer, itemsPerPerson), options, answer };
+    const people = commonOnly(universe, answer, itemsPerPerson);
+    // 요일은 월~일 7장, 장소는 지도 전체가 보기다. 메뉴는 화면에 나왔던 메뉴만 보기로 써서
+    // '한두 사람만 고른 메뉴' 가 함정이 되게 한다.
+    const options = round === 3 ? shuffle([...new Set(people.flat())]) : universe;
+    return { round, itemsPerPerson, people, options, answer };
   }
 }
 

@@ -6,9 +6,9 @@ import { ProgressBar } from '@components/common/ProgressBar';
 import { useGameLifecycle } from '@hooks/useGameLifecycle';
 import { AppointmentOptions, PersonItems } from './AppointmentItems';
 
-const PEOPLE = ['🧑', '👩', '🧓'];
+const PEOPLE = [['🧑', '지수'], ['👩', '민준'], ['🧓', '서연']];
 const INTRO_MS = 1500;
-const GAP_MS = 500;
+const GAP_MS = 300;
 const FEEDBACK_MS = 1200;
 
 type Phase =
@@ -96,13 +96,15 @@ export function AppointmentGame() {
           <div className="text-center space-y-3">
             <p className="text-3xl font-bold">{problem.round}라운드 · {info.name}</p>
             <p className="text-xl">{info.question}</p>
-            {problem.round === 4 && <p className="text-lg text-danger font-bold">이번 라운드는 '아무도 타지 않은' 번호가 답입니다</p>}
+            {problem.round === 4
+              ? <p className="text-lg text-danger font-bold">이번엔 반대! 아무도 타지 않은 버스 번호를 고르세요</p>
+              : <p className="text-lg">세 사람 모두 고른 것을 고르세요</p>}
           </div>
         );
       case 'person':
         return (
           <div className="flex flex-col items-center gap-6">
-            <p className="text-2xl font-bold">{PEOPLE[phase.index]} {phase.index + 1}번째 사람</p>
+            <p className="text-2xl font-bold">{PEOPLE[phase.index][0]} {PEOPLE[phase.index][1]}</p>
             <PersonItems round={problem.round} items={problem.people[phase.index]} />
           </div>
         );

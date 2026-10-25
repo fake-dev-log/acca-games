@@ -12,8 +12,8 @@ const start = (isRealMode = false, rounds = [3]) => act(() => {
 const tick = (ms: number) => {
   for (let t = 0; t < ms; t += 100) act(() => { vi.advanceTimersByTime(100); });
 };
-// 라운드 소개 1.5초 + (사람 1초 + 빈 화면 0.5초) × 3
-const toQuestion = () => tick(1500 + 1500 * 3);
+// 라운드 소개 1.5초 + (사람 1초 + 빈 화면 0.3초) × 3
+const toQuestion = () => tick(1500 + 1300 * 3);
 
 describe('AppointmentGame', () => {
   beforeEach(() => {
@@ -28,11 +28,11 @@ describe('AppointmentGame', () => {
     expect(screen.getByText('3라운드 · 메뉴')).toBeInTheDocument();
 
     tick(1500);
-    expect(screen.getByText(/1번째 사람/)).toBeInTheDocument();
-    tick(1500);
-    expect(screen.getByText(/2번째 사람/)).toBeInTheDocument();
-    tick(3000);
-    expect(screen.getByText('세 사람 모두 고른 메뉴는?')).toBeInTheDocument();
+    expect(screen.getByText(/지수/)).toBeInTheDocument();
+    tick(1300);
+    expect(screen.getByText(/민준/)).toBeInTheDocument();
+    tick(2600);
+    expect(screen.getByText('어떤 메뉴를 먹으면 좋을까요?')).toBeInTheDocument();
   });
 
   it('records a click, shows feedback, and moves on to the next problem', () => {
@@ -46,7 +46,7 @@ describe('AppointmentGame', () => {
     expect(useAppointmentStore.getState().results[0].isCorrect).toBe(true);
 
     tick(1200);
-    expect(screen.getByText(/1번째 사람/)).toBeInTheDocument(); // 같은 라운드라 소개 없이 바로
+    expect(screen.getByText(/지수/)).toBeInTheDocument(); // 같은 라운드라 소개 없이 바로
   });
 
   it('times out once and ends the game after the last problem', () => {
@@ -59,7 +59,7 @@ describe('AppointmentGame', () => {
     expect(results[0]).toMatchObject({ playerChoice: null, isCorrect: false });
 
     // 실전 모드는 피드백 없이 다음 문제
-    tick(1500 * 3);
+    tick(1300 * 3);
     const second = useAppointmentStore.getState().gameState!.problems[1];
     fireEvent.click(screen.getByRole('button', { name: formatItem(4, second.options[0]) }));
     expect(useAppointmentStore.getState().gameMode).toBe('result');

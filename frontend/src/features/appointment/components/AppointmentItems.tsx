@@ -1,12 +1,20 @@
-import { FC } from 'react';
-import { MAP_CELLS } from '../logic/AppointmentEngine';
+import { FC, ReactNode } from 'react';
+import { PLACES } from '../logic/AppointmentEngine';
 
 const MENU_EMOJI: Record<string, string> = {
   김밥: '🍙', 라면: '🍜', 떡볶이: '🌶️', 돈가스: '🍖', 짜장면: '🥡', 초밥: '🍣', 피자: '🍕', 햄버거: '🍔',
 };
 
+// 마을 지도의 건물 16채(왼쪽 위부터 행 순서)
+const BUILDINGS = [
+  ['🏠', '집'], ['🏫', '학교'], ['🏥', '병원'], ['🏦', '은행'],
+  ['🏪', '편의점'], ['⛪', '교회'], ['🏨', '호텔'], ['🏢', '회사'],
+  ['🏛️', '박물관'], ['🏬', '백화점'], ['🏤', '우체국'], ['🏟️', '경기장'],
+  ['🏰', '성'], ['🏯', '한옥'], ['🏭', '공장'], ['⛲', '공원'],
+];
+
 export const formatItem = (round: number, item: string) => {
-  if (round === 2) return `${Math.floor(Number(item) / 4) + 1}행 ${(Number(item) % 4) + 1}열`;
+  if (round === 2) return BUILDINGS[Number(item)].join(' ');
   if (round === 3) return `${MENU_EMOJI[item] ?? ''} ${item}`;
   if (round === 4) return `${item}번`;
   return item;
@@ -16,6 +24,23 @@ type Mark = 'correct' | 'wrong' | null;
 
 const markClass = (mark: Mark) =>
   mark === 'correct' ? 'ring-4 ring-success' : mark === 'wrong' ? 'ring-4 ring-danger' : '';
+
+// 길(회색 띠)로 나뉜 네 블록에 건물이 2×2 씩 있는 마을 지도
+const TownMap: FC<{ renderBuilding: (place: string, label: string) => ReactNode }> = ({ renderBuilding }) => {
+  const block = (rows: number[], cols: number[]) => (
+    <div className="grid grid-cols-2 gap-2 p-2 rounded-lg bg-[#e8e0c8] dark:bg-[#6b7a6a]">
+      {rows.flatMap((r) => cols.map((c) => {
+        const place = PLACES[r * 4 + c];
+        return <div key={place}>{renderBuilding(place, formatItem(2, place))}</div>;
+      }))}
+    </div>
+  );
+  return (
+    <div className="grid grid-cols-2 gap-6 p-4 rounded-xl bg-[#6b6b6b]">
+      {block([0, 1], [0, 1])}{block([0, 1], [2, 3])}{block([2, 3], [0, 1])}{block([2, 3], [2, 3])}
+    </div>
+  );
+};
 
 // 한 사람이 보여 주는 선호
 export const PersonItems: FC<{ round: number; items: string[] }> = ({ round, items }) => {
@@ -32,15 +57,12 @@ export const PersonItems: FC<{ round: number; items: string[] }> = ({ round, ite
     );
   }
   if (round === 2) {
-    return (
-      <div className="grid grid-cols-4 gap-1 p-2 bg-[#e8e0c8] dark:bg-[#5c6b5b] rounded-lg">
-        {MAP_CELLS.map((cell) => (
-          <div key={cell} className="w-16 h-16 rounded flex items-center justify-center text-3xl bg-white/60 dark:bg-black/20">
-            {items.includes(cell) ? '📍' : ''}
-          </div>
-        ))}
+    return <TownMap renderBuilding={(place, label) => (
+      <div className={`w-16 h-16 rounded-lg flex items-center justify-center text-4xl ${
+        items.includes(place) ? 'bg-white ring-4 ring-primary' : 'bg-white/50 opacity-40'}`} title={label}>
+        {BUILDINGS[Number(place)][0]}
       </div>
-    );
+    )} />;
   }
   return (
     <div className="flex flex-wrap gap-3 justify-center max-w-xl">
@@ -72,11 +94,7 @@ export const AppointmentOptions: FC<OptionsProps> = ({ round, options, disabled,
   );
 
   if (round === 2) {
-    return (
-      <div className="grid grid-cols-4 gap-1 p-2 bg-[#e8e0c8] dark:bg-[#5c6b5b] rounded-lg">
-        {options.map((cell) => button(cell, 'w-16 h-16', ''))}
-      </div>
-    );
+    return <TownMap renderBuilding={(place) => button(place, 'w-16 h-16 text-4xl bg-white! dark:bg-white!', BUILDINGS[Number(place)][0])} />;
   }
   if (round === 1) {
     return <div className="grid grid-cols-7 gap-2">{options.map((d) => button(d, 'w-14 h-14 text-xl font-bold', d))}</div>;
